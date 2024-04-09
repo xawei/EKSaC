@@ -1,12 +1,24 @@
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: xNetwork
 metadata:
-  name: linus-xplane-test
+  name: linus-cluster
 spec:
-  name: linus-xplane-test
+  name: linus-cluster
   location: "SGP"
   vpcCidr: "10.0.0.0/16"
   subnets:
     z1Cidr: "10.0.1.0/24"
     z2Cidr: "10.0.2.0/24"
     z3Cidr: "10.0.3.0/24"
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: Network
+metadata:
+  name: linus-cluster
+spec:
+  name: linus-cluster
+  location: "SGP"
+  resourceRef:
+    apiVersion: consumable.trustbank.sg/v1alpha1
+    kind: xNetwork
+    name: linus-cluster

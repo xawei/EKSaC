@@ -207,3 +207,41 @@ spec:
     - type: FromCompositeFieldPath
       fromFieldPath: spec.subnets.z3Cidr
       toFieldPath: spec.forProvider.cidrBlock
+  - name: xigw
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: InternetGateway
+      metadata:
+        name: xplane-igw
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          region: ap-southeast-1
+          tags:
+            Name: xplane-igw
+            Owner: linus.yong
+            Environment: sandbox
+            Project: crossplane
+        vpcIdRef:
+          name: xplane-vpc
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-igw"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-igw"
+      toFieldPath: spec.forProvider.tags.Name

@@ -372,7 +372,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-rta"
+          fmt: "%s-xplane-public-z1-rta"
       toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:
@@ -415,7 +415,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-rta"
+          fmt: "%s-xplane-public-z2-rta"
       toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:
@@ -458,7 +458,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-rta"
+          fmt: "%s-xplane-public-z3-rta"
       toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:

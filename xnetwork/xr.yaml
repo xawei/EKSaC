@@ -277,7 +277,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-drt"
+          fmt: "%s-xplane-rt"
       toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:
@@ -285,7 +285,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-igw"
+          fmt: "%s-xplane-rt"
       toFieldPath: spec.forProvider.tags.Name
     - type: CombineFromComposite
       combine:
@@ -301,7 +301,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-igw"
+          fmt: "%s-xplane-rt"
       toFieldPath: spec.forProvider.route[0].gatewayIdRef.name
   - name: x-private-subnet-z1
     base:

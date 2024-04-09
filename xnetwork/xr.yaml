@@ -639,3 +639,11 @@ spec:
         string:
           fmt: "%s-xplane-natgw-eip"
       toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-natgw-eip"
+      toFieldPath: spec.forProvider.tags.Name

@@ -30,12 +30,24 @@ spec:
                 subnets:
                   type: object
                   properties:
-                    z1Cidr:
-                      type: string
-                    z2Cidr:
-                      type: string
-                    z3Cidr:
-                      type: string
+                    public:
+                      type: object
+                      properties:
+                        z1Cidr:
+                          type: string
+                        z2Cidr:
+                          type: string
+                        z3Cidr:
+                          type: string
+                    private:
+                      type: object
+                      properties:
+                        z1Cidr:
+                          type: string
+                        z2Cidr:
+                          type: string
+                        z3Cidr:
+                          type: string
               required:
               - name
               - location

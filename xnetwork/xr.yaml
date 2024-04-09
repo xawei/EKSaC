@@ -352,7 +352,7 @@ spec:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: RouteTableAssociation
       metadata:
-        name: xplane-public-rta
+        name: xplane-public-z1-rta
       spec:
         deletionPolicy: Delete
         forProvider:
@@ -395,7 +395,7 @@ spec:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: RouteTableAssociation
       metadata:
-        name: xplane-public-rta
+        name: xplane-public-z2-rta
       spec:
         deletionPolicy: Delete
         forProvider:
@@ -438,7 +438,7 @@ spec:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: RouteTableAssociation
       metadata:
-        name: xplane-public-rta
+        name: xplane-public-z3-rta
       spec:
         deletionPolicy: Delete
         forProvider:

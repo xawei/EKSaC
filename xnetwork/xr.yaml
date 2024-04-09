@@ -390,6 +390,92 @@ spec:
         string:
           fmt: "%s-xplane-public-subnet-1a"
       toFieldPath: spec.forProvider.subnetIdRef.name
+  - name: x-public-z2-rta
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: RouteTableAssociation
+      metadata:
+        name: xplane-public-rta
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          region: ap-southeast-1
+          routeTableIdRef:
+            name: xplane-rt
+          subnetIdRef:
+            name: xplane-public-subnet-1b
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-rta"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-rt"
+      toFieldPath: spec.forProvider.routeTableIdRef.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-public-subnet-1b"
+      toFieldPath: spec.forProvider.subnetIdRef.name
+  - name: x-public-z3-rta
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: RouteTableAssociation
+      metadata:
+        name: xplane-public-rta
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          region: ap-southeast-1
+          routeTableIdRef:
+            name: xplane-rt
+          subnetIdRef:
+            name: xplane-public-subnet-1c
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-rta"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-rt"
+      toFieldPath: spec.forProvider.routeTableIdRef.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-public-subnet-1c"
+      toFieldPath: spec.forProvider.subnetIdRef.name
   - name: x-private-subnet-z1
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1

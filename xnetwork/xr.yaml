@@ -308,4 +308,4 @@ spec:
         strategy: string
         string:
           fmt: "%s-xplane-igw"
-      toFieldPath: spec.forProvider.route.gatewayIdRef.name
+      toFieldPath: spec.forProvider.route[0].gatewayIdRef.name

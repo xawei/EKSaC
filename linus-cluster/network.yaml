@@ -21,4 +21,4 @@ spec:
   resourceRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
     kind: xNetwork
-    name: linus-cluster-public
+    name: linus-cluster

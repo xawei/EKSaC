@@ -621,6 +621,11 @@ spec:
         deletionPolicy: Delete
         forProvider:
           region: ap-southeast-1
+          tags:
+            Name: xplane-private-subnet-1c
+            Owner: linus.yong
+            Environment: sandbox
+            Project: crossplane
         providerConfigRef:
           name: aws-provider
     patches:

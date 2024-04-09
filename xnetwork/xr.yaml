@@ -83,7 +83,7 @@ spec:
         forProvider:
           region: ap-southeast-1
           availabilityZone: ap-southeast-1a
-          cidrBlock: 10.0.1.0/24
+          cidrBlock: 10.0.100.0/24
           tags:
             Name: xplane-subnet-1a
             Owner: linus.yong
@@ -128,7 +128,7 @@ spec:
         forProvider:
           region: ap-southeast-1
           availabilityZone: ap-southeast-1b
-          cidrBlock: 10.0.2.0/24
+          cidrBlock: 10.0.101.0/24
           tags:
             Name: xplane-subnet-1b
             Owner: linus.yong
@@ -173,7 +173,7 @@ spec:
         forProvider:
           region: ap-southeast-1
           availabilityZone: ap-southeast-1c
-          cidrBlock: 10.0.3.0/24
+          cidrBlock: 10.0.102.0/24
           tags:
             Name: xplane-subnet-1c
             Owner: linus.yong

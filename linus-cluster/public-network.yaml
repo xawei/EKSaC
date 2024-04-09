@@ -7,9 +7,9 @@ spec:
   location: "SGP"
   vpcCidr: "10.0.0.0/16"
   subnets:
-    z1Cidr: "10.0.1.0/24"
-    z2Cidr: "10.0.2.0/24"
-    z3Cidr: "10.0.3.0/24"
+    z1Cidr: "10.0.0.0/24"
+    z2Cidr: "10.0.1.0/24"
+    z3Cidr: "10.0.2.0/24"
 ---
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: Network

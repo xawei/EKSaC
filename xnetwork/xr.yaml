@@ -104,7 +104,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-subnet-1a"
+          fmt: "%s-xplane-public-subnet-1a"
       toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:
@@ -112,7 +112,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-subnet-1a"
+          fmt: "%s-xplane-public-subnet-1a"
       toFieldPath: spec.forProvider.tags.Name
     - type: FromCompositeFieldPath
       fromFieldPath: spec.subnets.z1Cidr
@@ -149,7 +149,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-subnet-1b"
+          fmt: "%s-xplane-public-subnet-1b"
       toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:
@@ -157,7 +157,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-subnet-1b"
+          fmt: "%s-xplane-public-subnet-1b"
       toFieldPath: spec.forProvider.tags.Name
     - type: FromCompositeFieldPath
       fromFieldPath: spec.subnets.z2Cidr
@@ -194,7 +194,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-subnet-1c"
+          fmt: "%s-xplane-public-subnet-1c"
       toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:
@@ -202,7 +202,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-subnet-1c"
+          fmt: "%s-xplane-public-subnet-1c"
       toFieldPath: spec.forProvider.tags.Name
     - type: FromCompositeFieldPath
       fromFieldPath: spec.subnets.z3Cidr

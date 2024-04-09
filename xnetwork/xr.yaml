@@ -247,3 +247,49 @@ spec:
         string:
           fmt: "%s-xplane-igw"
       toFieldPath: spec.forProvider.tags.Name
+  - name: xdrt
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: DefaultRouteTable
+      metadata:
+        name: xplane-drt
+      spec:
+        deletionPolicy: Orphan
+        forProvider:
+          defaultRouteTableIdRef:
+            name: linus-cluster-public-xplane-vpc
+          region: ap-southeast-1
+          route:
+          - cidrBlock: 0.0.0.0/0
+            gatewayIdRef:
+              name: linus-cluster-public-xplane-igw
+          tags:
+            Name: xplane-drt
+            Owner: linus.yong
+            Environment: sandbox
+            Project: crossplane
+          vpcIdRef:
+            name: xplane-vpc
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: PatchSet
+      patchSetName: vpcid-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-drt"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-igw"
+      toFieldPath: spec.forProvider.tags.Name

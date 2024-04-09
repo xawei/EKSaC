@@ -622,7 +622,7 @@ spec:
         forProvider:
           region: ap-southeast-1
           tags:
-            Name: xplane-private-subnet-1c
+            Name: xplane-natgw-eip
             Owner: linus.yong
             Environment: sandbox
             Project: crossplane

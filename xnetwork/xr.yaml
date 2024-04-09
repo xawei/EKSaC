@@ -254,7 +254,7 @@ spec:
       metadata:
         name: xplane-drt
       spec:
-        deletionPolicy: Orphan
+        deletionPolicy: Delete
         forProvider:
           defaultRouteTableIdRef:
             name: xplane-vpc

@@ -247,7 +247,7 @@ spec:
         string:
           fmt: "%s-xplane-igw"
       toFieldPath: spec.forProvider.tags.Name
-  - name: xrt
+  - name: x-public-rt
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: RouteTable
@@ -303,7 +303,7 @@ spec:
         string:
           fmt: "%s-xplane-rt"
       toFieldPath: spec.forProvider.route[0].gatewayIdRef.name
-  - name: xroute
+  - name: x-public-route
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: Route
@@ -611,3 +611,26 @@ spec:
     - type: FromCompositeFieldPath
       fromFieldPath: spec.subnets.private.z3Cidr
       toFieldPath: spec.forProvider.cidrBlock
+  - name: xeip
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: EIP
+      metadata:
+        name: xplane-natgw-eip
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          region: ap-southeast-1
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-natgw-eip"
+      toFieldPath: metadata.name

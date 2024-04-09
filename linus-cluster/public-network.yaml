@@ -1,5 +1,5 @@
 apiVersion: consumable.trustbank.sg/v1alpha1
-kind: Network
+kind: xNetwork
 metadata:
   name: linus-xplane-test
 spec:

@@ -72,7 +72,7 @@ spec:
     - type: FromCompositeFieldPath
       fromFieldPath: spec.vpcCidr
       toFieldPath: spec.forProvider.cidrBlock
-  - name: xsubnet-z1
+  - name: x-public-subnet-z1
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: Subnet
@@ -117,7 +117,7 @@ spec:
     - type: FromCompositeFieldPath
       fromFieldPath: spec.subnets.z1Cidr
       toFieldPath: spec.forProvider.cidrBlock
-  - name: xsubnet-z2
+  - name: x-public-subnet-z2
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: Subnet
@@ -162,7 +162,7 @@ spec:
     - type: FromCompositeFieldPath
       fromFieldPath: spec.subnets.z2Cidr
       toFieldPath: spec.forProvider.cidrBlock
-  - name: xsubnet-z3
+  - name: x-public-subnet-z3
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: Subnet

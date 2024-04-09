@@ -257,12 +257,12 @@ spec:
         deletionPolicy: Orphan
         forProvider:
           defaultRouteTableIdRef:
-            name: linus-cluster-public-xplane-vpc
+            name: xplane-vpc
           region: ap-southeast-1
           route:
           - cidrBlock: 0.0.0.0/0
             gatewayIdRef:
-              name: linus-cluster-public-xplane-igw
+              name: xplane-igw
           tags:
             Name: xplane-drt
             Owner: linus.yong
@@ -293,3 +293,19 @@ spec:
         string:
           fmt: "%s-xplane-igw"
       toFieldPath: spec.forProvider.tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-vpc"
+      toFieldPath: spec.forProvider.defaultRouteTableIdRef.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-igw"
+      toFieldPath: spec.forProvider.route.gatewayIdRef.name

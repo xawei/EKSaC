@@ -115,7 +115,7 @@ spec:
           fmt: "%s-xplane-public-subnet-1a"
       toFieldPath: spec.forProvider.tags.Name
     - type: FromCompositeFieldPath
-      fromFieldPath: spec.subnets.z1Cidr
+      fromFieldPath: spec.subnets.public.z1Cidr
       toFieldPath: spec.forProvider.cidrBlock
   - name: x-public-subnet-z2
     base:
@@ -160,7 +160,7 @@ spec:
           fmt: "%s-xplane-public-subnet-1b"
       toFieldPath: spec.forProvider.tags.Name
     - type: FromCompositeFieldPath
-      fromFieldPath: spec.subnets.z2Cidr
+      fromFieldPath: spec.subnets.public.z2Cidr
       toFieldPath: spec.forProvider.cidrBlock
   - name: x-public-subnet-z3
     base:
@@ -205,7 +205,7 @@ spec:
           fmt: "%s-xplane-public-subnet-1c"
       toFieldPath: spec.forProvider.tags.Name
     - type: FromCompositeFieldPath
-      fromFieldPath: spec.subnets.z3Cidr
+      fromFieldPath: spec.subnets.public.z3Cidr
       toFieldPath: spec.forProvider.cidrBlock
   - name: xigw
     base:
@@ -309,3 +309,138 @@ spec:
         string:
           fmt: "%s-xplane-igw"
       toFieldPath: spec.forProvider.route[0].gatewayIdRef.name
+  - name: x-private-subnet-z1
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: Subnet
+      metadata:
+        name: xplane-private-subnet-1a
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          region: ap-southeast-1
+          availabilityZone: ap-southeast-1a
+          cidrBlock: 10.0.100.0/24
+          tags:
+            Name: xplane-private-subnet-1a
+            Owner: linus.yong
+            Environment: sandbox
+            Project: crossplane
+          vpcIdRef:
+            name: xplane-vpc
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: PatchSet
+      patchSetName: vpcid-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1a"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1a"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.subnets.private.z1Cidr
+      toFieldPath: spec.forProvider.cidrBlock
+  - name: x-private-subnet-z2
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: Subnet
+      metadata:
+        name: xplane-private-subnet-1b
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          region: ap-southeast-1
+          availabilityZone: ap-southeast-1b
+          cidrBlock: 10.0.101.0/24
+          tags:
+            Name: xplane-private-subnet-1b
+            Owner: linus.yong
+            Environment: sandbox
+            Project: crossplane
+          vpcIdRef:
+            name: xplane-vpc
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: PatchSet
+      patchSetName: vpcid-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1b"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1b"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.subnets.private.z2Cidr
+      toFieldPath: spec.forProvider.cidrBlock
+  - name: x-private-subnet-z3
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: Subnet
+      metadata:
+        name: xplane-private-subnet-1c
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          region: ap-southeast-1
+          availabilityZone: ap-southeast-1c
+          cidrBlock: 10.0.102.0/24
+          tags:
+            Name: xplane-private-subnet-1c
+            Owner: linus.yong
+            Environment: sandbox
+            Project: crossplane
+          vpcIdRef:
+            name: xplane-vpc
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: PatchSet
+      patchSetName: vpcid-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1c"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1c"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.subnets.private.z3Cidr
+      toFieldPath: spec.forProvider.cidrBlock

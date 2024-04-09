@@ -77,7 +77,7 @@ spec:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: Subnet
       metadata:
-        name: xplane-subnet-1a
+        name: xplane-public-subnet-1a
       spec:
         deletionPolicy: Delete
         forProvider:
@@ -85,7 +85,7 @@ spec:
           availabilityZone: ap-southeast-1a
           cidrBlock: 10.0.100.0/24
           tags:
-            Name: xplane-subnet-1a
+            Name: xplane-public-subnet-1a
             Owner: linus.yong
             Environment: sandbox
             Project: crossplane
@@ -122,7 +122,7 @@ spec:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: Subnet
       metadata:
-        name: xplane-subnet-1b
+        name: xplane-public-subnet-1b
       spec:
         deletionPolicy: Delete
         forProvider:
@@ -130,7 +130,7 @@ spec:
           availabilityZone: ap-southeast-1b
           cidrBlock: 10.0.101.0/24
           tags:
-            Name: xplane-subnet-1b
+            Name: xplane-public-subnet-1b
             Owner: linus.yong
             Environment: sandbox
             Project: crossplane
@@ -167,7 +167,7 @@ spec:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: Subnet
       metadata:
-        name: xplane-subnet-1c
+        name: xplane-public-subnet-1c
       spec:
         deletionPolicy: Delete
         forProvider:
@@ -175,7 +175,7 @@ spec:
           availabilityZone: ap-southeast-1c
           cidrBlock: 10.0.102.0/24
           tags:
-            Name: xplane-subnet-1c
+            Name: xplane-public-subnet-1c
             Owner: linus.yong
             Environment: sandbox
             Project: crossplane

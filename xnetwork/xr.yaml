@@ -677,6 +677,7 @@ spec:
         strategy: string
         string:
           fmt: "%s-xplane-natgw"
+      toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:
         variables:

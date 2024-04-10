@@ -5,7 +5,7 @@ metadata:
 spec:
   name: linus-cluster
   location: "SGP"
-  vpcCidr: "10.0.0.0/16"
+  vpcCidr: "10.0.0.0/24"
   subnets:
     public:
       z1Cidr: "10.0.0.0/28"

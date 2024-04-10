@@ -30,7 +30,7 @@ spec:
           fmt: "%s-xplane-vpc"
       toFieldPath: spec.forProvider.vpcIdRef.name
   resources:
-  - name: xvpc
+  - name: x-vpc
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: VPC
@@ -207,7 +207,7 @@ spec:
     - type: FromCompositeFieldPath
       fromFieldPath: spec.subnets.public.z3Cidr
       toFieldPath: spec.forProvider.cidrBlock
-  - name: xigw
+  - name: x-igw
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: InternetGateway
@@ -611,7 +611,7 @@ spec:
     - type: FromCompositeFieldPath
       fromFieldPath: spec.subnets.private.z3Cidr
       toFieldPath: spec.forProvider.cidrBlock
-  - name: xeip
+  - name: x-eip
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: EIP
@@ -647,7 +647,7 @@ spec:
         string:
           fmt: "%s-xplane-natgw-eip"
       toFieldPath: spec.forProvider.tags.Name
-  - name: xnatgw
+  - name: x-natgw
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: NATGateway

@@ -342,7 +342,7 @@ spec:
         forProvider:
           region: ap-southeast-1
           routeTableIdRef:
-            name: xplane-rt
+            name: xplane-public-rt
           subnetIdRef:
             name: xplane-public-subnet-1a
         providerConfigRef:
@@ -364,7 +364,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-rt"
+          fmt: "%s-xplane-public-rt"
       toFieldPath: spec.forProvider.routeTableIdRef.name
     - type: CombineFromComposite
       combine:
@@ -385,7 +385,7 @@ spec:
         forProvider:
           region: ap-southeast-1
           routeTableIdRef:
-            name: xplane-rt
+            name: xplane-public-rt
           subnetIdRef:
             name: xplane-public-subnet-1b
         providerConfigRef:
@@ -407,7 +407,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-rt"
+          fmt: "%s-xplane-public-rt"
       toFieldPath: spec.forProvider.routeTableIdRef.name
     - type: CombineFromComposite
       combine:
@@ -428,7 +428,7 @@ spec:
         forProvider:
           region: ap-southeast-1
           routeTableIdRef:
-            name: xplane-rt
+            name: xplane-public-rt
           subnetIdRef:
             name: xplane-public-subnet-1c
         providerConfigRef:
@@ -450,7 +450,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-rt"
+          fmt: "%s-xplane-public-rt"
       toFieldPath: spec.forProvider.routeTableIdRef.name
     - type: CombineFromComposite
       combine:

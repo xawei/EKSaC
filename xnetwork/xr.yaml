@@ -759,4 +759,4 @@ spec:
         strategy: string
         string:
           fmt: "%s-xplane-natgw"
-      toFieldPath: spec.forProvider.route.natGatewayId.name
+      toFieldPath: spec.forProvider.route[0].natGatewayId.name

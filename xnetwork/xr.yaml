@@ -700,7 +700,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-natgw-eip"
+          fmt: "%s-xplane-natgw"
       toFieldPath: spec.forProvider.tags.Name
     - type: CombineFromComposite
       combine:

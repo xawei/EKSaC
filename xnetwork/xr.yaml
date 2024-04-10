@@ -252,13 +252,13 @@ spec:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: RouteTable
       metadata:
-        name: xplane-rt
+        name: xplane-public-rt
       spec:
         deletionPolicy: Delete
         forProvider:
           region: ap-southeast-1
           tags:
-            Name: xplane-rt
+            Name: xplane-public-rt
             Owner: linus.yong
             Environment: sandbox
             Project: crossplane
@@ -277,7 +277,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-rt"
+          fmt: "%s-xplane-public-rt"
       toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:
@@ -285,24 +285,8 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-rt"
+          fmt: "%s-xplane-public-rt"
       toFieldPath: spec.forProvider.tags.Name
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "%s-xplane-vpc"
-      toFieldPath: spec.forProvider.defaultRouteTableIdRef.name
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "%s-xplane-rt"
-      toFieldPath: spec.forProvider.route[0].gatewayIdRef.name
   - name: x-public-route
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
@@ -314,7 +298,7 @@ spec:
         forProvider:
           region: ap-southeast-1
           routeTableIdRef:
-            name: xplane-rt
+            name: xplane-public-rt
           destinationCidrBlock: 0.0.0.0/0
           gatewayIdRef:
             name: xplane-igw
@@ -337,7 +321,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-rt"
+          fmt: "%s-xplane-public-rt"
       toFieldPath: spec.forProvider.routeTableIdRef.name
     - type: CombineFromComposite
       combine:

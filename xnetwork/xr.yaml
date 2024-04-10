@@ -720,7 +720,7 @@ spec:
             Environment: sandbox
             Project: crossplane
           route:
-            cidrBlock: "0.0.0.0/0"
+          - cidrBlock: "0.0.0.0/0"
             natGatewayId:
               name: xplane-natgw
         providerConfigRef:

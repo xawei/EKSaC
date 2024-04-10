@@ -702,6 +702,9 @@ spec:
         string:
           fmt: "%s-xplane-public-subnet-1b"
       toFieldPath: spec.forProvider.subnetIdRef.name
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.id
+      toFieldPath: status.natGatewayId
   # - name: x-default-rt
   #   base:
   #     apiVersion: ec2.aws.upbound.io/v1beta1

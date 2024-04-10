@@ -705,61 +705,55 @@ spec:
     - type: ToCompositeFieldPath
       fromFieldPath: status.atProvider.id
       toFieldPath: status.natGatewayId
-  # - name: x-default-rt
-  #   base:
-  #     apiVersion: ec2.aws.upbound.io/v1beta1
-  #     kind: DefaultRouteTable
-  #     metadata:
-  #       name: xplane-default-rt
-  #     spec:
-  #       deletionPolicy: Delete
-  #       forProvider:
-  #         region: ap-southeast-1
-  #         defaultRouteTableIdRef:
-  #           name: xplane-vpc
-  #         tags:
-  #           Name: xplane-default-rt
-  #           Owner: linus.yong
-  #           Environment: sandbox
-  #           Project: crossplane
-  #         route:
-  #         - cidrBlock: "0.0.0.0/0"
-  #           natGatewayId:
-  #             name: linus-cluster-xplane-natgw
-  #       providerConfigRef:
-  #         name: aws-provider
-  #   patches:
-  #   - type: PatchSet
-  #     patchSetName: region-patchset
-  #   - type: CombineFromComposite
-  #     combine:
-  #       variables:
-  #       - fromFieldPath: spec.name
-  #       strategy: string
-  #       string:
-  #         fmt: "%s-xplane-default-rt"
-  #     toFieldPath: metadata.name
-  #   - type: CombineFromComposite
-  #     combine:
-  #       variables:
-  #       - fromFieldPath: spec.name
-  #       strategy: string
-  #       string:
-  #         fmt: "%s-xplane-default-rt"
-  #     toFieldPath: spec.forProvider.tags.Name
-  #   - type: CombineFromComposite
-  #     combine:
-  #       variables:
-  #       - fromFieldPath: spec.name
-  #       strategy: string
-  #       string:
-  #         fmt: "%s-xplane-vpc"
-  #     toFieldPath: spec.forProvider.defaultRouteTableIdRef.name
-  #   - type: CombineFromComposite
-  #     combine:
-  #       variables:
-  #       - fromFieldPath: spec.name
-  #       strategy: string
-  #       string:
-  #         fmt: "%s-xplane-natgw"
-  #     toFieldPath: spec.forProvider.route[0].natGatewayId.name
+  - name: x-default-rt
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: DefaultRouteTable
+      metadata:
+        name: xplane-default-rt
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          region: ap-southeast-1
+          defaultRouteTableIdRef:
+            name: xplane-vpc
+          tags:
+            Name: xplane-default-rt
+            Owner: linus.yong
+            Environment: sandbox
+            Project: crossplane
+          route:
+          - cidrBlock: 0.0.0.0/0
+            natGatewayId: natGatewayId
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-default-rt"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-default-rt"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-vpc"
+      toFieldPath: spec.forProvider.defaultRouteTableIdRef.name
+    - type: FromCompositeFieldPath
+      fromFieldPath: status.natGatewayId
+      toFieldPath: spec.forProvider.route[0].natGatewayId

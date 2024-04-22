@@ -1,7 +1,7 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: xnetworks.consumable.trustbank.sg
+  name: xekscluster.consumable.trustbank.sg
 spec:
   group: consumable.trustbank.sg
   names:

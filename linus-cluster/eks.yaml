@@ -1,0 +1,17 @@
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: xEksCluster
+metadata:
+  name: linus-cluster
+spec:
+  name: linus-cluster
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: EksCluster
+metadata:
+  name: linus-cluster
+spec:
+  name: linus-cluster
+  resourceRef:
+    apiVersion: consumable.trustbank.sg/v1alpha1
+    kind: xEksCluster
+    name: linus-cluster

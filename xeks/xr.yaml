@@ -1,0 +1,8 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: x-eks-cluster
+spec:
+  compositeTypeRef:
+    apiVersion: consumable.trustbank.sg/v1alpha1
+    kind: xEksCluster

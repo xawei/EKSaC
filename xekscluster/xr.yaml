@@ -6,3 +6,21 @@ spec:
   compositeTypeRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
     kind: xEksCluster
+  patchSets: []
+  resources:
+  - name: x-iam
+    base:
+      apiVersion: iam.aws.upbound.io/v1beta1
+      kind: Role
+      metadata:
+        name: xplane-eks-iam
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          tags:
+            Name: xplane-eks-iam
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches: []

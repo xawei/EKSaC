@@ -17,10 +17,41 @@ spec:
       spec:
         deletionPolicy: Delete
         forProvider:
+          assumeRolePolicy: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "eks.amazonaws.com"
+                  },
+                  "Action": "sts:AssumeRole"
+                }
+              ]
+            }
+          managedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
           tags:
             Name: xplane-eks-iam
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
           name: aws-provider
-    patches: []
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xxplane-eks-iam"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-iam"
+      toFieldPath: spec.forProvider.tags.Name

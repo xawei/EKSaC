@@ -45,7 +45,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xxplane-eks-iam"
+          fmt: "%s-xplane-eks-iam"
       toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:

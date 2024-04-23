@@ -4,6 +4,7 @@ metadata:
   name: linus-cluster
 spec:
   name: linus-cluster
+  location: "SGP"
 ---
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: EksCluster
@@ -11,6 +12,7 @@ metadata:
   name: linus-cluster
 spec:
   name: linus-cluster
+  location: "SGP"
   resourceRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
     kind: xEksCluster

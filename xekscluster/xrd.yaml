@@ -18,8 +18,16 @@ spec:
             properties:
               name:
                 type: string
+              location:
+                type: string
+                oneOf:
+                - pattern: '^HKG$'
+                - pattern: '^SGP$'
+                - pattern: '^SYD$'
+                - pattern: '^JKT$'
             required:
             - name
+            - location
     served: true
     referenceable: true
   claimNames:

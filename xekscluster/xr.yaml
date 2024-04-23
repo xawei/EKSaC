@@ -6,7 +6,19 @@ spec:
   compositeTypeRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
     kind: xEksCluster
-  patchSets: []
+  patchSets:
+  - name: region-patchset
+    patches:
+    - type: FromCompositeFieldPath
+      fromFieldPath: "spec.location"
+      toFieldPath: "spec.forProvider.region"
+      transforms:
+        - type: map
+          map: 
+            HKG: "ap-east-1"
+            SGP: "ap-southeast-1"
+            SYD: "ap-southeast-2"
+            JKT: "ap-southeast-3"
   resources:
   - name: x-iam
     base:
@@ -55,3 +67,169 @@ spec:
         string:
           fmt: "%s-xplane-eks-iam"
       toFieldPath: spec.forProvider.tags.Name
+  - name: x-securitygroup-eks-cluster
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: SecurityGroup
+      metadata:
+        name: xplane-eks-sg-cluster
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          description: "Security Group for EKS Control Plane"
+          region: ap-southeast-1
+          vpcIdRef:
+            name: xplane-vpc
+          tags:
+            Name: xplane-eks-sg-cluster
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-cluster"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-cluster"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-vpc"
+  - name: x-securitygroup-eks-node
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: SecurityGroup
+      metadata:
+        name: xplane-eks-sg-node
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          description: "Security Group for EKS Nodes"
+          region: ap-southeast-1
+          vpcIdRef:
+            name: xplane-vpc
+          tags:
+            Name: xplane-eks-sg-node
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-node"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-node"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-vpc"
+  - name: x-eks
+    base:
+      apiVersion: eks.aws.upbound.io/v1beta1
+      kind: Cluster
+      metadata:
+        name: xplane-eks-cluster
+      spec:
+        forProvider:
+          region: ap-southeast-1
+          roleArnRef:
+            name: xplane-eks-iam
+          version: "1.29"
+          vpcConfig:
+            subnetIdsRefs:
+              - name: xplane-private-subnet-1a
+              - name: xplane-private-subnet-1b
+              - name: xplane-private-subnet-1c
+            securityGroupIdsSelector:
+              matchControllerRef: true
+          tags:
+            Name: xplane-eks-cluster
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-iam"
+      toFieldPath: spec.forProvider.roleArnRef.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1a"
+      toFieldPath: spec.forProvider.vpcConfig.subnetIdsRefs[0].name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1b"
+      toFieldPath: spec.forProvider.vpcConfig.subnetIdsRefs[1].name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1c"
+      toFieldPath: spec.forProvider.vpcConfig.subnetIdsRefs[2].name

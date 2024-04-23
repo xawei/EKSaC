@@ -7,6 +7,10 @@ spec:
   names:
     kind: xEksCluster
     plural: xeksclusters
+  connectionSecretKeys:
+  - cluster-ca
+  - apiserver-endpoint
+  - value
   versions:
   - name: v1alpha1
     schema:

@@ -181,7 +181,7 @@ spec:
           # - securityGroupIdSelector:
           #   matchControllerRef: true
           - securityGroupIdRefs:
-            - name: linus-cluster-xplane-eks-sg-cluster
+            # - name: linus-cluster-xplane-eks-sg-cluster
             - name: linus-cluster-xplane-eks-sg-node
           tags:
             Name: xplane-eks-cluster

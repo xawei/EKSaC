@@ -183,13 +183,13 @@ spec:
           # - securityGroupIdRefs:
           #   - name: linus-cluster-xplane-eks-sg-cluster
           #   - name: linus-cluster-xplane-eks-sg-node
-          writeConnectionSecretToRef:
-            namespace: eksac
-            name: xplane-eks-cluster-connection
           tags:
             Name: xplane-eks-cluster
             Owner: linus.yong
             Environment: sandbox
+        writeConnectionSecretToRef:
+          namespace: eksac
+          name: xplane-eks-cluster-connection
         providerConfigRef:
           name: aws-provider
     patches:
@@ -250,7 +250,7 @@ spec:
         strategy: string
         string:
           fmt: "%s-xplane-eks-cluster-connection"
-      toFieldPath: spec.forProvider.writeConnectionSecretToRef.name
+      toFieldPath: spec.writeConnectionSecretToRef.name
     connectionDetails:
     - name: cluster-ca
       fromConnectionSecretKey: clusterCA

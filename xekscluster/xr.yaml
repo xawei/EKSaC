@@ -252,9 +252,9 @@ spec:
           fmt: "%s-xplane-eks-cluster-connection"
       toFieldPath: spec.forProvider.writeConnectionSecretToRef.name
     connectionDetails:
-      - name: cluster-ca
-        fromConnectionSecretKey: clusterCA
-      - name: apiserver-endpoint
-        fromConnectionSecretKey: endpoint
-      - name: value
-        fromConnectionSecretKey: kubeconfig
+    - name: cluster-ca
+      fromConnectionSecretKey: clusterCA
+    - name: apiserver-endpoint
+      fromConnectionSecretKey: endpoint
+    - name: value
+      fromConnectionSecretKey: kubeconfig      

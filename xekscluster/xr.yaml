@@ -180,9 +180,9 @@ spec:
             - name: xplane-private-subnet-1c
           # - securityGroupIdSelector:
           #   matchControllerRef: true
-          # - securityGroupIdRefs:
-          #   - name: linus-cluster-xplane-eks-sg-cluster
-          #   - name: linus-cluster-xplane-eks-sg-node
+          - securityGroupIdRefs:
+            - name: linus-cluster-xplane-eks-sg-cluster
+            - name: linus-cluster-xplane-eks-sg-node
           tags:
             Name: xplane-eks-cluster
             Owner: linus.yong

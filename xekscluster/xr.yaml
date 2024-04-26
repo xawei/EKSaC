@@ -178,11 +178,11 @@ spec:
             - name: xplane-private-subnet-1a
             - name: xplane-private-subnet-1b
             - name: xplane-private-subnet-1c
-          # - securityGroupIdSelector:
-          #   matchControllerRef: true
-          - securityGroupIdRefs:
-            # - name: linus-cluster-xplane-eks-sg-cluster
-            - name: linus-cluster-xplane-eks-sg-node
+            securityGroupIdSelector:
+              matchControllerRef: true
+          # - securityGroupIdRefs:
+          #   - name: linus-cluster-xplane-eks-sg-cluster
+          #   - name: linus-cluster-xplane-eks-sg-node
           tags:
             Name: xplane-eks-cluster
             Owner: linus.yong
@@ -201,7 +201,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks"
+          fmt: "%s-xplane-eks-cluster"
       toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:
@@ -209,7 +209,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks"
+          fmt: "%s-xplane-eks-cluster"
       toFieldPath: spec.forProvider.tags.Name
     - type: CombineFromComposite
       combine:

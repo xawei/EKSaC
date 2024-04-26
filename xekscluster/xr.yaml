@@ -77,6 +77,7 @@ spec:
       spec:
         deletionPolicy: Delete
         forProvider:
+          name: xplane-eks-sg-cluster
           description: "Security Group for EKS Control Plane"
           region: ap-southeast-1
           vpcIdRef:
@@ -90,6 +91,14 @@ spec:
     patches:
     - type: PatchSet
       patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-cluster"
+      toFieldPath: spec.forProvider.name
     - type: CombineFromComposite
       combine:
         variables:
@@ -123,6 +132,7 @@ spec:
       spec:
         deletionPolicy: Delete
         forProvider:
+          name: xplane-eks-sg-node
           description: "Security Group for EKS Nodes"
           region: ap-southeast-1
           vpcIdRef:
@@ -140,6 +150,14 @@ spec:
       combine:
         variables:
         - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-node"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.forProvider.name
         strategy: string
         string:
           fmt: "%s-xplane-eks-sg-node"
@@ -174,15 +192,14 @@ spec:
             name: xplane-eks-iam
           version: "1.29"
           vpcConfig:
-          - subnetIdRefs:
+          - endpointPrivateAccess: true
+            endpointPublicAccess: true
+            subnetIdRefs:
             - name: xplane-private-subnet-1a
             - name: xplane-private-subnet-1b
             - name: xplane-private-subnet-1c
             securityGroupIdSelector:
               matchControllerRef: true
-          # - securityGroupIdRefs:
-          #   - name: linus-cluster-xplane-eks-sg-cluster
-          #   - name: linus-cluster-xplane-eks-sg-node
           tags:
             Name: xplane-eks-cluster
             Owner: linus.yong

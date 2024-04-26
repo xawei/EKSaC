@@ -20,6 +20,16 @@ spec:
             SGP: "ap-southeast-1"
             SYD: "ap-southeast-2"
             JKT: "ap-southeast-3"
+  - name: vpcid-patchset
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-vpc"
+      toFieldPath: spec.forProvider.vpcIdRef.name
   resources:
   - name: x-iam
     base:
@@ -91,6 +101,7 @@ spec:
     patches:
     - type: PatchSet
       patchSetName: region-patchset
+      patchSetName: vpcid-patchset
     - type: CombineFromComposite
       combine:
         variables:
@@ -115,14 +126,6 @@ spec:
         string:
           fmt: "%s-xplane-eks-sg-cluster"
       toFieldPath: spec.forProvider.tags.Name
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "%s-xplane-vpc"
-      toFieldPath: spec.forProvider.vpcIdRef.name
   - name: x-securitygroup-eks-node
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
@@ -146,6 +149,7 @@ spec:
     patches:
     - type: PatchSet
       patchSetName: region-patchset
+      patchSetName: vpcid-patchset
     - type: CombineFromComposite
       combine:
         variables:
@@ -170,14 +174,6 @@ spec:
         string:
           fmt: "%s-xplane-eks-sg-node"
       toFieldPath: spec.forProvider.tags.Name
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "%s-xplane-vpc"
-      toFieldPath: spec.forProvider.vpcIdRef.name
   - name: x-eks
     base:
       apiVersion: eks.aws.upbound.io/v1beta1

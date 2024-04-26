@@ -126,6 +126,52 @@ spec:
         string:
           fmt: "%s-xplane-eks-sg-cluster"
       toFieldPath: spec.forProvider.tags.Name
+  - name: x-sg-ingress-eks-cluster
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: SecurityGroupIngress
+      metadata:
+        name: xplane-eks-sg-ingress-cluster
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          region: ap-southeast-1
+          fromPort: 443
+          toPort: 443
+          ipProtocol: tcp
+          securityGroupIdRef:
+            name: xplane-eks-sg-cluster
+          tags:
+            Name: xplane-eks-sg-ingress-cluster
+            Owner: linus.yong
+            Environment: sandbox
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-ingress-cluster"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-ingress-cluster"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-cluster"
+      toFieldPath: spec.forProvider.securityGroupIdRef.name
   - name: x-securitygroup-eks-node
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1

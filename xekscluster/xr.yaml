@@ -153,11 +153,11 @@ spec:
         strategy: string
         string:
           fmt: "%s-xplane-eks-sg-node"
-      toFieldPath: metadata.name
+      toFieldPath: spec.forProvider.groupName
     - type: CombineFromComposite
       combine:
         variables:
-        - fromFieldPath: spec.forProvider.groupName
+        - fromFieldPath: spec.name
         strategy: string
         string:
           fmt: "%s-xplane-eks-sg-node"

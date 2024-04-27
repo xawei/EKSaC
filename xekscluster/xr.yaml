@@ -339,7 +339,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks-sg-node-to-node"
+          fmt: "%s-xplane-eks-sg-node"
       toFieldPath: spec.forProvider.securityGroupIdRef.name
     - type: CombineFromComposite
       combine:
@@ -347,7 +347,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks-sg-node-to-node"
+          fmt: "%s-xplane-eks-sg-node"
       toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
   - name: x-sg-ingress-eks-node-to-cluster
     base:
@@ -398,7 +398,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks-sg-node-to-cluster"
+          fmt: "%s-xplane-eks-sg-node"
       toFieldPath: spec.forProvider.securityGroupIdRef.name
     - type: CombineFromComposite
       combine:
@@ -406,7 +406,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks-sg-node-to-cluster"
+          fmt: "%s-xplane-eks-sg-node"
       toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
   - name: x-eks
     base:

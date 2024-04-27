@@ -292,26 +292,26 @@ spec:
         string:
           fmt: "%s-xplane-eks-sg-node"
       toFieldPath: spec.forProvider.tags.Name
-  - name: x-sg-ingress-eks-node
+  - name: x-sg-ingress-eks-node-to-node
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
       kind: SecurityGroupIngressRule
       metadata:
-        name: xplane-eks-sg-ingress-node
+        name: xplane-eks-sg-ingress-node-to-node
       spec:
         deletionPolicy: Delete
         forProvider:
           description: "Allow woker node to communicate with each others"
           region: ap-southeast-1
-          fromPort: 443
-          toPort: 443
-          ipProtocol: tcp
+          fromPort: 0
+          toPort: 65535
+          ipProtocol: -1
           referencedSecurityGroupIdRef:
-            name: xplane-eks-sg-node
+            name: xplane-eks-sg-node-to-node
           securityGroupIdRef:
-            name: xplane-eks-sg-node
+            name: xplane-eks-sg-node-to-node
           tags:
-            Name: xplane-eks-sg-ingress-node
+            Name: xplane-eks-sg-ingress-node-to-node
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
@@ -325,7 +325,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks-sg-ingress-node"
+          fmt: "%s-xplane-eks-sg-ingress-node-to-node"
       toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:
@@ -333,7 +333,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks-sg-ingress-node"
+          fmt: "%s-xplane-eks-sg-ingress-node-to-node"
       toFieldPath: spec.forProvider.tags.Name
     - type: CombineFromComposite
       combine:
@@ -341,7 +341,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks-sg-node"
+          fmt: "%s-xplane-eks-sg-node-to-node"
       toFieldPath: spec.forProvider.securityGroupIdRef.name
     - type: CombineFromComposite
       combine:
@@ -349,7 +349,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks-sg-node"
+          fmt: "%s-xplane-eks-sg-node-to-node"
       toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
   - name: x-eks
     base:

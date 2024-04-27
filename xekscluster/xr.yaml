@@ -185,6 +185,65 @@ spec:
         string:
           fmt: "%s-xplane-eks-sg-cluster"
       toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
+  - name: x-sg-egress-eks-cluster
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: SecurityGroupEgressRule
+      metadata:
+        name: xplane-eks-sg-egress-cluster
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          description: "Allow woker node to communicate with cluster API server"
+          region: ap-southeast-1
+          fromPort: 1024
+          toPort: 65535
+          ipProtocol: tcp
+          referencedSecurityGroupIdRef:
+            name: xplane-eks-sg-cluster
+          securityGroupIdRef:
+            name: xplane-eks-sg-cluster
+          tags:
+            Name: xplane-eks-sg-egress-cluster
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-egress-cluster"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-egress-cluster"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-cluster"
+      toFieldPath: spec.forProvider.securityGroupIdRef.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-cluster"
+      toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
   - name: x-securitygroup-eks-node
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1

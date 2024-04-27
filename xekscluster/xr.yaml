@@ -129,16 +129,19 @@ spec:
   - name: x-sg-ingress-eks-cluster
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1
-      kind: SecurityGroupIngress
+      kind: SecurityGroupIngressRule
       metadata:
         name: xplane-eks-sg-ingress-cluster
       spec:
         deletionPolicy: Delete
         forProvider:
+          description: "Allow woker node to communicate with cluster API server"
           region: ap-southeast-1
           fromPort: 443
           toPort: 443
           ipProtocol: tcp
+          referencedSecurityGroupIdRef:
+            name: xplane-eks-sg-cluster
           securityGroupIdRef:
             name: xplane-eks-sg-cluster
           tags:
@@ -172,6 +175,14 @@ spec:
         string:
           fmt: "%s-xplane-eks-sg-cluster"
       toFieldPath: spec.forProvider.securityGroupIdRef.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-cluster"
+      toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
   - name: x-securitygroup-eks-node
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1

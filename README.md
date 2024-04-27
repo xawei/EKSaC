@@ -1,2 +1,2 @@
 # EKSaC
-EKS as Consumable
+EKS as Consumables

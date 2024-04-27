@@ -87,7 +87,7 @@ spec:
       spec:
         deletionPolicy: Delete
         forProvider:
-          groupName: xplane-eks-sg-cluster
+          name: xplane-eks-sg-cluster
           description: "Security Group for EKS Control Plane"
           region: ap-southeast-1
           vpcIdRef:
@@ -109,7 +109,7 @@ spec:
         strategy: string
         string:
           fmt: "%s-xplane-eks-sg-cluster"
-      toFieldPath: spec.forProvider.groupName
+      toFieldPath: spec.forProvider.name
     - type: CombineFromComposite
       combine:
         variables:
@@ -194,7 +194,7 @@ spec:
       spec:
         deletionPolicy: Delete
         forProvider:
-          groupName: xplane-eks-sg-node
+          name: xplane-eks-sg-node
           description: "Security Group for EKS Nodes"
           region: ap-southeast-1
           vpcIdRef:
@@ -216,7 +216,7 @@ spec:
         strategy: string
         string:
           fmt: "%s-xplane-eks-sg-node"
-      toFieldPath: spec.forProvider.groupName
+      toFieldPath: spec.forProvider.name
     - type: CombineFromComposite
       combine:
         variables:

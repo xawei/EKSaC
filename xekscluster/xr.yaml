@@ -148,6 +148,8 @@ spec:
             Name: xplane-eks-sg-ingress-cluster
             Owner: linus.yong
             Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
     patches:
     - type: PatchSet
       patchSetName: region-patchset

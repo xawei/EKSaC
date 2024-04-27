@@ -360,7 +360,7 @@ spec:
       spec:
         deletionPolicy: Delete
         forProvider:
-          description: "Allow woker node to communicate with each others"
+          description: "Allow worker Kubelets and pods to receive communication from the cluster control plane"
           region: ap-southeast-1
           fromPort: 1025
           toPort: 65535

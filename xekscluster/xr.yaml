@@ -351,6 +351,65 @@ spec:
         string:
           fmt: "%s-xplane-eks-sg-node-to-node"
       toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
+  - name: x-sg-ingress-eks-node-to-cluster
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: SecurityGroupIngressRule
+      metadata:
+        name: xplane-eks-sg-ingress-node-to-cluster
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          description: "Allow woker node to communicate with each others"
+          region: ap-southeast-1
+          fromPort: 1025
+          toPort: 65535
+          ipProtocol: tcp
+          referencedSecurityGroupIdRef:
+            name: xplane-eks-sg-node-to-cluster
+          securityGroupIdRef:
+            name: xplane-eks-sg-node-to-cluster
+          tags:
+            Name: xplane-eks-sg-ingress-node-to-cluster
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-ingress-node-to-cluster"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-ingress-node-to-cluster"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-node-to-cluster"
+      toFieldPath: spec.forProvider.securityGroupIdRef.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-node-to-cluster"
+      toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
   - name: x-eks
     base:
       apiVersion: eks.aws.upbound.io/v1beta1

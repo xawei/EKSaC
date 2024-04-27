@@ -303,9 +303,7 @@ spec:
         forProvider:
           description: "Allow woker node to communicate with each others"
           region: ap-southeast-1
-          fromPort: 0
-          toPort: 65535
-          ipProtocol: -1
+          ipProtocol: "-1"
           referencedSecurityGroupIdRef:
             name: xplane-eks-sg-node-to-node
           securityGroupIdRef:

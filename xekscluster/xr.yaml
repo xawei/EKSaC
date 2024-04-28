@@ -305,9 +305,9 @@ spec:
           region: ap-southeast-1
           ipProtocol: "-1"
           referencedSecurityGroupIdRef:
-            name: xplane-eks-sg-node-to-node
+            name: x-securitygroup-eks-node
           securityGroupIdRef:
-            name: xplane-eks-sg-node-to-node
+            name: x-securitygroup-eks-node
           tags:
             Name: xplane-eks-sg-ingress-node-to-node
             Owner: linus.yong
@@ -332,65 +332,6 @@ spec:
         strategy: string
         string:
           fmt: "%s-xplane-eks-sg-ingress-node-to-node"
-      toFieldPath: spec.forProvider.tags.Name
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "%s-xplane-eks-sg-node"
-      toFieldPath: spec.forProvider.securityGroupIdRef.name
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "%s-xplane-eks-sg-node"
-      toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
-  - name: x-sg-ingress-eks-node-to-cluster
-    base:
-      apiVersion: ec2.aws.upbound.io/v1beta1
-      kind: SecurityGroupIngressRule
-      metadata:
-        name: xplane-eks-sg-ingress-node-to-cluster
-      spec:
-        deletionPolicy: Delete
-        forProvider:
-          description: "Allow worker Kubelets and pods to receive communication from the cluster control plane"
-          region: ap-southeast-1
-          fromPort: 1025
-          toPort: 65535
-          ipProtocol: tcp
-          referencedSecurityGroupIdRef:
-            name: xplane-eks-sg-node-to-cluster
-          securityGroupIdRef:
-            name: xplane-eks-sg-node-to-cluster
-          tags:
-            Name: xplane-eks-sg-ingress-node-to-cluster
-            Owner: linus.yong
-            Environment: sandbox
-        providerConfigRef:
-          name: aws-provider
-    patches:
-    - type: PatchSet
-      patchSetName: region-patchset
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "%s-xplane-eks-sg-ingress-node-to-cluster"
-      toFieldPath: metadata.name
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "%s-xplane-eks-sg-ingress-node-to-cluster"
       toFieldPath: spec.forProvider.tags.Name
     - type: CombineFromComposite
       combine:

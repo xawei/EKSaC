@@ -349,6 +349,65 @@ spec:
         string:
           fmt: "%s-xplane-eks-sg-node"
       toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
+  - name: x-sg-ingress-eks-cluster-to-node
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: SecurityGroupIngressRule
+      metadata:
+        name: xplane-eks-sg-ingress-cluster-to-node
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          description: "Allow Control Plane to communicate with Workers"
+          region: ap-southeast-1
+          fromPort: 1025
+          toPort: 65535
+          ipProtocol: tcp
+          referencedSecurityGroupIdRef:
+            name: xplane-eks-sg-cluster
+          securityGroupIdRef:
+            name: xplane-eks-sg-node
+          tags:
+            Name: xplane-eks-sg-ingress-node-to-node
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-ingress-cluster-to-node"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-ingress-cluster-to-node"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-node"
+      toFieldPath: spec.forProvider.securityGroupIdRef.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-cluster"
+      toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
   - name: x-sg-egress-eks-node
     base:
       apiVersion: ec2.aws.upbound.io/v1beta1

@@ -349,6 +349,54 @@ spec:
         string:
           fmt: "%s-xplane-eks-sg-node"
       toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
+  - name: x-sg-egress-eks-node
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: SecurityGroupEgressRule
+      metadata:
+        name: xplane-eks-sg-egress-node
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          description: "Allow woker node to communicate out"
+          region: ap-southeast-1
+          cidrIpv4: 0.0.0.0/0
+          ipProtocol: "-1"
+          securityGroupIdRef:
+            name: xplane-eks-sg-node
+          tags:
+            Name: xplane-eks-sg-egress-node
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-egress-node"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-egress-node"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-node"
+      toFieldPath: spec.forProvider.securityGroupIdRef.name
   - name: x-eks
     base:
       apiVersion: eks.aws.upbound.io/v1beta1

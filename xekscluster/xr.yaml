@@ -141,7 +141,7 @@ spec:
           toPort: 443
           ipProtocol: tcp
           referencedSecurityGroupIdRef:
-            name: xplane-eks-sg-cluster
+            name: xplane-eks-sg-node
           securityGroupIdRef:
             name: xplane-eks-sg-cluster
           tags:
@@ -183,7 +183,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks-sg-cluster"
+          fmt: "%s-xplane-eks-sg-node"
       toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
   - name: x-sg-egress-eks-cluster
     base:
@@ -200,7 +200,7 @@ spec:
           toPort: 65535
           ipProtocol: tcp
           referencedSecurityGroupIdRef:
-            name: xplane-eks-sg-cluster
+            name: xplane-eks-sg-node
           securityGroupIdRef:
             name: xplane-eks-sg-cluster
           tags:
@@ -242,7 +242,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks-sg-cluster"
+          fmt: "%s-xplane-eks-sg-node"
       toFieldPath: spec.forProvider.referencedSecurityGroupIdRef.name
   - name: x-securitygroup-eks-node
     base:

@@ -3,7 +3,6 @@ kind: Composition
 metadata:
   name: x-eks-cluster
 spec:
-  writeConnectionSecretsToNamespace: eksac
   compositeTypeRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
     kind: xEksCluster
@@ -456,7 +455,7 @@ spec:
         string:
           fmt: "%s-xplane-eks-sg-node"
       toFieldPath: spec.forProvider.securityGroupIdRef.name
-  - name: x-eks
+  - name: x-eks-cluster
     base:
       apiVersion: eks.aws.upbound.io/v1beta1
       kind: Cluster
@@ -482,9 +481,6 @@ spec:
             Name: xplane-eks-cluster
             Owner: linus.yong
             Environment: sandbox
-        writeConnectionSecretToRef:
-          namespace: eksac
-          name: xplane-eks-cluster-connection
         providerConfigRef:
           name: aws-provider
     patches:
@@ -538,18 +534,3 @@ spec:
         string:
           fmt: "%s-xplane-private-subnet-1c"
       toFieldPath: spec.forProvider.vpcConfig[0].subnetIdRefs[2].name
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "%s-xplane-eks-cluster-connection"
-      toFieldPath: spec.writeConnectionSecretToRef.name
-    connectionDetails:
-    - name: cluster-ca
-      fromConnectionSecretKey: clusterCA
-    - name: apiserver-endpoint
-      fromConnectionSecretKey: endpoint
-    - name: value
-      fromConnectionSecretKey: kubeconfig

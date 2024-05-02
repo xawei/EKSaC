@@ -30,7 +30,7 @@ spec:
           fmt: "%s-xplane-vpc"
       toFieldPath: spec.forProvider.vpcIdRef.name
   resources:
-  - name: x-iam
+  - name: x-iam-eks
     base:
       apiVersion: iam.aws.upbound.io/v1beta1
       kind: Role
@@ -534,3 +534,135 @@ spec:
         string:
           fmt: "%s-xplane-private-subnet-1c"
       toFieldPath: spec.forProvider.vpcConfig[0].subnetIdRefs[2].name
+  - name: x-iam-fargate-pod
+    base:
+      apiVersion: iam.aws.upbound.io/v1beta1
+      kind: Role
+      metadata:
+        name: xplane-fargate-pod-iam
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          assumeRolePolicy: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "eks-fargate-pods.amazonaws.com"
+                  },
+                  "Action": "sts:AssumeRole"
+                }
+              ]
+            }
+          managedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy
+          tags:
+            Name: xplane-fargate-pod-iam
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-fargate-pod-iam"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-fargate-pod-iam"
+      toFieldPath: spec.forProvider.tags.Name
+  - name: x-fargate-profile
+    base:
+      apiVersion: eks.aws.upbound.io/v1beta1
+      kind: FargateProfile
+      metadata:
+        name: xplane-fargate-profile
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          clusterNameRef:
+            name: xplane-fargate-profile
+          podExecutionRoleArnRef:
+            name: xplane-eks-fargate-pod-iam
+          region: ap-southeast-1
+          selector:
+            - namespace: karpenter
+          subnetIdRefs:
+            - name: xplane-private-subnet-1a
+            - name: xplane-private-subnet-1b
+            - name: xplane-private-subnet-1c
+          tags:
+            Name: xplane-fargate-profile
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-fargate-profile"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-fargate-profile"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-fargate-pod-iam"
+      toFieldPath: spec.forProvider.podExecutionRoleArnRef.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-fargate-pod-iam"
+      toFieldPath: spec.forProvider.podExecutionRoleArnRef.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1a"
+      toFieldPath: spec.forProvider.subnetIdRefs[0].name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1a"
+      toFieldPath: spec.forProvider.subnetIdRefs[1].name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1a"
+      toFieldPath: spec.forProvider.subnetIdRefs[2].name

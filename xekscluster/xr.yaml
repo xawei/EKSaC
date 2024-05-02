@@ -537,6 +537,46 @@ spec:
     - type: ToCompositeFieldPath
       fromFieldPath: status.atProvider.identity[0].issuer[0]
       toFieldPath: status.oidcIssuer
+  - name: x-oidc-provider
+    base:
+      apiVersion: iam.aws.upbound.io/v1beta1
+      kind: OpenIDConnectProvider
+      metadata:
+        name: xplane-oidc-provider
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          clientIdList:
+          - sts.amazonaws.com
+          thumbprintList:
+          - 9e99a48a9960b14926bb7f3b02e22da2b0ab7280
+          url: https://oidc.eks.ap-southeast-1.amazonaws.com/id/E30EE4E734F4D87FD466A10AA72A89D4
+          tags:
+            Name: xplane-oidc-provider
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-oidc-provider"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-oidc-provider"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.oidcIssuer
+      toFieldPath: spec.forProvider.url
   - name: x-iam-fargate-pod
     base:
       apiVersion: iam.aws.upbound.io/v1beta1

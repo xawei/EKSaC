@@ -640,7 +640,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks-fargate-pod-iam"
+          fmt: "%s-xplane-fargate-pod-iam"
       toFieldPath: spec.forProvider.podExecutionRoleArnRef.name
     - type: CombineFromComposite
       combine:

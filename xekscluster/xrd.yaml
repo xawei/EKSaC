@@ -32,6 +32,11 @@ spec:
             required:
             - name
             - location
+          status:
+            type: object
+            properties:
+              oidcIssuer:
+                type: string
     served: true
     referenceable: true
   claimNames:

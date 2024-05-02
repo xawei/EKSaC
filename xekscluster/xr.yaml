@@ -534,6 +534,9 @@ spec:
         string:
           fmt: "%s-xplane-private-subnet-1c"
       toFieldPath: spec.forProvider.vpcConfig[0].subnetIdRefs[2].name
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.identity[0].issuer[0]
+      toFieldPath: status.oidcIssuer
   - name: x-iam-fargate-pod
     base:
       apiVersion: iam.aws.upbound.io/v1beta1

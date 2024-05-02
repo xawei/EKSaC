@@ -656,7 +656,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-private-subnet-1a"
+          fmt: "%s-xplane-private-subnet-1b"
       toFieldPath: spec.forProvider.subnetIdRefs[1].name
     - type: CombineFromComposite
       combine:
@@ -664,5 +664,5 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-private-subnet-1a"
+          fmt: "%s-xplane-private-subnet-1c"
       toFieldPath: spec.forProvider.subnetIdRefs[2].name

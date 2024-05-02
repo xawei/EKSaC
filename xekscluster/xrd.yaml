@@ -35,7 +35,7 @@ spec:
           status:
             type: object
             properties:
-              oidcIssuer:
+              oidcIssue":
                 type: string
     served: true
     referenceable: true

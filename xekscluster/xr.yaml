@@ -591,7 +591,7 @@ spec:
         deletionPolicy: Delete
         forProvider:
           clusterNameRef:
-            name: xplane-fargate-profile
+            name:  xplane-eks-cluster
           podExecutionRoleArnRef:
             name: xplane-eks-fargate-pod-iam
           region: ap-southeast-1
@@ -632,8 +632,8 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-eks-fargate-pod-iam"
-      toFieldPath: spec.forProvider.podExecutionRoleArnRef.name
+          fmt: "%s-xplane-eks-cluster"
+      toFieldPath: spec.forProvider.clusterNameRef.name
     - type: CombineFromComposite
       combine:
         variables:

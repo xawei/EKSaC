@@ -35,11 +35,6 @@ spec:
           status:
             type: object
             properties:
-              oidcIssue":
-                type: string
-          status:
-            type: object
-            properties:
               oidcIssuer:
                 type: string
     served: true

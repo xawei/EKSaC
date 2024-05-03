@@ -550,7 +550,6 @@ spec:
           - sts.amazonaws.com
           thumbprintList:
           - 9e99a48a9960b14926bb7f3b02e22da2b0ab7280
-          url: https://oidc.eks.ap-southeast-1.amazonaws.com/id/E30EE4E734F4D87FD466A10AA72A89D4
           tags:
             Name: xplane-oidc-provider
             Owner: linus.yong
@@ -577,6 +576,8 @@ spec:
     - type: FromCompositeFieldPath
       fromFieldPath: status.oidcIssuer
       toFieldPath: spec.forProvider.url
+      policy:
+        fromFieldPath: Required
   - name: x-iam-fargate-pod
     base:
       apiVersion: iam.aws.upbound.io/v1beta1

@@ -533,9 +533,9 @@ spec:
         strategy: string
         string:
           fmt: "%s-xplane-private-subnet-1c"
-      toFieldPath: spec.forProvider.arn
+      toFieldPath: spec.forProvider.vpcConfig[0].subnetIdRefs[1].name
     - type: ToCompositeFieldPath
-      fromFieldPath: .status.atProvider.identity[0].oidc[0].issuer
+      fromFieldPath: status.atProvider.identity[0].oidc[0].issuer
       toFieldPath: status.oidcIssuer
   # - name: x-oidc-provider
   #   base:

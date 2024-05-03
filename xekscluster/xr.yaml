@@ -574,7 +574,7 @@ spec:
         string:
           fmt: "%s-xplane-oidc-provider"
       toFieldPath: spec.forProvider.tags.Name
-    - type: ToCompositeFieldPath
+    - type: FromCompositeFieldPath
       fromFieldPath: status.oidcIssuer
       toFieldPath: spec.forProvider.url
   - name: x-iam-fargate-pod

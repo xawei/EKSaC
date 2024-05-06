@@ -712,3 +712,114 @@ spec:
         string:
           fmt: "%s-xplane-private-subnet-1c"
       toFieldPath: spec.forProvider.subnetIdRefs[2].name
+  - name: x-iam-karpenter-policy
+    base:
+      apiVersion: iam.aws.upbound.io/v1beta1
+      kind: Policy
+      metadata:
+        name: xplane-karpenter-policy
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          policy: |
+            {
+                "Statement": [
+                    {
+                        "Action": [
+                            "ssm:GetParameter",
+                            "pricing:GetProducts",
+                            "iam:TagInstanceProfile",
+                            "iam:PassRole",
+                            "iam:GetInstanceProfile",
+                            "iam:CreateInstanceProfile",
+                            "iam:AddRoleToInstanceProfile",
+                            "ec2:TerminateInstances",
+                            "ec2:RunInstances",
+                            "ec2:DescribeSubnets",
+                            "ec2:DescribeSpotPriceHistory",
+                            "ec2:DescribeSecurityGroups",
+                            "ec2:DescribeLaunchTemplates",
+                            "ec2:DescribeInstances",
+                            "ec2:DescribeInstanceTypes",
+                            "ec2:DescribeInstanceTypeOfferings",
+                            "ec2:DescribeImages",
+                            "ec2:DescribeAvailabilityZones",
+                            "ec2:DeleteLaunchTemplate",
+                            "ec2:CreateTags",
+                            "ec2:CreateLaunchTemplate",
+                            "ec2:CreateFleet"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "*",
+                        "Sid": "Karpenter"
+                    },
+                    {
+                        "Action": "ec2:TerminateInstances",
+                        "Condition": {
+                            "StringLike": {
+                                "ec2:ResourceTag/Name": "*karpenter*"
+                            }
+                        },
+                        "Effect": "Allow",
+                        "Resource": "*",
+                        "Sid": "ConditionalEC2Termination"
+                    },
+                    {
+                        "Action": "iam:PassRole",
+                        "Effect": "Allow",
+                        "Resource": "arn:aws:iam::390945758345:role/X_CLUSTER_NAME-xplane-eks-cluster",
+                        "Sid": "PassNodeIAMRole"
+                    },
+                    {
+                        "Action": "eks:DescribeCluster",
+                        "Effect": "Allow",
+                        "Resource": "arn:aws:eks:ap-southeast-1:390945758345:cluster/X_CLUSTER_NAME-xplane-eks-cluster",
+                        "Sid": "EKSClusterEndpointLookup"
+                    },
+                    {
+                        "Action": [
+                            "sqs:ReceiveMessage",
+                            "sqs:GetQueueUrl",
+                            "sqs:GetQueueAttributes",
+                            "sqs:DeleteMessage"
+                        ],
+                        "Effect": "Allow",
+                        "Resource": "*",
+                        "Sid": "KarpenterSQS"
+                    }
+                ],
+                "Version": "2012-10-17"
+            }
+          tags:
+            Name: xplane-karpenter-policy
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-karpenter-policy"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-karpenter-policy"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.name
+      toFieldPath: spec.policy
+      transforms:
+      - type: match
+        match:
+          patterns:
+          - type: literal
+            literal: "X_CLUSTER_NAME"
+            result: "linus-cluster"

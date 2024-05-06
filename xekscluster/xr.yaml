@@ -641,6 +641,8 @@ spec:
           region: ap-southeast-1
           selector:
             - namespace: karpenter
+              labels:
+                app.kubernetes.io/name: karpenter
           subnetIdRefs:
             - name: xplane-private-subnet-1a
             - name: xplane-private-subnet-1b

@@ -840,3 +840,64 @@ spec:
       toFieldPath: spec.forProvider.policy
       policy:
         fromFieldPath: Required
+  - name: x-iam-karpenter
+    base:
+      apiVersion: iam.aws.upbound.io/v1beta1
+      kind: Role
+      metadata:
+        name: xplane-karpenter-iam
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          tags:
+            Name: xplane-karpenter-iam
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-karpenter-iam"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-karpenter-iam"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.awsAccountId
+        - fromFieldPath: status.oidcIssuer
+        - fromFieldPath: status.oidcIssuer
+        strategy: string
+        string: 
+          fmt: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                  {
+                      "Effect": "Allow",
+                      "Principal": {
+                          "Federated": "arn:aws:iam::%s:oidc-provider/%s"
+                      },
+                      "Action": "sts:AssumeRoleWithWebIdentity",
+                      "Condition": {
+                          "StringEquals": {
+                              "%s:sub": "system:serviceaccount:karpenter:karpenter"
+                          }
+                      }
+                  }
+              ]
+            }
+      toFieldPath: spec.forProvider.assumeRolePolicy
+      policy:
+        fromFieldPath: Required

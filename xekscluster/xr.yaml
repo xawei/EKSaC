@@ -537,6 +537,11 @@ spec:
     - type: ToCompositeFieldPath
       fromFieldPath: status.atProvider.identity[0].oidc[0].issuer
       toFieldPath: status.oidcIssuer
+      transforms:
+      - type: string
+        string:
+          type: TrimPrefix
+          trim: 'https://'
   - name: x-oidc-provider
     base:
       apiVersion: iam.aws.upbound.io/v1beta1
@@ -573,8 +578,18 @@ spec:
         string:
           fmt: "%s-xplane-oidc-provider"
       toFieldPath: spec.forProvider.tags.Name
-    - type: FromCompositeFieldPath
-      fromFieldPath: status.oidcIssuer
+    # - type: FromCompositeFieldPath
+    #   fromFieldPath: status.oidcIssuer
+    #   toFieldPath: spec.forProvider.url
+    #   policy:
+    #     fromFieldPath: Required
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: status.oidcIssuer
+        strategy: string
+        string:
+          fmt: "https://%s"
       toFieldPath: spec.forProvider.url
       policy:
         fromFieldPath: Required

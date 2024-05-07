@@ -901,3 +901,43 @@ spec:
       toFieldPath: spec.forProvider.assumeRolePolicy
       policy:
         fromFieldPath: Required
+  - name: x-iam-karpenter-policy-attachment
+    base:
+      apiVersion: iam.aws.upbound.io/v1beta1
+      kind: RolePolicyAttachment
+      metadata:
+        name: xplane-karpenter-policy-attachment
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          policyArnRef:
+            name: xplane-karpenter-policy
+          roleRef:
+            name: xplane-karpenter-iam
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-karpenter-policy-attachment"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-karpenter-policy"
+      toFieldPath: spec.forProvider.policyArnRef.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-karpenter-iam"
+      toFieldPath: spec.forProvider.roleRef.name

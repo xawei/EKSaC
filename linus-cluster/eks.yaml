@@ -5,6 +5,7 @@ metadata:
 spec:
   name: linus-cluster
   location: "SGP"
+  awsAccountId: "390945758345"
 ---
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: EksCluster
@@ -13,6 +14,7 @@ metadata:
 spec:
   name: linus-cluster
   location: "SGP"
+  awsAccountId: "390945758345"
   resourceRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
     kind: xEksCluster

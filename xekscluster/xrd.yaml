@@ -29,9 +29,12 @@ spec:
                 - pattern: '^SGP$'
                 - pattern: '^SYD$'
                 - pattern: '^JKT$'
+              awsAccountId:
+                type: string
             required:
             - name
             - location
+            - awsAccountId
           status:
             type: object
             properties:

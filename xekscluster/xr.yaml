@@ -589,11 +589,6 @@ spec:
         string:
           fmt: "%s-xplane-oidc-provider"
       toFieldPath: spec.forProvider.tags.Name
-    # - type: FromCompositeFieldPath
-    #   fromFieldPath: status.oidcIssuer
-    #   toFieldPath: spec.forProvider.url
-    #   policy:
-    #     fromFieldPath: Required
     - type: CombineFromComposite
       combine:
         variables:

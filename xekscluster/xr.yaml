@@ -481,6 +481,9 @@ spec:
             Name: xplane-eks-cluster
             Owner: linus.yong
             Environment: sandbox
+        writeConnectionSecretToRef:
+          name: xplane-eks-cluster
+          namespace: eksac
         providerConfigRef:
           name: aws-provider
     patches:

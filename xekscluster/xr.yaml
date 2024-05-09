@@ -545,6 +545,13 @@ spec:
         string:
           type: TrimPrefix
           trim: 'https://'
+    connectionDetails:
+    - name: cluster-ca
+      fromConnectionSecretKey: clusterCA
+    - name: apiserver-endpoint
+      fromConnectionSecretKey: endpoint
+    - name: value
+      fromConnectionSecretKey: kubeconfig
   - name: x-oidc-provider
     base:
       apiVersion: iam.aws.upbound.io/v1beta1

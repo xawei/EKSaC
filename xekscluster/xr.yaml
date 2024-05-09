@@ -3,6 +3,7 @@ kind: Composition
 metadata:
   name: x-eks-cluster
 spec:
+  writeConnectionSecretsToNamespace: eksac
   compositeTypeRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
     kind: xEksCluster

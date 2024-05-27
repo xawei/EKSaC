@@ -40,6 +40,8 @@ spec:
             properties:
               oidcIssuer:
                 type: string
+              karpenterFargateStatus:
+                type: string
     served: true
     referenceable: true
   claimNames:

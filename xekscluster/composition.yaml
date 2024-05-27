@@ -468,7 +468,7 @@ spec:
           region: ap-southeast-1
           roleArnRef:
             name: xplane-eks-iam
-          version: "1.29"
+          version: "1.30"
           vpcConfig:
           - endpointPrivateAccess: true
             endpointPublicAccess: true

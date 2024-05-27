@@ -1,9 +1,9 @@
+
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
   name: x-eks-cluster
 spec:
-  writeConnectionSecretsToNamespace: eksac
   compositeTypeRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
     kind: xEksCluster
@@ -482,9 +482,6 @@ spec:
             Name: xplane-eks-cluster
             Owner: linus.yong
             Environment: sandbox
-        writeConnectionSecretToRef:
-          name: xplane-eks-cluster
-          namespace: eksac
         providerConfigRef:
           name: aws-provider
     patches:
@@ -546,13 +543,262 @@ spec:
         string:
           type: TrimPrefix
           trim: 'https://'
-    connectionDetails:
-    - name: cluster-ca
-      fromConnectionSecretKey: clusterCA
-    - name: apiserver-endpoint
-      fromConnectionSecretKey: endpoint
-    - name: value
-      fromConnectionSecretKey: kubeconfig
+  - name: x-eks-addon-coredns
+    base:
+      apiVersion: eks.aws.upbound.io/v1beta1
+      kind: Addon
+      metadata:
+        name: xplane-eks-addon-coredns
+      spec:
+        forProvider:
+          region: ap-southeast-1
+          addonName: coredns
+          addonVersion: v1.11.1-eksbuild.9
+          configurationValues: |
+            { "replicaCount": 1 }
+          clusterNameRef:
+            name: xplane-eks-cluster
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-addon-coredns"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-cluster"
+      toFieldPath: spec.forProvider.clusterNameRef.name
+  - name: x-eks-addon-vpc-cni
+    base:
+      apiVersion: eks.aws.upbound.io/v1beta1
+      kind: Addon
+      metadata:
+        name: xplane-eks-addon-vpc-cni
+      spec:
+        forProvider:
+          region: ap-southeast-1
+          addonName: vpc-cni
+          addonVersion: v1.18.1-eksbuild.3
+          clusterNameRef:
+            name: xplane-eks-cluster
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-addon-vpc-cni"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-cluster"
+      toFieldPath: spec.forProvider.clusterNameRef.name
+  - name: x-eks-addon-kube-proxy
+    base:
+      apiVersion: eks.aws.upbound.io/v1beta1
+      kind: Addon
+      metadata:
+        name: xplane-eks-addon-kube-proxy
+      spec:
+        forProvider:
+          region: ap-southeast-1
+          addonName: kube-proxy
+          addonVersion: v1.29.3-eksbuild.2
+          clusterNameRef:
+            name: xplane-eks-cluster
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-addon-kube-proxy"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-cluster"
+      toFieldPath: spec.forProvider.clusterNameRef.name
+  - name: x-iam-ebs-csi
+    base:
+      apiVersion: iam.aws.upbound.io/v1beta1
+      kind: Role
+      metadata:
+        name: xplane-ebs-csi-iam
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          managedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+          tags:
+            Name: xplane-ebs-csi-iam
+            Owner: linus.yong
+            Environment: sandbox
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-ebs-csi-iam"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-ebs-csi-iam"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.awsAccountId
+        - fromFieldPath: status.oidcIssuer
+        - fromFieldPath: status.oidcIssuer
+        - fromFieldPath: status.oidcIssuer
+        strategy: string
+        string: 
+          fmt: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                  {
+                      "Effect": "Allow",
+                      "Principal": {
+                          "Federated": "arn:aws:iam::%s:oidc-provider/%s"
+                      },
+                      "Action": "sts:AssumeRoleWithWebIdentity",
+                      "Condition": {
+                          "StringEquals": {
+                              "%s:aud": "sts.amazonaws.com",
+                              "%s:sub": "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+                          }
+                      }
+                  }
+              ]
+            }
+      toFieldPath: spec.forProvider.assumeRolePolicy
+      policy:
+        fromFieldPath: Required
+  - name: x-eks-addon-ebs-csi
+    base:
+      apiVersion: eks.aws.upbound.io/v1beta1
+      kind: Addon
+      metadata:
+        name: xplane-eks-addon-ebs-csi
+      spec:
+        forProvider:
+          region: ap-southeast-1
+          addonName: aws-ebs-csi-driver
+          addonVersion: v1.30.0-eksbuild.1
+          clusterNameRef:
+            name: xplane-eks-cluster
+          serviceAccountRoleArnRef:
+            name: xplane-ebs-csi-iam
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-addon-ebs-csi"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-cluster"
+      toFieldPath: spec.forProvider.clusterNameRef.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-ebs-csi-iam"
+      toFieldPath: spec.forProvider.serviceAccountRoleArnRef.name
+  - name: x-eks-cluster-auth
+    base:
+      apiVersion: eks.aws.upbound.io/v1beta1
+      kind: ClusterAuth
+      metadata:
+        name: xplane-eks-cluster-auth
+      spec:
+        forProvider:
+          clusterNameRef:
+            name: xplane-eks-cluster
+          region: ap-southeast-1
+        writeConnectionSecretToRef:
+          name: xplane-eks-cluster-auth
+          namespace: eksac
+        providerConfigRef:
+          name: aws-provider
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-cluster"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-cluster"
+      toFieldPath: spec.forProvider.clusterNameRef.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-cluster-auth"
+      toFieldPath: spec.writeConnectionSecretToRef.name
   - name: x-oidc-provider
     base:
       apiVersion: iam.aws.upbound.io/v1beta1
@@ -733,6 +979,9 @@ spec:
         string:
           fmt: "%s-xplane-private-subnet-1c"
       toFieldPath: spec.forProvider.subnetIdRefs[2].name
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.status
+      toFieldPath: status.karpenterFargateStatus
   - name: x-iam-karpenter-policy
     base:
       apiVersion: iam.aws.upbound.io/v1beta1
@@ -844,8 +1093,6 @@ spec:
               "Version": "2012-10-17"
             }
       toFieldPath: spec.forProvider.policy
-      policy:
-        fromFieldPath: Required
   - name: x-iam-karpenter
     base:
       apiVersion: iam.aws.upbound.io/v1beta1
@@ -997,3 +1244,413 @@ spec:
         string:
           fmt: "%s-xplane-karpenter-node-iam"
       toFieldPath: spec.forProvider.tags.Name
+  - name: x-aws-auth-karpenter
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: 
+        annotations:
+          crossplane.io/external-name: aws-auth
+      spec:
+        forProvider:
+          manifest:
+            apiVersion: v1
+            kind: ConfigMap
+            metadata:
+              name: aws-auth
+              namespace: kube-system
+            data:
+              mapRoles: |
+                TO_BE_REPLACED
+        managementPolicies:
+        - Observe
+        - Create
+        - Update
+        providerConfigRef:
+          name: kubernetes-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-aws-auth-karpenter"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.awsAccountId
+        - fromFieldPath: spec.name
+        - fromFieldPath: spec.awsAccountId
+        - fromFieldPath: spec.name
+        strategy: string
+        string: 
+          fmt: |
+            - groups:
+              - system:bootstrappers
+              - system:nodes
+              rolearn: arn:aws:iam::%s:role/%s-xplane-karpenter-node-iam
+              username: system:node:{{EC2PrivateDNSName}}
+            - groups:
+              - system:bootstrappers
+              - system:nodes
+              - system:node-proxier
+              rolearn: arn:aws:iam::%s:role/%s-xplane-fargate-pod-iam
+              username: system:node:{{SessionName}}
+      toFieldPath: spec.forProvider.manifest.data.mapRoles
+  - name: x-helm-karpenter
+    base:
+      apiVersion: helm.crossplane.io/v1beta1
+      kind: Release
+      metadata:
+        name: xplane-helm-karpenter
+      spec:
+        forProvider:
+          chart:
+            name: karpenter
+            repository: oci://public.ecr.aws/karpenter
+            version: "0.36.1"
+          namespace: karpenter
+          set:
+          - name: serviceAccount.annotations.eks\.amazonaws\.com/role-arn
+            value: arn:aws:iam::390945758345:role/linus-cluster-xplane-karpenter-iam
+          - name: settings.clusterName
+            value: linus-cluster-xplane-eks-cluster
+          - name: serviceAccount.name
+            value: karpenter
+          - name: dnsPolicy
+            value: Default
+          - name: replicas
+            value: "1"
+          wait: true
+        providerConfigRef:
+          name: helm-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-helm-karpenter"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.awsAccountId
+        - fromFieldPath: spec.name
+        strategy: string
+        string: 
+          fmt: arn:aws:iam::%s:role/%s-xplane-karpenter-iam
+      toFieldPath: spec.forProvider.set[0].value
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-cluster"
+      toFieldPath: spec.forProvider.set[1].value
+    - type: FromCompositeFieldPath
+      fromFieldPath: status.karpenterFargateStatus
+      toFieldPath: metadata.labels["karpenterFargateStatus"]
+      policy:
+        fromFieldPath: Required
+  - name: x-ec2nc-karpenter
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-ec2nc-karpenter
+      spec:
+        forProvider:
+          manifest:
+            apiVersion: karpenter.k8s.aws/v1beta1
+            kind: EC2NodeClass
+            metadata:
+              name: default
+            spec:
+              amiFamily: Bottlerocket
+              blockDeviceMappings:
+              - deviceName: /dev/xvdb
+                ebs:
+                  deleteOnTermination: true
+                  volumeSize: 100Gi
+                  volumeType: gp3
+              metadataOptions:
+                httpEndpoint: enabled
+                httpProtocolIPv6: disabled
+                httpPutResponseHopLimit: 2
+                httpTokens: required
+              role: xplane-karpenter-node-iam
+              securityGroupSelectorTerms:
+              - tags:
+                  Name: xplane-eks-sg-node
+              subnetSelectorTerms:
+              - tags:
+                  Name: xplane-private-subnet-*
+        managementPolicies:
+        - Observe
+        - Create
+        - Update
+        - Delete
+        providerConfigRef:
+          name: kubernetes-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-ec2nc-karpenter"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-karpenter-node-iam"
+      toFieldPath: spec.forProvider.manifest.spec.role
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-sg-node"
+      toFieldPath: spec.forProvider.manifest.spec.securityGroupSelectorTerms[0].tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-*"
+      toFieldPath: spec.forProvider.manifest.spec.subnetSelectorTerms[0].tags.Name
+  - name: x-arm64-nodepool-karpenter
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-arm64-nodepool-karpenter
+      spec:
+        forProvider:
+          manifest:
+            apiVersion: karpenter.sh/v1beta1
+            kind: NodePool
+            metadata:
+              name: arm64
+            spec:
+              disruption:
+                consolidationPolicy: WhenUnderutilized
+                expireAfter: 2h
+              template:
+                metadata:
+                  labels:
+                    managed-by: karpenter
+                spec:
+                  nodeClassRef:
+                    name: default
+                  requirements:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                    - arm64
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                    - linux
+                  - key: karpenter.sh/capacity-type
+                    operator: In
+                    values:
+                    - spot
+              weight: 50
+        managementPolicies:
+        - Observe
+        - Create
+        - Update
+        - Delete
+        providerConfigRef:
+          name: kubernetes-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-arm64-nodepool-karpenter"
+      toFieldPath: metadata.name
+  - name: x-role-restart-karpenter
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-role-restart-karpenter
+      spec:
+        forProvider:
+          manifest:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: Role
+            metadata:
+              name: karpenter-restart
+              namespace: karpenter
+            rules:
+              - apiGroups: ["apps", "extensions"]
+                resources: ["deployments"]
+                resourceNames: ["linus-cluster-xplane-helm-karpenter"]
+                verbs: ["get", "patch", "list", "watch"]
+        managementPolicies:
+        - Observe
+        - Create
+        - Update
+        - Delete
+        providerConfigRef:
+          name: kubernetes-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-role-restart-karpenter"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-helm-karpenter"
+      toFieldPath: spec.forProvider.manifest.rules[0].resourceNames[0]
+  - name: x-sa-restart-karpenter
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-sa-restart-karpenter
+      spec:
+        forProvider:
+          manifest:
+            apiVersion: v1
+            kind: ServiceAccount
+            metadata:
+              name: karpenter-restart
+              namespace: karpenter
+            automountServiceAccountToken: true
+        managementPolicies:
+        - Observe
+        - Create
+        - Update
+        - Delete
+        providerConfigRef:
+          name: kubernetes-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-sa-restart-karpenter"
+      toFieldPath: metadata.name
+  - name: x-rolebinding-restart-karpenter
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-rolebinding-restart-karpenter
+      spec:
+        forProvider:
+          manifest:
+            apiVersion: rbac.authorization.k8s.io/v1
+            kind: RoleBinding
+            metadata:
+              name: karpenter-restart
+              namespace: karpenter
+            roleRef:
+              apiGroup: rbac.authorization.k8s.io
+              kind: Role
+              name: karpenter-restart
+            subjects:
+              - kind: ServiceAccount
+                name: karpenter-restart
+                namespace: karpenter
+        managementPolicies:
+        - Observe
+        - Create
+        - Update
+        - Delete
+        providerConfigRef:
+          name: kubernetes-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-rolebinding-restart-karpenter"
+      toFieldPath: metadata.name
+  - name: x-cronjob-restart-karpenter
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-cronjob-restart-karpenter
+      spec:
+        forProvider:
+          manifest:
+            apiVersion: batch/v1
+            kind: CronJob
+            metadata:
+              name: karpenter-restart
+              namespace: karpenter
+            spec:
+              successfulJobsHistoryLimit: 1
+              failedJobsHistoryLimit: 2
+              concurrencyPolicy: Forbid
+              schedule: '0 */1 * * *'
+              jobTemplate:
+                spec:
+                  backoffLimit: 2 
+                  activeDeadlineSeconds: 600 
+                  ttlSecondsAfterFinished: 120
+                  template:
+                    spec:
+                      serviceAccountName: karpenter-restart
+                      restartPolicy: Never
+                      containers:
+                        - name: kubectl
+                          image: bitnami/kubectl 
+                          command: ["kubectl"]
+                          args: ["rollout", "restart", "deployment/linus-cluster-xplane-helm-karpenter"]
+        managementPolicies:
+        - Observe
+        - Create
+        - Update
+        - Delete
+        providerConfigRef:
+          name: kubernetes-provider
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-cronjob-restart-karpenter"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "deployment/%s-xplane-helm-karpenter"
+      toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].args[2]

@@ -722,7 +722,7 @@ spec:
         forProvider:
           region: ap-southeast-1
           addonName: aws-ebs-csi-driver
-          addonVersion: v1.30.0-eksbuild.1
+          addonVersion: v1.31.0-eksbuild.1
           clusterNameRef:
             name: xplane-eks-cluster
           serviceAccountRoleArnRef:

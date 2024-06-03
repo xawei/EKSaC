@@ -1,9 +1,9 @@
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: xNetwork
 metadata:
-  name: linus-cluster
+  name: xplane01-cluster
 spec:
-  name: linus-cluster
+  name: xplane01-cluster
   location: "SGP"
   vpcCidr: "10.0.0.0/24"
   subnets:
@@ -19,11 +19,41 @@ spec:
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: Network
 metadata:
-  name: linus-cluster
+  name: xplane01-cluster
 spec:
-  name: linus-cluster
+  name: xplane01-cluster
   location: "SGP"
   resourceRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
     kind: xNetwork
-    name: linus-cluster
+    name: xplane01-cluster
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: xNetwork
+metadata:
+  name: xplane02-cluster
+spec:
+  name: xplane02-cluster
+  location: "SGP"
+  vpcCidr: "10.0.1.0/24"
+  subnets:
+    public:
+      z1Cidr: "10.0.1.0/28"
+      z2Cidr: "10.0.1.16/28"
+      z3Cidr: "10.0.1.32/28"
+    private:
+      z1Cidr: "10.0.1.64/26"
+      z2Cidr: "10.0.1.128/26"
+      z3Cidr: "10.0.1.192/26"
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: Network
+metadata:
+  name: xplane02-cluster
+spec:
+  name: xplane02-cluster
+  location: "SGP"
+  resourceRef:
+    apiVersion: consumable.trustbank.sg/v1alpha1
+    kind: xNetwork
+    name: xplane02-cluster

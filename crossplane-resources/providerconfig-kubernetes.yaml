@@ -1,0 +1,11 @@
+apiVersion: kubernetes.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: kubernetes-provider
+spec:
+  credentials:
+    secretRef:
+      name: linus-cluster-xplane-eks-cluster-auth
+      key: kubeconfig
+      namespace: eksac
+    source: Secret

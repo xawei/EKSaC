@@ -1,0 +1,11 @@
+apiVersion: helm.crossplane.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: helm-provider
+spec:
+  credentials:
+    secretRef:
+      name: linus-cluster-xplane-eks-cluster-auth
+      key: kubeconfig
+      namespace: eksac
+    source: Secret

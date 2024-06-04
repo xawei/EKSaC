@@ -1,43 +1,21 @@
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: xEksCluster
 metadata:
-  name: xplane01-cluster
+  name: linus-cluster
 spec:
-  name: xplane01-cluster
+  name: linus-cluster
   location: "SGP"
   awsAccountId: "390945758345"
 ---
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: EksCluster
 metadata:
-  name: xplane01-cluster
+  name: linus-cluster
 spec:
-  name: xplane01-cluster
+  name: linus-cluster
   location: "SGP"
   awsAccountId: "390945758345"
   resourceRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
     kind: xEksCluster
-    name: xplane01-cluster
----
-apiVersion: consumable.trustbank.sg/v1alpha1
-kind: xEksCluster
-metadata:
-  name: xplane02-cluster
-spec:
-  name: xplane02-cluster
-  location: "SGP"
-  awsAccountId: "390945758345"
----
-apiVersion: consumable.trustbank.sg/v1alpha1
-kind: EksCluster
-metadata:
-  name: xplane02-cluster
-spec:
-  name: xplane02-cluster
-  location: "SGP"
-  awsAccountId: "390945758345"
-  resourceRef:
-    apiVersion: consumable.trustbank.sg/v1alpha1
-    kind: xEksCluster
-    name: xplane02-cluster
+    name: linus-cluster

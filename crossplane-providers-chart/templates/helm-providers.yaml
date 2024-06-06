@@ -1,0 +1,19 @@
+{{- with .Values.provider.helm }}
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-helm
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/provider-helm:{{ .version }}
+---
+{{- range $providers := .providers }}
+apiVersion: aws.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: {{ .name }}
+spec:
+  credentials:
+    {{- .providerConfig.credentials | toYaml | trim | nindent 4 }}
+---
+{{- end }}
+{{- end }}

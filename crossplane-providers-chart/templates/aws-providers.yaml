@@ -1,0 +1,19 @@
+{{- range $providers := .Values.provider.awsFamily.providers }}
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: {{ .name }}
+spec:
+  package: xpkg.upbound.io/upbound/{{ .name }}:{{ $.Values.provider.awsFamily.version }}
+  runtimeConfigRef:
+    name: {{ $.Values.provider.awsFamily.deploymentRuntimeConfig.name }}
+---
+apiVersion: aws.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: {{ .name }}
+spec:
+  credentials:
+    {{- .providerConfig.credentials | toYaml | trim | nindent 4 }}
+---
+{{- end }}

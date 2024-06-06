@@ -1,11 +1,12 @@
+{{- with .Values.provider.awsFamily }}
 apiVersion: pkg.crossplane.io/v1beta1
 kind: DeploymentRuntimeConfig
 metadata:
-  name: aws-deployment-runtime-config
+  name: {{ .deploymentRuntimeConfig.name }}
 spec:
   deploymentTemplate:
     spec:
-      replicas: 1
+      replicas: {{ .deploymentRuntimeConfig.deploymentTemplate.spec.replicas }}
       selector: {}
       template:
         spec:
@@ -18,11 +19,11 @@ spec:
             - name: AWS_STS_REGIONAL_ENDPOINTS
               value: regional
             - name: AWS_DEFAULT_REGION
-              value: ap-southeast-1
+              value: {{ .region }}
             - name: AWS_REGION
-              value: ap-southeast-1
+              value: {{ .region }}
             - name: AWS_ROLE_ARN
-              value: arn:aws:iam::390945758345:role/linus-sandbox-eks-crossplane-iam-role
+              value: arn:aws:iam::{{ .accountId }}:role/{{ .crossplaneIamRoleName }}
             - name: AWS_WEB_IDENTITY_TOKEN_FILE
               value: /var/run/secrets/eks.amazonaws.com/serviceaccount/token
             name: package-runtime
@@ -42,4 +43,5 @@ spec:
   serviceAccountTemplate:
     metadata:
       annotations:
-        eks.amazonaws.com/role-arn: arn:aws:iam::390945758345:role/linus-sandbox-eks-crossplane-iam-role
+        eks.amazonaws.com/role-arn: arn:aws:iam::{{ .accountId }}:role/{{ .crossplaneIamRoleName }}
+{{- end }}

@@ -7,7 +7,7 @@ spec:
   package: xpkg.upbound.io/crossplane-contrib/provider-kubernetes:{{ .version }}
 ---
 {{- range $providers := .providers }}
-apiVersion: aws.upbound.io/v1beta1
+apiVersion: kubernetes.crossplane.io/v1alpha1
 kind: ProviderConfig
 metadata:
   name: {{ .name }}

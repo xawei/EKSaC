@@ -1,6 +1,3 @@
-clusters:
-- name: linus-cluster
-
 provider:
   awsFamily:
     name: aws-provider

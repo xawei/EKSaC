@@ -5,8 +5,8 @@ provider:
   awsFamily:
     name: aws-provider
     accountId: "390945758345"
-    crossplaneIamRoleName: "linus-sandbox-eks-crossplane-iam-role"
-    region: "ap-southeast-1"
+    crossplaneIamRoleName: linus-sandbox-eks-crossplane-iam-role
+    region: ap-southeast-1
     deploymentRuntimeConfig:
       name: aws-deployment-runtime-config
       deploymentTemplate:
@@ -33,7 +33,15 @@ provider:
       providerConfig:
         credentials:
           secretRef:
-            name: linus-cluster-xplane-eks-cluster-auth
+            name: eksac-cluster01-xplane-eks-cluster-auth
+            key: kubeconfig
+            namespace: eksac
+          source: Secret
+    - name: provider-helm
+      providerConfig:
+        credentials:
+          secretRef:
+            name: eksac-cluster02-xplane-eks-cluster-auth
             key: kubeconfig
             namespace: eksac
           source: Secret
@@ -44,7 +52,15 @@ provider:
       providerConfig:
         credentials:
           secretRef:
-            name: linus-cluster-xplane-eks-cluster-auth
+            name: eksac-cluster01-xplane-eks-cluster-auth
+            key: kubeconfig
+            namespace: eksac
+          source: Secret
+    - name: provider-helm
+      providerConfig:
+        credentials:
+          secretRef:
+            name: eksac-cluster02-xplane-eks-cluster-auth
             key: kubeconfig
             namespace: eksac
           source: Secret

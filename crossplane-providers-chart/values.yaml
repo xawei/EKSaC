@@ -29,7 +29,7 @@ provider:
   helm:
     version: v0.19.0
     providers:
-    - name: provider-helm
+    - name: provider-helm-eksac-cluster01
       providerConfig:
         credentials:
           secretRef:
@@ -37,7 +37,7 @@ provider:
             key: kubeconfig
             namespace: eksac
           source: Secret
-    - name: provider-helm
+    - name: provider-helm-eksac-cluster02
       providerConfig:
         credentials:
           secretRef:
@@ -48,7 +48,7 @@ provider:
   kubernetes:
     version: v0.14.0
     providers:
-    - name: provider-kubernetes
+    - name: provider-kubernetes-eksac-cluster01
       providerConfig:
         credentials:
           secretRef:
@@ -56,7 +56,7 @@ provider:
             key: kubeconfig
             namespace: eksac
           source: Secret
-    - name: provider-helm
+    - name: provider-kubernetes-eksac-cluster02
       providerConfig:
         credentials:
           secretRef:

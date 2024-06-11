@@ -1,0 +1,51 @@
+provider:
+  awsFamily:
+    name: aws-provider
+    accountId: "390945758345"
+    crossplaneIamRoleName: "linus-sandbox-eks-crossplane-iam-role"
+    region: "ap-southeast-1"
+    deploymentRuntimeConfig:
+      name: aws-deployment-runtime-config
+      deploymentTemplate:
+        spec:
+          replicas: 1
+    version: v1.5.0
+    providers:
+    - name: provider-aws-ec2
+      providerConfig:
+        credentials:
+          source: IRSA
+    - name: provider-aws-eks
+      providerConfig:
+        credentials:
+          source: IRSA
+    - name: provider-aws-iam
+      providerConfig:
+        credentials:
+          source: IRSA
+  helm:
+    version: v0.19.0
+    providers:
+    - name: provider-helm
+      providerConfig:
+        credentials:
+          secretRef:
+            name: eksac-cluster01-xplane-eks-cluster-auth
+            key: kubeconfig
+            namespace: eksac
+          source: Secret
+  kubernetes:
+    version: v0.14.0
+    providers:
+    - name: provider-kubernetes
+      providerConfig:
+        credentials:
+          source: InjectedIdentity
+    - name: provider-kubernetes
+      providerConfig:
+        credentials:
+          secretRef:
+            name: eksac-cluster01-xplane-eks-cluster-auth
+            key: kubeconfig
+            namespace: eksac
+          source: Secret

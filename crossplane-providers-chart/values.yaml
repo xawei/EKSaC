@@ -23,6 +23,8 @@ provider:
       providerConfig:
         credentials:
           source: IRSA
+  helm:
+    version: v0.19.0
   kubernetes:
     version: v0.14.0
     providers:

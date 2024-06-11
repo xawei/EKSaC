@@ -23,41 +23,10 @@ provider:
       providerConfig:
         credentials:
           source: IRSA
-  helm:
-    version: v0.19.0
-    providers:
-    - name: provider-helm-eksac-cluster01
-      providerConfig:
-        credentials:
-          secretRef:
-            name: eksac-cluster01-xplane-eks-cluster-auth
-            key: kubeconfig
-            namespace: eksac
-          source: Secret
-    - name: provider-helm-eksac-cluster02
-      providerConfig:
-        credentials:
-          secretRef:
-            name: eksac-cluster02-xplane-eks-cluster-auth
-            key: kubeconfig
-            namespace: eksac
-          source: Secret
   kubernetes:
     version: v0.14.0
     providers:
-    - name: provider-kubernetes-eksac-cluster01
+    - name: provider-kubernetes
       providerConfig:
         credentials:
-          secretRef:
-            name: eksac-cluster01-xplane-eks-cluster-auth
-            key: kubeconfig
-            namespace: eksac
-          source: Secret
-    - name: provider-kubernetes-eksac-cluster02
-      providerConfig:
-        credentials:
-          secretRef:
-            name: eksac-cluster02-xplane-eks-cluster-auth
-            key: kubeconfig
-            namespace: eksac
-          source: Secret
+          source: InjectedIdentity

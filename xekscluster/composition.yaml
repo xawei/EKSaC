@@ -1,4 +1,3 @@
-
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
@@ -13,14 +12,32 @@ spec:
     - type: FromCompositeFieldPath
       fromFieldPath: "spec.location"
       toFieldPath: "spec.forProvider.region"
-      transforms:
-        - type: map
-          map: 
-            HKG: "ap-east-1"
-            SGP: "ap-southeast-1"
-            SYD: "ap-southeast-2"
-            JKT: "ap-southeast-3"
   - name: vpcid-patchset
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.vpcRef
+        strategy: string
+        string:
+          fmt: "%s-xplane-vpc"
+      toFieldPath: spec.forProvider.vpcIdRef.name
+  resources:
+  - name: x-providerconfig-helm
+    base:
+      apiVersion: helm.crossplane.io/v1beta1
+      kind: ProviderConfig
+      metadata:
+        name: provider-helm
+      spec:
+        credentials:
+          secretRef:
+            name: xplane-eks-cluster-auth
+            key: kubeconfig
+            namespace: eksac
+          source: Secret
+        providerConfigRef:
+          name: provider-helm
     patches:
     - type: CombineFromComposite
       combine:
@@ -28,9 +45,189 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-vpc"
-      toFieldPath: spec.forProvider.vpcIdRef.name
-  resources:
+          fmt: "provider-helm-%s"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-cluster-auth"
+      toFieldPath: spec.credentials.secretRef.name
+    readinessChecks:
+    - type: NonEmpty
+      fieldPath: status.users
+  - name: x-providerconfig-kubernetes
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha1
+      kind: ProviderConfig
+      metadata:
+        name: provider-kubernetes
+      spec:
+        credentials:
+          secretRef:
+            name: xplane-eks-cluster-auth
+            key: kubeconfig
+            namespace: eksac
+          source: Secret
+        providerConfigRef:
+          name: provider-kubernetes
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-eks-cluster-auth"
+      toFieldPath: spec.credentials.secretRef.name
+    readinessChecks:
+    - type: NonEmpty
+      fieldPath: status.users
+  - name: x-private-subnet-z1
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: Subnet
+      metadata:
+        name: xplane-private-subnet-1a
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          region: ap-southeast-1
+          availabilityZone: ap-southeast-1a
+          cidrBlock: 10.0.100.0/24
+          tags:
+            Name: xplane-private-subnet-1a
+            Owner: linus.yong
+            Environment: sandbox
+            Project: crossplane
+          vpcIdRef:
+            name: xplane-vpc
+        providerConfigRef:
+          name: provider-aws-ec2
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: PatchSet
+      patchSetName: vpcid-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1a"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1a"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.subnets.private.z1Cidr
+      toFieldPath: spec.forProvider.cidrBlock
+  - name: x-private-subnet-z2
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: Subnet
+      metadata:
+        name: xplane-private-subnet-1b
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          region: ap-southeast-1
+          availabilityZone: ap-southeast-1b
+          cidrBlock: 10.0.101.0/24
+          tags:
+            Name: xplane-private-subnet-1b
+            Owner: linus.yong
+            Environment: sandbox
+            Project: crossplane
+          vpcIdRef:
+            name: xplane-vpc
+        providerConfigRef:
+          name: provider-aws-ec2
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: PatchSet
+      patchSetName: vpcid-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1b"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1b"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.subnets.private.z2Cidr
+      toFieldPath: spec.forProvider.cidrBlock
+  - name: x-private-subnet-z3
+    base:
+      apiVersion: ec2.aws.upbound.io/v1beta1
+      kind: Subnet
+      metadata:
+        name: xplane-private-subnet-1c
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          region: ap-southeast-1
+          availabilityZone: ap-southeast-1c
+          cidrBlock: 10.0.102.0/24
+          tags:
+            Name: xplane-private-subnet-1c
+            Owner: linus.yong
+            Environment: sandbox
+            Project: crossplane
+          vpcIdRef:
+            name: xplane-vpc
+        providerConfigRef:
+          name: provider-aws-ec2
+    patches:
+    - type: PatchSet
+      patchSetName: region-patchset
+    - type: PatchSet
+      patchSetName: vpcid-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1c"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-private-subnet-1c"
+      toFieldPath: spec.forProvider.tags.Name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.subnets.private.z3Cidr
+      toFieldPath: spec.forProvider.cidrBlock
   - name: x-iam-eks
     base:
       apiVersion: iam.aws.upbound.io/v1beta1
@@ -60,7 +257,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-iam
     patches:
     - type: CombineFromComposite
       combine:
@@ -97,7 +294,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-ec2
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -149,7 +346,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-ec2
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -208,7 +405,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-ec2
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -263,7 +460,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-ec2
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -313,7 +510,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-ec2
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -372,7 +569,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-ec2
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -428,7 +625,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-ec2
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -483,7 +680,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-eks
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -555,11 +752,11 @@ spec:
           addonName: coredns
           addonVersion: v1.11.1-eksbuild.9
           configurationValues: |
-            { "replicaCount": 1 }
+            {"replicaCount":1}
           clusterNameRef:
             name: xplane-eks-cluster
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-eks
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -589,11 +786,11 @@ spec:
         forProvider:
           region: ap-southeast-1
           addonName: vpc-cni
-          addonVersion: v1.18.1-eksbuild.3
+          addonVersion: v1.18.2-eksbuild.1
           clusterNameRef:
             name: xplane-eks-cluster
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-eks
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -623,11 +820,11 @@ spec:
         forProvider:
           region: ap-southeast-1
           addonName: kube-proxy
-          addonVersion: v1.29.3-eksbuild.2
+          addonVersion: v1.30.0-eksbuild.3
           clusterNameRef:
             name: xplane-eks-cluster
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-eks
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -663,7 +860,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-iam
     patches:
     - type: CombineFromComposite
       combine:
@@ -728,7 +925,7 @@ spec:
           serviceAccountRoleArnRef:
             name: xplane-ebs-csi-iam
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-eks
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -771,7 +968,7 @@ spec:
           name: xplane-eks-cluster-auth
           namespace: eksac
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-eks
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -817,7 +1014,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-iam
     patches:
     - type: CombineFromComposite
       combine:
@@ -874,7 +1071,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-iam
     patches:
     - type: CombineFromComposite
       combine:
@@ -919,7 +1116,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-eks
     patches:
     - type: PatchSet
       patchSetName: region-patchset
@@ -996,7 +1193,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-iam
     patches:
     - type: CombineFromComposite
       combine:
@@ -1107,7 +1304,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-iam
     patches:
     - type: CombineFromComposite
       combine:
@@ -1168,7 +1365,7 @@ spec:
           roleRef:
             name: xplane-karpenter-iam
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-iam
     patches:
     - type: CombineFromComposite
       combine:
@@ -1226,7 +1423,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
-          name: aws-provider
+          name: provider-aws-iam
     patches:
     - type: CombineFromComposite
       combine:
@@ -1268,7 +1465,7 @@ spec:
         - Create
         - Update
         providerConfigRef:
-          name: kubernetes-provider
+          name: provider-kubernetes
     patches:
     - type: CombineFromComposite
       combine:
@@ -1300,6 +1497,14 @@ spec:
               rolearn: arn:aws:iam::%s:role/%s-xplane-fargate-pod-iam
               username: system:node:{{SessionName}}
       toFieldPath: spec.forProvider.manifest.data.mapRoles
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name
   - name: x-helm-karpenter
     base:
       apiVersion: helm.crossplane.io/v1beta1
@@ -1326,7 +1531,7 @@ spec:
             value: "1"
           wait: true
         providerConfigRef:
-          name: helm-provider
+          name: provider-helm
     patches:
     - type: CombineFromComposite
       combine:
@@ -1353,6 +1558,14 @@ spec:
         string:
           fmt: "%s-xplane-eks-cluster"
       toFieldPath: spec.forProvider.set[1].value
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "provider-helm-%s"
+      toFieldPath: spec.providerConfigRef.name
     - type: FromCompositeFieldPath
       fromFieldPath: status.karpenterFargateStatus
       toFieldPath: metadata.labels["karpenterFargateStatus"]
@@ -1397,7 +1610,7 @@ spec:
         - Update
         - Delete
         providerConfigRef:
-          name: kubernetes-provider
+          name: provider-kubernetes
     patches:
     - type: CombineFromComposite
       combine:
@@ -1423,6 +1636,14 @@ spec:
         string:
           fmt: "%s-xplane-eks-sg-node"
       toFieldPath: spec.forProvider.manifest.spec.securityGroupSelectorTerms[0].tags.Name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name
     - type: CombineFromComposite
       combine:
         variables:
@@ -1475,7 +1696,7 @@ spec:
         - Update
         - Delete
         providerConfigRef:
-          name: kubernetes-provider
+          name: provider-kubernetes
     patches:
     - type: CombineFromComposite
       combine:
@@ -1485,6 +1706,14 @@ spec:
         string:
           fmt: "%s-xplane-arm64-nodepool-karpenter"
       toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name
   - name: x-role-restart-karpenter
     base:
       apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -1510,7 +1739,7 @@ spec:
         - Update
         - Delete
         providerConfigRef:
-          name: kubernetes-provider
+          name: provider-kubernetes
     patches:
     - type: CombineFromComposite
       combine:
@@ -1528,6 +1757,14 @@ spec:
         string:
           fmt: "%s-xplane-helm-karpenter"
       toFieldPath: spec.forProvider.manifest.rules[0].resourceNames[0]
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name
   - name: x-sa-restart-karpenter
     base:
       apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -1549,7 +1786,7 @@ spec:
         - Update
         - Delete
         providerConfigRef:
-          name: kubernetes-provider
+          name: provider-kubernetes
     patches:
     - type: CombineFromComposite
       combine:
@@ -1559,6 +1796,14 @@ spec:
         string:
           fmt: "%s-xplane-sa-restart-karpenter"
       toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name
   - name: x-rolebinding-restart-karpenter
     base:
       apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -1587,7 +1832,7 @@ spec:
         - Update
         - Delete
         providerConfigRef:
-          name: kubernetes-provider
+          name: provider-kubernetes
     patches:
     - type: CombineFromComposite
       combine:
@@ -1597,6 +1842,14 @@ spec:
         string:
           fmt: "%s-xplane-rolebinding-restart-karpenter"
       toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name
   - name: x-cronjob-restart-karpenter
     base:
       apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -1636,7 +1889,7 @@ spec:
         - Update
         - Delete
         providerConfigRef:
-          name: kubernetes-provider
+          name: provider-kubernetes
     patches:
     - type: CombineFromComposite
       combine:
@@ -1653,4 +1906,12 @@ spec:
         strategy: string
         string:
           fmt: "deployment/%s-xplane-helm-karpenter"
-      toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].args[2]
+      toFieldPath: spec.forProvider.manifest.spec.jobTemplate.spec.template.spec.containers[0].args[2]
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name

@@ -21,10 +21,7 @@ spec:
               location:
                 type: string
                 oneOf:
-                - pattern: '^HKG$'
-                - pattern: '^SGP$'
-                - pattern: '^SYD$'
-                - pattern: '^JKT$'
+                - pattern: '^ap-southeast-1$'
               vpcCidr:
                 type: string
               subnets:
@@ -39,18 +36,8 @@ spec:
                         type: string
                       z3Cidr:
                         type: string
-                  private:
-                    type: object
-                    properties:
-                      z1Cidr:
-                        type: string
-                      z2Cidr:
-                        type: string
-                      z3Cidr:
-                        type: string
             required:
             - name
-            - location
           status:
             type: object
             properties:

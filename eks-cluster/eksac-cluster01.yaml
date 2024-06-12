@@ -1,0 +1,25 @@
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: xEksCluster
+metadata:
+  name: eksac-cluster01
+spec:
+  name: eksac-cluster01
+  location: "ap-southeast-1"
+  awsAccountId: "390945758345"
+  vpcRef: sandbox-eksac01
+  subnets:
+    private:
+      z1Cidr: "10.0.0.64/26"
+      z2Cidr: "10.0.0.128/26"
+      z3Cidr: "10.0.0.192/26"
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: EksCluster
+metadata:
+  name: eksac-cluster01
+spec:
+  name: eksac-cluster01
+  resourceRef:
+    apiVersion: consumable.trustbank.sg/v1alpha1
+    kind: xEksCluster
+    name: eksac-cluster01

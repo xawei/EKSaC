@@ -1,29 +1,24 @@
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: xNetwork
 metadata:
-  name: linus-cluster
+  name: sandbox-eksac01
 spec:
-  name: linus-cluster
-  location: "SGP"
-  vpcCidr: "10.0.0.0/24"
+  name: sandbox-eksac01
+  location: "ap-southeast-1"
+  vpcCidr: "10.0.0.0/22"
   subnets:
     public:
       z1Cidr: "10.0.0.0/28"
       z2Cidr: "10.0.0.16/28"
       z3Cidr: "10.0.0.32/28"
-    private:
-      z1Cidr: "10.0.0.64/26"
-      z2Cidr: "10.0.0.128/26"
-      z3Cidr: "10.0.0.192/26"
 ---
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: Network
 metadata:
-  name: linus-cluster
+  name: sandbox-eksac01
 spec:
-  name: linus-cluster
-  location: "SGP"
+  name: sandbox-eksac01
   resourceRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
     kind: xNetwork
-    name: linus-cluster
+    name: sandbox-eksac01

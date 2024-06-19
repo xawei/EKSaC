@@ -708,6 +708,9 @@ spec:
         string:
           fmt: "%s-xplane-eks-iam"
       toFieldPath: spec.forProvider.roleArnRef.name
+    - type: ToCompositeFieldPath
+      fromFieldPath: spec.components.eks.version
+      toFieldPath: spec.forProvider.version
     - type: CombineFromComposite
       combine:
         variables:
@@ -953,7 +956,7 @@ spec:
         string:
           fmt: "%s-xplane-ebs-csi-iam"
       toFieldPath: spec.forProvider.serviceAccountRoleArnRef.name
-  - name: x-eks-addob-ebs-csi-reduce-replicas
+  - name: x-eks-addob-ebs-csi-deployment-replica
     base:
       apiVersion: kubernetes.crossplane.io/v1alpha2
       kind: Object

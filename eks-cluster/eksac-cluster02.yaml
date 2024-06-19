@@ -12,6 +12,9 @@ spec:
       z1Cidr: "10.0.1.0/26"
       z2Cidr: "10.0.1.64/26"
       z3Cidr: "10.0.1.128/26"
+  components:
+    eks:
+      version: "1.30"
 ---
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: EksCluster

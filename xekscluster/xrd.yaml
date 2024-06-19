@@ -46,6 +46,31 @@ spec:
                     properties:
                       version:
                         type: string
+                  corednsAddOn:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                  vpccniAddOn:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                  kubeproxyAddOn:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                  ebscsiAddOn:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                  karpenterHelm:
+                    type: object
+                    properties:
+                      version:
+                        type: string
             required:
             - name
           status:

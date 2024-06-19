@@ -779,6 +779,9 @@ spec:
         string:
           fmt: "%s-xplane-eks-cluster"
       toFieldPath: spec.forProvider.clusterNameRef.name
+    - type: ToCompositeFieldPath
+      fromFieldPath: spec.components.corednsAddOn.version
+      toFieldPath: spec.forProvider.addonVersion
   - name: x-eks-addon-vpc-cni
     base:
       apiVersion: eks.aws.upbound.io/v1beta1
@@ -813,6 +816,9 @@ spec:
         string:
           fmt: "%s-xplane-eks-cluster"
       toFieldPath: spec.forProvider.clusterNameRef.name
+    - type: ToCompositeFieldPath
+      fromFieldPath: spec.components.vpccniAddOn.version
+      toFieldPath: spec.forProvider.addonVersion
   - name: x-eks-addon-kube-proxy
     base:
       apiVersion: eks.aws.upbound.io/v1beta1
@@ -847,6 +853,9 @@ spec:
         string:
           fmt: "%s-xplane-eks-cluster"
       toFieldPath: spec.forProvider.clusterNameRef.name
+    - type: ToCompositeFieldPath
+      fromFieldPath: spec.components.kubeproxyAddOn.version
+      toFieldPath: spec.forProvider.addonVersion
   - name: x-iam-ebs-csi
     base:
       apiVersion: iam.aws.upbound.io/v1beta1
@@ -956,6 +965,9 @@ spec:
         string:
           fmt: "%s-xplane-ebs-csi-iam"
       toFieldPath: spec.forProvider.serviceAccountRoleArnRef.name
+    - type: ToCompositeFieldPath
+      fromFieldPath: spec.components.ebscsiAddOn.version
+      toFieldPath: spec.forProvider.addonVersion
   - name: x-eks-addob-ebs-csi-deployment-replica
     base:
       apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -963,7 +975,6 @@ spec:
       metadata:
         annotations:
           crossplane.io/external-name: ebs-csi-controller
-        name: ebs-csi-controller
       spec:
         deletionPolicy: Orphan
         forProvider:
@@ -972,6 +983,7 @@ spec:
             kind: Deployment
             metadata:
               namespace: kube-system
+              name: ebs-csi-controller
             spec:
               replicas: 1
         managementPolicies:
@@ -1607,6 +1619,9 @@ spec:
       toFieldPath: metadata.labels["karpenterFargateStatus"]
       policy:
         fromFieldPath: Required
+    - type: ToCompositeFieldPath
+      fromFieldPath: spec.components.karpenterHelm.version
+      toFieldPath: spec.forProvider.chart.version
   - name: x-ec2nc-karpenter
     base:
       apiVersion: kubernetes.crossplane.io/v1alpha2

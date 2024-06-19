@@ -953,6 +953,38 @@ spec:
         string:
           fmt: "%s-xplane-ebs-csi-iam"
       toFieldPath: spec.forProvider.serviceAccountRoleArnRef.name
+  - name: x-eks-addob-ebs-csi-reduce-replicas
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        annotations:
+          crossplane.io/external-name: ebs-csi-controller
+        name: ebs-csi-controller
+      spec:
+        deletionPolicy: Orphan
+        forProvider:
+          manifest:
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              namespace: kube-system
+            spec:
+              replicas: 1
+        managementPolicies:
+        - Observe
+        - Create
+        - Update
+        providerConfigRef:
+          name: provider-kubernetes
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name
   - name: x-eks-cluster-auth
     base:
       apiVersion: eks.aws.upbound.io/v1beta1

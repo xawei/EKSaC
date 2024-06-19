@@ -980,6 +980,7 @@ spec:
         - Update
         providerConfigRef:
           name: provider-kubernetes
+    patches:
     - type: CombineFromComposite
       combine:
         variables:

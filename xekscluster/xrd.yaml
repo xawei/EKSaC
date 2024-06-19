@@ -38,6 +38,14 @@ spec:
                         type: string
                       z3Cidr:
                         type: string
+              components:
+                type: object
+                properties:
+                  eks:
+                    type: object
+                    properties:
+                      version:
+                        type: string
             required:
             - name
           status:

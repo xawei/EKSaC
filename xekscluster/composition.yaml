@@ -708,7 +708,7 @@ spec:
         string:
           fmt: "%s-xplane-eks-iam"
       toFieldPath: spec.forProvider.roleArnRef.name
-    - type: ToCompositeFieldPath
+    - type: FromCompositeFieldPath
       fromFieldPath: spec.components.eks.version
       toFieldPath: spec.forProvider.version
     - type: CombineFromComposite
@@ -779,7 +779,7 @@ spec:
         string:
           fmt: "%s-xplane-eks-cluster"
       toFieldPath: spec.forProvider.clusterNameRef.name
-    - type: ToCompositeFieldPath
+    - type: FromCompositeFieldPath
       fromFieldPath: spec.components.corednsAddOn.version
       toFieldPath: spec.forProvider.addonVersion
   - name: x-eks-addon-vpc-cni
@@ -816,7 +816,7 @@ spec:
         string:
           fmt: "%s-xplane-eks-cluster"
       toFieldPath: spec.forProvider.clusterNameRef.name
-    - type: ToCompositeFieldPath
+    - type: FromCompositeFieldPath
       fromFieldPath: spec.components.vpccniAddOn.version
       toFieldPath: spec.forProvider.addonVersion
   - name: x-eks-addon-kube-proxy
@@ -853,7 +853,7 @@ spec:
         string:
           fmt: "%s-xplane-eks-cluster"
       toFieldPath: spec.forProvider.clusterNameRef.name
-    - type: ToCompositeFieldPath
+    - type: FromCompositeFieldPath
       fromFieldPath: spec.components.kubeproxyAddOn.version
       toFieldPath: spec.forProvider.addonVersion
   - name: x-iam-ebs-csi
@@ -965,7 +965,7 @@ spec:
         string:
           fmt: "%s-xplane-ebs-csi-iam"
       toFieldPath: spec.forProvider.serviceAccountRoleArnRef.name
-    - type: ToCompositeFieldPath
+    - type: FromCompositeFieldPath
       fromFieldPath: spec.components.ebscsiAddOn.version
       toFieldPath: spec.forProvider.addonVersion
   - name: x-eks-addob-ebs-csi-deployment-replica
@@ -1619,7 +1619,7 @@ spec:
       toFieldPath: metadata.labels["karpenterFargateStatus"]
       policy:
         fromFieldPath: Required
-    - type: ToCompositeFieldPath
+    - type: FromCompositeFieldPath
       fromFieldPath: spec.components.karpenterHelm.version
       toFieldPath: spec.forProvider.chart.version
   - name: x-ec2nc-karpenter

@@ -24,7 +24,7 @@ spec:
     ebscsiAddOn:
       version: "v1.31.0-eksbuild.1"
     karpenterHelm:
-      version: "0.36.2"
+      version: "0.37.0"
 ---
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: EksCluster

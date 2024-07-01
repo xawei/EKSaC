@@ -1765,6 +1765,68 @@ spec:
         string:
           fmt: "provider-kubernetes-%s"
       toFieldPath: spec.providerConfigRef.name
+  - name: x-amd64-nodepool-karpenter
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-amd64-nodepool-karpenter
+      spec:
+        forProvider:
+          manifest:
+            apiVersion: karpenter.sh/v1beta1
+            kind: NodePool
+            metadata:
+              name: amd64
+            spec:
+              disruption:
+                consolidationPolicy: WhenUnderutilized
+                expireAfter: 2h
+              template:
+                metadata:
+                  labels:
+                    managed-by: karpenter
+                spec:
+                  nodeClassRef:
+                    name: default
+                  requirements:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                    - amd64
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                    - linux
+                  - key: karpenter.sh/capacity-type
+                    operator: In
+                    values:
+                    - spot
+              weight: 10
+        managementPolicies:
+        - Observe
+        - Create
+        - Update
+        - Delete
+        providerConfigRef:
+          name: provider-kubernetes
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-amd64-nodepool-karpenter"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name
   - name: x-role-restart-karpenter
     base:
       apiVersion: kubernetes.crossplane.io/v1alpha2

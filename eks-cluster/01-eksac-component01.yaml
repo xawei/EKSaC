@@ -1,0 +1,18 @@
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: xEksComponent
+metadata:
+  name: eksac-component01
+spec:
+  name: eksac-component01
+  clusterRef: eksac-cluster01
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: EksComponent
+metadata:
+  name: eksac-component01
+spec:
+  name: eksac-component01
+  resourceRef:
+    apiVersion: consumable.trustbank.sg/v1alpha1
+    kind: xEksComponent
+    name: eksac-component01

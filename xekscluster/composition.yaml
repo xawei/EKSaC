@@ -1997,7 +1997,7 @@ spec:
                         - name: kubectl
                           image: bitnami/kubectl 
                           command: ["kubectl"]
-                          args: ["rollout", "restart", "deployment/linus-cluster-xplane-helm-karpenter"]
+                          args: ["rollout", "restart", "deployment/karpenter"]
         managementPolicies:
         - Observe
         - Create

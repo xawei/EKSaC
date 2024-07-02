@@ -1,7 +1,7 @@
 provider:
   awsFamily:
     name: aws-provider
-    accountId: "123456789012"
+    accountId: "390945758345"
     crossplaneIamRoleName: "eksac-crossplane-iam-role"
     region: ap-southeast-1
     deploymentRuntimeConfig:

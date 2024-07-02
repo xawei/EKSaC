@@ -14,15 +14,15 @@ spec:
       z3Cidr: "10.0.0.192/26"
   components:
     eks:
-      version: "1.27"
+      version: "1.28"
     corednsAddOn:
-      version: "v1.10.1-eksbuild.4"
+      version: "v1.10.1-eksbuild.11"
     vpccniAddOn:
-      version: "v1.15.1-eksbuild.1"
+      version: "v1.18.2-eksbuild.1"
     kubeproxyAddOn:
-      version: "v1.27.6-eksbuild.2"
+      version: "v1.28.8-eksbuild.5"
     ebscsiAddOn:
-      version: "v1.31.0-eksbuild.1"
+      version: "v1.32.0-eksbuild.1"
     karpenterHelm:
       version: "0.37.0"
 ---

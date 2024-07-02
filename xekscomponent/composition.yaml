@@ -13,6 +13,8 @@ spec:
       kind: Release
       metadata:
         name: xplane-helm-metrics-server
+        annotations:
+          crossplane.io/external-name: metrics-server
       spec:
         forProvider:
           chart:
@@ -32,3 +34,6 @@ spec:
         string:
           fmt: "provider-helm-%s"
       toFieldPath: spec.providerConfigRef.name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.components.metrics-server.version
+      toFieldPath: spec.forProvider.chart.version

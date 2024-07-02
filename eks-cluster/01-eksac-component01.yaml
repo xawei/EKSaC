@@ -5,6 +5,9 @@ metadata:
 spec:
   name: eksac-component01
   clusterRef: eksac-cluster01
+  components:
+    metrics-server:
+      version: "3.12.1"
 ---
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: EksComponent

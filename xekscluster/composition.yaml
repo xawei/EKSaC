@@ -1559,6 +1559,8 @@ spec:
       kind: Release
       metadata:
         name: xplane-helm-karpenter
+        annotations:
+          crossplane.io/external-name: karpenter
       spec:
         forProvider:
           chart:

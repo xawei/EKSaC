@@ -1,0 +1,15 @@
+apiVersion: ec2.aws.upbound.io/v1beta1
+kind: VPCIpamPool
+metadata:
+  name: sandbox-eksac-ipam-pool
+spec:
+  forProvider:
+    addressFamily: ipv4
+    ipamScopeId: ipam-scope-0882c3e159c7f2035
+    locale: ap-southeast-1
+    region: ap-southeast-1
+    tags:
+      Name: Sandbox EKSaC IPAM Pool
+      owner: linus.yong
+  providerConfigRef:
+    name: provider-aws-ec2

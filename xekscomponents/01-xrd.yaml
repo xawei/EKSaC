@@ -5,7 +5,7 @@ metadata:
 spec:
   group: consumable.trustbank.sg
   names:
-    kind: xEksComponent
+    kind: xEksComponents
     plural: xekscomponents
   versions:
   - name: v1alpha1
@@ -23,15 +23,34 @@ spec:
               components:
                 type: object
                 properties:
-                  metrics-server:
+                  aws-loadbalancer-controller-helm:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                  metrics-server-helm:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                  vault-helm:
                     type: object
                     properties:
                       version:
                         type: string
             required:
             - name
+          status:
+            type: object
+            properties:
+              awsAccountId:
+                type: string
+              oidcIssuer:
+                type: string
+              karpenterFargateStatus:
+                type: string
     served: true
     referenceable: true
   claimNames:
-    kind: EksComponent
+    kind: EksComponents
     plural: ekscomponents

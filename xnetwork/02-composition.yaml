@@ -82,6 +82,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
             Project: crossplane
+            kubernetes.io/role/elb: "1"
           vpcIdRef:
             name: xplane-vpc
         providerConfigRef:
@@ -127,6 +128,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
             Project: crossplane
+            kubernetes.io/role/elb: "1"
           vpcIdRef:
             name: xplane-vpc
         providerConfigRef:
@@ -172,6 +174,7 @@ spec:
             Owner: linus.yong
             Environment: sandbox
             Project: crossplane
+            kubernetes.io/role/elb: "1"
           vpcIdRef:
             name: xplane-vpc
         providerConfigRef:

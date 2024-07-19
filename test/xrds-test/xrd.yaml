@@ -1,0 +1,37 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xkubeobjects.consumable.trustbank.sg
+spec:
+  group: consumable.trustbank.sg
+  names:
+    kind: xKubeObject
+    plural: xkubeobjects
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              name:
+                type: string
+              components:
+                type: object
+                properties:
+                  eks:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                    required:
+                    - version
+            required:
+            - name
+    served: true
+    referenceable: true
+  claimNames:
+    kind: KubeObject
+    plural: kubeobjects

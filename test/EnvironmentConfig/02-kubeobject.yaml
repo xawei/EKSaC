@@ -1,0 +1,17 @@
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: xKubeObject
+metadata:
+  name: test
+spec:
+  name: test
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: KubeObject
+metadata:
+  name: test
+spec:
+  name: test
+  resourceRef:
+    apiVersion: consumable.trustbank.sg/v1alpha1
+    kind: xKubeObject
+    name: test

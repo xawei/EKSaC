@@ -1,6 +1,6 @@
-# XNetwork (xnetworks.comsumable.trustbank.sg)
+# xNetwork (xnetworks.comsumable.trustbank.sg)
 
-## Anatomy of XNetwork
+## Anatomy of xNetwork
 This is the EKSaC network component which includes:
 - 1 VPC with CIDR provided in the `XR`
 - 3 public subnets with CIDRs provided in the `XR`
@@ -12,7 +12,7 @@ This is the EKSaC network component which includes:
 - 1 NatGateway
 - Update the Default RouteTable to route all traffic to NatGateway.  Since the Default RouteTable routes all traffic to NatGateway, when new subnets are created the traffic will all route through NatGateway.
 
-## Example of XNetwork (XR)
+## Example of xNetwork (XR)
 ```yaml
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: xNetwork

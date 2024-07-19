@@ -1,0 +1,41 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJUXNscGhTeGVyZFl3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TkRBM01UWXdNVEE1TWpSYUZ3MHpOREEzTVRRd01URTBNalJhTU
+JVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUUM0bkt6SStxZmhqQWxWZ0ZCWnVsTUMvUVNIU3dBWVAzN0lQOHpWanJTOUFaZTJQVUZVRlQ3UndvbTQKRC9keXZFZDA3czZqd3hDZTJmQ0VndXdZVkswdWRNQTh1QzdjRkVoWHZDMVFWNV
+ZSWXZiQm5hU2ZPbDBYclAwTQpjNDhSZEFGMjlaTExWTjhWSGdDTFpqUlFybmMrQjl3TC9qaWYxTW0vZTNGSDdXandOb1BJVC9qeURNZ1ltRzdJCmIva1dEM2lHU09FTGpNcUxHckthRG96U3ZPdWVFRTVodkY3aWJvaW5mR2dYM2NsbWxhRVEwSm55YUw3Uzc3b2UKbFhqVWZRdlloLzFqQTJDTG9ObVg3TUV0Sm5zSVphZT
+JtbGpJUFJhaXhwY1VQVld1UENEM3VGamx2SVNnMmU2aApIK1g4d1JPYk9jSWh4aTFEb1pBSVZQN2JFQ2xOQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJTS05KSkFhMG5sZ1lyUjQ2dXZrdVkzSEUzWVh6QVYKQmdOVkhSRUVEakFNZ2dwcm
+RXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQk0ydStzYTVaWAo1TkNHRnBaU1k0S0pqN2hzTmJnYXBmU0cvd0thaDRqTVIxVjFSZE9zZnVmTlV2c0l6VGx5Sjc4Q213ZDR1WjVHCkZpcmFoeGtEczBzeG1OVGZMcFIyNjU1a3ljWmFsM1hpamxQMEZEdDFuWS9YNlJWak1wWEdkRGVGdGVMK2k0RDIKSl
+BBVHc5Vmp0bGNaVEk4OU95eTNRbTg4ZlJpdU05T01UZHBacHI3VzNOdkdNN29jYXdhQUJUaWkvV1JJN1BrdwpGdkllZUYwd09LTU9DbndCVlU3U2xmR0ZZYjJ6Y2xUNVk4R2c2cm4vK28ycUtXN2luY0w0eUM1RG5CMERENmRqCkVseVE0V3F4c2RER2Vvcml6OEZydys3NVlJZTl6TDlldEZnZXN1U0htbmlTMW5VQUdrQk
+ltN2ZIOVdPcXZMQlcKWDR1Rkc3UjF3N2tVCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+    server: https://08F08BA7237BD6DB35C6492F65B7A915.yl4.ap-southeast-1.eks.amazonaws.com
+  name: eksac-cluster01
+contexts:
+- context:
+    cluster: eksac-cluster01
+    namespace: default
+    user: eksac-linus01
+  name: eksac-cluster01
+current-context: eksac-cluster01
+kind: Config
+preferences: {}
+users:
+- name: eksac-linus01
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      args:
+      - --region
+      - ap-southeast-1
+      - eks
+      - get-token
+      - --cluster-name
+      - eksac-cluster01-xplane-eks-cluster
+      - --output
+      - json
+      command: aws
+      env:
+      - name: AWS_PROFILE
+        value: sandbox-dns
+      interactiveMode: IfAvailable
+      provideClusterInfo: false

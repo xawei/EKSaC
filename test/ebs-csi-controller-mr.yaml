@@ -1,0 +1,22 @@
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  annotations:
+    crossplane.io/external-name: ebs-csi-controller
+  name: ebs-csi-controller
+spec:
+  deletionPolicy: Orphan
+  forProvider:
+    manifest:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        namespace: kube-system
+      spec:
+        replicas: 1
+  managementPolicies:
+  - Observe
+  - Create
+  - Update
+  providerConfigRef:
+    name: provider-kubernetes-eksac-cluster01

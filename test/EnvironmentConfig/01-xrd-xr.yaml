@@ -1,0 +1,107 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xkubeobjects.consumable.trustbank.sg
+spec:
+  group: consumable.trustbank.sg
+  names:
+    kind: xKubeObject
+    plural: xkubeobjects
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              name:
+                type: string
+            required:
+            - name
+    served: true
+    referenceable: true
+  claimNames:
+    kind: KubeObject
+    plural: kubeobjects
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: x-kubeobject
+spec:
+  environment:
+    environmentConfigs:
+    - type: Reference
+      ref:
+        name: eksac-environment
+  compositeTypeRef:
+    apiVersion: consumable.trustbank.sg/v1alpha1
+    kind: xKubeObject
+  resources:
+  - name: x-configmap-01
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: kubeobject-test-01
+      spec:
+        forProvider:
+          manifest:
+            apiVersion: v1
+            kind: ConfigMap
+            metadata:
+              name: kubeobject-test-01
+              namespace: eksac
+            data:
+              version: "1.29"
+        managementPolicies:
+        - Observe
+        - Create
+        - Update
+        - Delete
+        providerConfigRef:
+          name: provider-kubernetes
+    patches:
+    # - type: FromCompositeFieldPath
+    #   fromFieldPath: spec.name
+    #   toFieldPath: spec.forProvider.manifest.metadata.name
+    - type: FromEnvironmentFieldPath
+      fromFieldPath: oidcIssuer
+      toFieldPath: spec.forProvider.manifest.data.version
+    - type: ToEnvironmentFieldPath
+      fromFieldPath: spec.forProvider.manifest.data.version
+      toFieldPath: kubeversion
+  - name: x-configmap-02
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: kubeobject-test-02
+      spec:
+        forProvider:
+          manifest:
+            apiVersion: v1
+            kind: ConfigMap
+            metadata:
+              name: kubeobject-test-02
+              namespace: eksac
+            data:
+              version: "1.29"
+        managementPolicies:
+        - Observe
+        - Create
+        - Update
+        - Delete
+        providerConfigRef:
+          name: provider-kubernetes
+    patches:
+    # - type: FromCompositeFieldPath
+    #   fromFieldPath: spec.name
+    #   toFieldPath: spec.forProvider.manifest.metadata.name
+    - type: FromEnvironmentFieldPath
+      fromFieldPath: kubeversion
+      toFieldPath: spec.forProvider.manifest.data.version
+      policy:
+        fromFieldPath: Required

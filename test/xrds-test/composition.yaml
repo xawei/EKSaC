@@ -1,0 +1,39 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: x-kubeobject
+spec:
+  compositeTypeRef:
+    apiVersion: consumable.trustbank.sg/v1alpha1
+    kind: xKubeObject
+  resources:
+  - name: x-configmap
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: kubeobject-test
+      spec:
+        forProvider:
+          manifest:
+            apiVersion: v1
+            kind: ConfigMap
+            metadata:
+              name: kubeobject-test
+              namespace: eksac
+            data:
+              version: "1.30"
+        managementPolicies:
+        - Observe
+        - Create
+        - Update
+        - Delete
+        providerConfigRef:
+          name: provider-kubernetes
+    patches:
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.components.eks.version
+      toFieldPath: spec.forProvider.manifest.data.version
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.name
+      toFieldPath: spec.forProvider.manifest.metadata.name

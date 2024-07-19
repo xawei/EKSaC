@@ -41,7 +41,7 @@ spec:
               components:
                 type: object
                 properties:
-                  eks:
+                  ciliumHelm:
                     type: object
                     properties:
                       version:
@@ -51,17 +51,12 @@ spec:
                     properties:
                       version:
                         type: string
-                  vpccniAddOn:
-                    type: object
-                    properties:
-                      version:
-                        type: string
-                  kubeproxyAddOn:
-                    type: object
-                    properties:
-                      version:
-                        type: string
                   ebscsiAddOn:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                  eks:
                     type: object
                     properties:
                       version:
@@ -77,6 +72,8 @@ spec:
             type: object
             properties:
               oidcIssuer:
+                type: string
+              clusterEndpoint:
                 type: string
               karpenterFargateStatus:
                 type: string

@@ -1,0 +1,8 @@
+apiVersion: apiextensions.crossplane.io/v1alpha1
+kind: EnvironmentConfig
+metadata:
+  name: eksac-environment
+  labels:
+    version: "1.30"
+data:
+  oidcIssuer: "1.30"

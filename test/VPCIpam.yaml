@@ -1,0 +1,17 @@
+apiVersion: ec2.aws.upbound.io/v1beta1
+kind: VPCIpam
+metadata:
+  name: sandbox-eksac-ipam
+spec:
+  forProvider:
+    description: IPAM for Sandbox EKSaC
+    cascade: true
+    operatingRegions:
+      - regionName: ap-southeast-1
+    region: ap-southeast-1
+    tier: advanced
+    tags:
+      Name: Sandbox EKSaC IPAM
+      owner: linus.yong
+  providerConfigRef:
+    name: provider-aws-ec2

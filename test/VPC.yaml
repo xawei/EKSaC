@@ -1,0 +1,17 @@
+apiVersion: ec2.aws.upbound.io/v1beta1
+kind: VPC
+metadata:
+  name: eksac-vpc
+spec:
+  forProvider:
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    ipv4IpamPoolIdRef:
+      name: sandbox-eksac-ipam-pool
+    ipv4NetmaskLength: 24
+    region: ap-northeast-1
+    tags:
+      Name: Sandbox EKSaC VPC
+      owner: linus.yong
+  providerConfigRef:
+    name: provider-aws-ec2

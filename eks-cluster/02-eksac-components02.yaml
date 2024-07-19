@@ -1,0 +1,27 @@
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: xEksComponents
+metadata:
+  name: eksac-components02
+  namespace: eksac
+spec:
+  name: eksac-components02
+  clusterRef: eksac-cluster02
+  components:
+    aws-loadbalancer-controller-helm:
+      version: "1.8.1"
+    metrics-server-helm:
+      version: "3.12.1"
+    vault-helm:
+      version: "0.28.1"
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: EksComponents
+metadata:
+  name: eksac-components02
+  namespace: eksac
+spec:
+  name: eksac-components02
+  resourceRef:
+    apiVersion: consumable.trustbank.sg/v1alpha1
+    kind: xEksComponents
+    name: eksac-components02

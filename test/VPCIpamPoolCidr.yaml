@@ -1,0 +1,12 @@
+apiVersion: ec2.aws.upbound.io/v1beta1
+kind: VPCIpamPoolCidr
+metadata:
+  name: sandbox-eksac-ipam-pool-cidr
+spec:
+  forProvider:
+    cidr: "10.0.0.0/16"
+    ipamPoolIdRef:
+      name: sandbox-eksac-ipam-pool
+    region: ap-southeast-1
+  providerConfigRef:
+    name: provider-aws-ec2

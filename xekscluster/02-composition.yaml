@@ -1151,7 +1151,7 @@ spec:
             name: xplane-eks-fargate-pod-iam
           region: ap-southeast-1
           selector:
-            - namespace: karpenter
+            - namespace: kube-system
               labels:
                 app.kubernetes.io/name: karpenter
           subnetIdRefs:
@@ -1389,7 +1389,7 @@ spec:
                       "Action": "sts:AssumeRoleWithWebIdentity",
                       "Condition": {
                           "StringEquals": {
-                              "%s:sub": "system:serviceaccount:karpenter:karpenter"
+                              "%s:sub": "system:serviceaccount:kube-system:karpenter"
                           }
                       }
                   }
@@ -1571,7 +1571,7 @@ spec:
             name: karpenter
             repository: oci://public.ecr.aws/karpenter
             version: "0.37.0"
-          namespace: karpenter
+          namespace: kube-system
           set:
           - name: serviceAccount.annotations.eks\.amazonaws\.com/role-arn
             value: arn:aws:iam::390945758345:role/linus-cluster-xplane-karpenter-iam
@@ -1862,7 +1862,7 @@ spec:
             kind: Role
             metadata:
               name: karpenter-restart
-              namespace: karpenter
+              namespace: kube-system
             rules:
               - apiGroups: ["apps", "extensions"]
                 resources: ["deployments"]
@@ -1913,7 +1913,7 @@ spec:
             kind: ServiceAccount
             metadata:
               name: karpenter-restart
-              namespace: karpenter
+              namespace: kube-system
             automountServiceAccountToken: true
         managementPolicies:
         - Observe
@@ -1952,7 +1952,7 @@ spec:
             kind: RoleBinding
             metadata:
               name: karpenter-restart
-              namespace: karpenter
+              namespace: kube-system
             roleRef:
               apiGroup: rbac.authorization.k8s.io
               kind: Role
@@ -1960,7 +1960,7 @@ spec:
             subjects:
               - kind: ServiceAccount
                 name: karpenter-restart
-                namespace: karpenter
+                namespace: kube-system
         managementPolicies:
         - Observe
         - Create
@@ -1998,7 +1998,7 @@ spec:
             kind: CronJob
             metadata:
               name: karpenter-restart
-              namespace: karpenter
+              namespace: kube-system
             spec:
               successfulJobsHistoryLimit: 1
               failedJobsHistoryLimit: 2

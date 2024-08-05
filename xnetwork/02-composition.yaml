@@ -285,7 +285,7 @@ spec:
       toFieldPath: spec.forProvider.tags.Name
   - name: x-public-route
     base:
-      apiVersion: ec2.aws.upbound.io/v1beta1
+      apiVersion: ec2.aws.upbound.io/v1beta2
       kind: Route
       metadata:
         name: xplane-route

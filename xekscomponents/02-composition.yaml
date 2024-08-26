@@ -552,50 +552,377 @@ spec:
     - type: FromCompositeFieldPath
       fromFieldPath: spec.components.aws-loadbalancer-controller-helm.version
       toFieldPath: spec.forProvider.chart.version
-  # - name: x-helm-vault
-  #   base:
-  #     apiVersion: helm.crossplane.io/v1beta1
-  #     kind: Release
-  #     metadata:
-  #       name: xplane-helm-vault
-  #       annotations:
-  #         crossplane.io/external-name: vault
-  #     spec:
-  #       forProvider:
-  #         chart:
-  #           name: vault
-  #           repository: https://helm.releases.hashicorp.com
-  #           version: "0.28.1"
-  #         namespace: vault
-  #         set:
-  #         - name: server.ha.enabled
-  #           value: "true"
-  #         - name: server.ha.replicas
-  #           value: "3"
-  #         - name: server.ha.raft.enabled
-  #           value: "true"
-  #         wait: true
-  #       providerConfigRef:
-  #         name: provider-helm
-  #   patches:
-  #   - type: PatchSet
-  #     patchSetName: clusterready-patchset
-  #   - type: CombineFromComposite
-  #     combine:
-  #       variables:
-  #       - fromFieldPath: spec.name
-  #       strategy: string
-  #       string:
-  #         fmt: "%s-xplane-helm-vault"
-  #     toFieldPath: metadata.name
-  #   - type: CombineFromComposite
-  #     combine:
-  #       variables:
-  #       - fromFieldPath: spec.clusterRef
-  #       strategy: string
-  #       string:
-  #         fmt: "provider-helm-%s"
-  #     toFieldPath: spec.providerConfigRef.name
-  #   - type: FromCompositeFieldPath
-  #     fromFieldPath: spec.components.vault-helm.version
-  #     toFieldPath: spec.forProvider.chart.version
+  - name: x-istio-namespace
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-istio-namespace
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          manifest:
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: istio-system
+        managementPolicies:
+        - Create
+        - Update
+        - Observe
+        - Delete
+        providerConfigRef:
+          name: provider-kubernetes
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-istio-namespace"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.clusterRef
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name  
+  - name: x-istio-cacerts
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-istio-cacerts
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          manifest:
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              name: cacerts
+              namespace: istio-system
+            type: Opaque
+            data:
+              ca-cert.pem: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZlVENDQTJHZ0F3SUJBZ0lVY3lJWDN1SnYveVlvU0VBRDI1RDdkRW0xRW40d0RRWUpLb1pJaHZjTkFRRUwKQlFBd0lqRU9NQXdHQTFVRUNnd0ZTWE4wYVc4eEVEQU9CZ05WQkFNTUIxSnZiM1FnUTBFd0hoY05NalF3TnpJNQpNRGN5T0RBMldoY05NelF3TnpJM01EY3lPREEyV2pBOU1RNHdEQVlEVlFRS0RBVkpjM1JwYnpFWU1CWUdBMVVFCkF3d1BTVzUwWlhKdFpXUnBZWFJsSUVOQk1SRXdEd1lEVlFRSERBaGpiSFZ6ZEdWeU1UQ0NBaUl3RFFZSktvWkkKaHZjTkFRRUJCUUFEZ2dJUEFEQ0NBZ29DZ2dJQkFNakNjbkRudnFFeUJ5NUR1R2lVYUJlbWFsOGwxRFlpTmRrWQo3d3J6R2pOMExYcmxKcURVOTNkNC9LNWQrODZ2Vkd6bk9aeDVVZVRaeVlCc3lhL0RQOTBJZnd2QXdKK2hGUGMxCjVZY2o5MDZYMDFIeGJMUEFVaHZ2VGU3aWdEeUV2N0luTFMrUmlrOWRYa3BTZE9NSVpxM2l6K01UM2xSSzB2N2kKSlRxYjlpc2I4K2VZd0ROMU9BdExQTVRDdU1JNGRXZWxURDFaeTBmVjdjTkhGNW1BaEJzY1FxRmwxRTVmTnZuWApnVnJQS2IzMEpjblV4QVNwS0VGNGlHVTBJT3JTVURMNDJ2YTA4NjNqbWNlajBJZ0RwSkltWXU4SlVOVDhxTFlhClIwQmp4ejd3bFdMR1RaL1B6eHVLNTV4UGUvMjNGM2pTdjFTT0lCZ3FBckd0K3lCWDNwKy8yN0F6M2ozZmxEZncKYkhhcjJhS253Wk5vNHJrQkZsMHdFMDY5S0VQSWlyUUY5QXlQVjhWeS8zam9uZ3dwbTgwTUdrbnIzc21ZZ2o5MQp6V0o3ZjBLa3hLaEtQKzljaVFFc1hmbFR5dEVmb1c4aXpjTGRmdmhaNXFvTWpFSE00czBOcnVhN3l4VjBmY3U3CkFJV0o3elMyTUdRc29kclRqZnBlazVUZFZBd3RrcGthbEVjVkk4Mm10WE1iUVAxVFZKem9ZcUN3TVl2QnUyeWsKaTNaU1BNRjE1ang2MnA5M0hLV1hGNnNBQklkSjRiY0IyelprV2YwdXNITzdwUWZPaDJCQVA1dGd4L1o1MUtPbQpkLzdGSXFaRFVPT3hoYTR3cU9qWmJVUFJKMElRVWNiRmF4VjJXL1MzbklxVU0rZ1NhMzlGczNhbll6ZXJPZWlvCmlWYXpEQzFyQWdNQkFBR2pnWXN3Z1lnd0hRWURWUjBPQkJZRUZEc1gybGRqT0tuOHQ0T2NSNndjSWF0MTNwWVkKTUJJR0ExVWRFd0VCL3dRSU1BWUJBZjhDQVFBd0RnWURWUjBQQVFIL0JBUURBZ0xrTUNJR0ExVWRFUVFiTUJtQwpGMmx6ZEdsdlpDNXBjM1JwYnkxemVYTjBaVzB1YzNaak1COEdBMVVkSXdRWU1CYUFGSFZ2NVp0ajJuVjJnNWRKCjNkdmEraGJDU2NuUk1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQ0FRQjI4bWt1cTJxZUhtNjRQaEFaencyb0h1ZlkKMmNpb3IwclFIdGdwNnVlNmFpYmMwaEltbmZQdERpeWpqdE12UFNJMCtDeUJFbjBFZ0VTWFQ5ZlU3Z0MxTkJqSwpwWU1ta0ZPSkhqUzBHTTdjL3hCZWhOVjl1TWZTaTUxc1lqb2dUTVFBMnlqRW5PU3RrbnBRQU1hUlJSYndVS3VIClpXRUNFOUZsZm8zdHUwLzV4a1A2bXFtQnRzcks1eklpK0pDVTBpbnBhSGw1c3NQaVRENzZoNXZUYmJiWGVjYzkKWjkrYW01ZGt1cjZ3U3R4TC9uRnVkQmR6c21OTlBVYld1c0lkN3VydldnRlBDS1c3RjJaNnN6ZGkwQ1lRc0NWTApEaE1wSjluSVp2cFZrNHVCUWlyMFY5K0MzV1MzdHFtWHA3aWxxRHRvaGl3Q3RVQzloR3grTUV6bHdaM3hCdzZFCnQwQXd4QTlicWE5azRTWElUc1E4Um8wQnl2RDJ5citvVWYraytaRHlaUkJHQTlIeTVIb25CTitLSC9NMkpROTgKcDFWWjJxdzMwK3I5VXJSbzVNVjRjc2NzYnBWd1cwV2hqMWtLVkNJWmp3VU4xVHZFTEZHTFoxNXg4K3NSdW5ITwp4NzVvN095anBQUHRCUk1heHFmekprWC9iZmc0WEIvV0M2djZOUGZBdkFic2JYSW5UNEtaYklFUk1aWG9XMnZrCldlazU0V0RsZXNlRVIzSStJRmpTNytIWjdMWlZ6ZXBFNmxyc0tIbmd2VGtNTVNJYkYrdnRRQ1pXVm9xbHJ3UHAKT2p1elkxcWJUbXZmNkFkZEx4aDMzT2xxMkNiRkhMaGRoTFg0aDZGQytXTzRTSngyem9Dai9aYXhoOUUwKzNIeQp0TUJISGR4aFlYckY0TUpYWHc9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+              ca-key.pem: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUpSQUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQ1M0d2dna3FBZ0VBQW9JQ0FRREl3bkp3NTc2aE1nY3UKUTdob2xHZ1hwbXBmSmRRMklqWFpHTzhLOHhvemRDMTY1U2FnMVBkM2VQeXVYZnZPcjFSczV6bWNlVkhrMmNtQQpiTW12d3ovZENIOEx3TUNmb1JUM05lV0hJL2RPbDlOUjhXeXp3RkliNzAzdTRvQThoTCt5SnkwdmtZcFBYVjVLClVuVGpDR2F0NHMvakU5NVVTdEwrNGlVNm0vWXJHL1BubU1BemRUZ0xTenpFd3JqQ09IVm5wVXc5V2N0SDFlM0QKUnhlWmdJUWJIRUtoWmRST1h6YjUxNEZhenltOTlDWEoxTVFFcVNoQmVJaGxOQ0RxMGxBeStOcjJ0UE90NDVuSApvOUNJQTZTU0ptTHZDVkRVL0tpMkdrZEFZOGMrOEpWaXhrMmZ6ODhiaXVlY1Qzdjl0eGQ0MHI5VWppQVlLZ0t4CnJmc2dWOTZmdjl1d005NDkzNVEzOEd4MnE5bWlwOEdUYU9LNUFSWmRNQk5PdlNoRHlJcTBCZlFNajFmRmN2OTQKNko0TUtadk5EQnBKNjk3Sm1JSS9kYzFpZTM5Q3BNU29Tai92WElrQkxGMzVVOHJSSDZGdklzM0MzWDc0V2VhcQpESXhCek9MTkRhN211OHNWZEgzTHV3Q0ZpZTgwdGpCa0xLSGEwNDM2WHBPVTNWUU1MWktaR3BSSEZTUE5wclZ6CkcwRDlVMVNjNkdLZ3NER0x3YnRzcEl0MlVqekJkZVk4ZXRxZmR4eWxseGVyQUFTSFNlRzNBZHMyWkZuOUxyQnoKdTZVSHpvZGdRRCtiWU1mMmVkU2pwbmYreFNLbVExRGpzWVd1TUtqbzJXMUQwU2RDRUZIR3hXc1ZkbHYwdDV5SwpsRFBvRW10L1JiTjJwMk0zcXpub3FJbFdzd3d0YXdJREFRQUJBb0lDQUNpcjQvMWxwYVFJZTVYdTJFUXZsS3I5CjV0emgwQTByZnhjOVN1Zy8rZFhrdW5ZRVNJQWF4UXVxTWg2dElaOXN1OERZVXo2VkFYZEllOThOcXdwMWx0R1QKc0JGVWVuR2NjNS9saGx1TGVNV3VVbnh1V2FSTTJSV1p0SU1wMWVyc3hkMDB2SjIvY1hMRXFwNko5KzRxdklxTAp3YXZ5VVg5b0xUaS8zZVR5eGJ0VURXU2srSU0wUXlkZWxiQVM5dFU2Rk9icmdQZUk0bnJxSnlJQm5CRllET3RsCkhVYVBWNlNNKzVsQUJJKytHbW5HTllXZkdoc0xuZ0V0aHd4aHRDMStjQXJ6aVlDamhoNTdWcU13VjhYR1h5ZlEKcVFoZUxjY0liTEYvdjJHWEZUMTJCZjJkeVFvUVVwZjAyeGs2clJib2FkUHJkaUdPTFloWHNuWUdsakttT281cwpaWndTcHpsNGZRNC9zZ0FMM1BPRHRIb1BYZUpBUmNKbjN2U1lSODBhKzZ0QnZEdVI3SWU1KzdXU0t0S3NKNFV6Cmt4TTdtZEVsMEZJV3VTT0ZWOGJ0VkQ1SHdXa25oM2wwV1dVN1dzUCthdDJSTWExVTQxZnZhWmZKenFLRDFJSU8Kd3c5ODIralR3VjV5Y0F1SWt2dENzZFB1M215dnIyeFJkVUdvaDIyaVRaL2VBRVNGUkdBNGJvWURHZzVGQXVWVwpSN05mV0VjQ09tLzY3UmVXYjhwOCs2WHNhbzVud3FqcFNacHA5M2NNV1c1TmhadklnMkQxcEVSUi83dUtLd3l0CnlrNGdiOG9GT2xEOE5NWGFRUm5ScmwxeXFpZ0liSkhRTGJkK2hKMFdjdkJTdHhBMDVackpvb2gxSFdhWmRZSW8KWTJ1MnhHK0I5NkpIRHJWNmZVUEpBb0lCQVFEMmQ0NXFYRmtBSU9BdnhaRmFxSHVpR1U2dlFaVFpFME9YVGFnKwppUG9iOVpTT0RVYlM1Q2JMcnpMQlcyakVBajlwTTlQb2xHTmxEMXNOU2N5QVlOZmZVVC82ekl0aGlDbkZTZi9ICnZKeEN4K1dtZE1hV0ZOdmZXZTk0aXE2MTZvNk03V0JQUGtuaHFPcHlLOHh0V2NKU0FOclcyYjVWdEFxdUZFeGoKZmtrUHFIWlR1dHM3MWtQcUFZWW5vbGtXM2UyZTVUTllEK3lGSnZ1SzFmdzBEeERYSzFQanI0cDJFZlduMWVBZwpsR3BlL1dScnN5dmpqQUE0S2x0VS9TQnNlMzc1Vi9pRGoxS0VmNWYvNTByR0hXOWhWaDdPa3RhQmJnclBuTzFMCnd6NkJUQVVxdHJqYXV0SWtZeEMwYk1Od3U3MzVscE52WVQvOFljRk90WXJCUkdESEFvSUJBUURRaGs4WDhFd2MKZ1RzQ09UQnd2SXpWdVVkOFFmUzllMWhzUTNQMER0ZklYeGQxY1hvMUp0UVNsbFVLZ1FsQzQ3UHlYNE9FSU44dQpGRnRwb01FRzg2OGtMV2RzWmU4UEVDdWxrbmdpZlZHZ2lrQ0JGZ3lqVmVOdDk5QnZoSGhnUFNPVXNOS1JiWUhuCjBncXZmc2xCOFBxbzRrTjNCQnJCRUh2RmhhNnIvQU54NjBBNkRhN3JNclZIUTYzOFVIZWpDYTRNdHN2U2sweDQKaVY3R3FZZ3A4OEFsWHJUV2VyZktsdkpyQ0xtZnlzc2NJS1JJZEMxNk5RN0hWbk9ZNGhETkxxRE5oei92bVIyNApiMUp4TGZZcmJTMjZiZ01NcEl2YnpBMWNJcTBYSGk4ZFF1YjFqU1VQRFVwMnZWY1kzNEJIY254b0dTNzl4bGdMClFmYzJCWndRay9JOUFvSUJBUUNCT1BQeGJoTzN6b1RjWnpDcm9MU1pxNzBtaERML2tXc1oxRHlHOVJoMU9sQTIKSGwzb3luaFF5TDNLeFJ0cjBXWGZ5YTJzUHNqU1ByZlZnc0QyK2srVXBhdnUyZm1tSEZjU09wY2g2UkRncnFBSQpveWRQbndZYzE3R0h1T2FiT0t5ZTFRSnU2ZENnd1FpUzdjWFQrNEMzci8wTk1zTHBlbWt6Rmk5cTV0WjFvRFRSCjk2RmtnUlhBaGlZSmQ4UlFDZkhCSXBqRjdpdHJNS0lvQzhPY285MkhndzhMeklqREdPMThudFZSSDUrWnlDOHoKakpCUlVLRDQwYlJySGdBM0FKVDFOSnQybHRtRDRNWVlCUE9lWmVaMDJVdHpzV2RJR3lNTjhWQTFMZHdDdkpIawo4RUtCWS93ejJjRHphQ2NjWDBMZXJvVUVtNitKcXROSWFrU2l5akFYQW9JQkFRQ0VCellYQ3grMXdLRXpGREMyCmdMdVBLdU8zS2kraXRYRlVBeFZzeHVVYlNoSVpXME1zV2l4V3BIYXQwdXVoUFhrWEVpQzhUTy9pUmlObTZ0Q3MKN1NmTWVTOE50REM3MGRwQTJFOVdUeENhM0U1aExTdk5VemxQekdOZDZIc3JQQ3JHSDNzRGQxbVVCU3FjMldMbQpiSVRZMzRJbDNpUnViMWhleFBqR2ppZEVQdGFJcTFkQU5mZ1BhaXZFSU5MUEdQYnB0K2V2cVhIMnM4dWRiNFAyClJBNDUyeEFXNk5acjRFMFhOZ3dKdjZZQVppNStiWWpKNHNRN3RHSTJ2NVF4eGI4c3d1RFpmSklUei9CY0Z1VFIKdEN3SzZWTG04MXhXUzRsOTk3cXVjMzhUUU9QcFAzZmlZdUR0ODQ0dEFuNC9QcDdFYm9XUlNyOCtTWU1UNGxOaApMN3RsQW9JQkFRQ3FZU2NKTlB1UUxYMmR2dXJQOXVoL0lYeGdEazlCU3pCRTUxYXJsdDFNaUNRMjUxMENoRG9JCmpGRXFpdUlPcmF6ajdiMkswVmhVNENZK3ptZXVmNUpXcjVuTjVDM0pTbEFUSHJJZVlNN0NWWGNRalhkNjBlaGsKZDc1bjEvamUzN0lCb21mRzRaWnNqTTM2RkJGWWxzSXBweDQra3QxcFh3ZFR4VFRaa0JXU3Z2dXMycGUrb1ZuWgprNDl1K1VKVnVmd0xZaE14a2QxaU9vOGVxTThZZnZxKzBwU0FEb0pXTytqY3hJMVE0czhJcnhMUUZMK09UK2NsCkpVUGkzT2RpS01kdXoydGV3anBVbjNSanl3QnYwYkx0anhSVk9xYitKRWR0cUpia0xUWDRIY25lS1hwRDJJQVIKOVFvWkY0bFdVTDB6b1BrUExJM01NUGV2TVMwL1J6Qk0KLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLQo=
+              cert-chain.pem: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZlVENDQTJHZ0F3SUJBZ0lVY3lJWDN1SnYveVlvU0VBRDI1RDdkRW0xRW40d0RRWUpLb1pJaHZjTkFRRUwKQlFBd0lqRU9NQXdHQTFVRUNnd0ZTWE4wYVc4eEVEQU9CZ05WQkFNTUIxSnZiM1FnUTBFd0hoY05NalF3TnpJNQpNRGN5T0RBMldoY05NelF3TnpJM01EY3lPREEyV2pBOU1RNHdEQVlEVlFRS0RBVkpjM1JwYnpFWU1CWUdBMVVFCkF3d1BTVzUwWlhKdFpXUnBZWFJsSUVOQk1SRXdEd1lEVlFRSERBaGpiSFZ6ZEdWeU1UQ0NBaUl3RFFZSktvWkkKaHZjTkFRRUJCUUFEZ2dJUEFEQ0NBZ29DZ2dJQkFNakNjbkRudnFFeUJ5NUR1R2lVYUJlbWFsOGwxRFlpTmRrWQo3d3J6R2pOMExYcmxKcURVOTNkNC9LNWQrODZ2Vkd6bk9aeDVVZVRaeVlCc3lhL0RQOTBJZnd2QXdKK2hGUGMxCjVZY2o5MDZYMDFIeGJMUEFVaHZ2VGU3aWdEeUV2N0luTFMrUmlrOWRYa3BTZE9NSVpxM2l6K01UM2xSSzB2N2kKSlRxYjlpc2I4K2VZd0ROMU9BdExQTVRDdU1JNGRXZWxURDFaeTBmVjdjTkhGNW1BaEJzY1FxRmwxRTVmTnZuWApnVnJQS2IzMEpjblV4QVNwS0VGNGlHVTBJT3JTVURMNDJ2YTA4NjNqbWNlajBJZ0RwSkltWXU4SlVOVDhxTFlhClIwQmp4ejd3bFdMR1RaL1B6eHVLNTV4UGUvMjNGM2pTdjFTT0lCZ3FBckd0K3lCWDNwKy8yN0F6M2ozZmxEZncKYkhhcjJhS253Wk5vNHJrQkZsMHdFMDY5S0VQSWlyUUY5QXlQVjhWeS8zam9uZ3dwbTgwTUdrbnIzc21ZZ2o5MQp6V0o3ZjBLa3hLaEtQKzljaVFFc1hmbFR5dEVmb1c4aXpjTGRmdmhaNXFvTWpFSE00czBOcnVhN3l4VjBmY3U3CkFJV0o3elMyTUdRc29kclRqZnBlazVUZFZBd3RrcGthbEVjVkk4Mm10WE1iUVAxVFZKem9ZcUN3TVl2QnUyeWsKaTNaU1BNRjE1ang2MnA5M0hLV1hGNnNBQklkSjRiY0IyelprV2YwdXNITzdwUWZPaDJCQVA1dGd4L1o1MUtPbQpkLzdGSXFaRFVPT3hoYTR3cU9qWmJVUFJKMElRVWNiRmF4VjJXL1MzbklxVU0rZ1NhMzlGczNhbll6ZXJPZWlvCmlWYXpEQzFyQWdNQkFBR2pnWXN3Z1lnd0hRWURWUjBPQkJZRUZEc1gybGRqT0tuOHQ0T2NSNndjSWF0MTNwWVkKTUJJR0ExVWRFd0VCL3dRSU1BWUJBZjhDQVFBd0RnWURWUjBQQVFIL0JBUURBZ0xrTUNJR0ExVWRFUVFiTUJtQwpGMmx6ZEdsdlpDNXBjM1JwYnkxemVYTjBaVzB1YzNaak1COEdBMVVkSXdRWU1CYUFGSFZ2NVp0ajJuVjJnNWRKCjNkdmEraGJDU2NuUk1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQ0FRQjI4bWt1cTJxZUhtNjRQaEFaencyb0h1ZlkKMmNpb3IwclFIdGdwNnVlNmFpYmMwaEltbmZQdERpeWpqdE12UFNJMCtDeUJFbjBFZ0VTWFQ5ZlU3Z0MxTkJqSwpwWU1ta0ZPSkhqUzBHTTdjL3hCZWhOVjl1TWZTaTUxc1lqb2dUTVFBMnlqRW5PU3RrbnBRQU1hUlJSYndVS3VIClpXRUNFOUZsZm8zdHUwLzV4a1A2bXFtQnRzcks1eklpK0pDVTBpbnBhSGw1c3NQaVRENzZoNXZUYmJiWGVjYzkKWjkrYW01ZGt1cjZ3U3R4TC9uRnVkQmR6c21OTlBVYld1c0lkN3VydldnRlBDS1c3RjJaNnN6ZGkwQ1lRc0NWTApEaE1wSjluSVp2cFZrNHVCUWlyMFY5K0MzV1MzdHFtWHA3aWxxRHRvaGl3Q3RVQzloR3grTUV6bHdaM3hCdzZFCnQwQXd4QTlicWE5azRTWElUc1E4Um8wQnl2RDJ5citvVWYraytaRHlaUkJHQTlIeTVIb25CTitLSC9NMkpROTgKcDFWWjJxdzMwK3I5VXJSbzVNVjRjc2NzYnBWd1cwV2hqMWtLVkNJWmp3VU4xVHZFTEZHTFoxNXg4K3NSdW5ITwp4NzVvN095anBQUHRCUk1heHFmekprWC9iZmc0WEIvV0M2djZOUGZBdkFic2JYSW5UNEtaYklFUk1aWG9XMnZrCldlazU0V0RsZXNlRVIzSStJRmpTNytIWjdMWlZ6ZXBFNmxyc0tIbmd2VGtNTVNJYkYrdnRRQ1pXVm9xbHJ3UHAKT2p1elkxcWJUbXZmNkFkZEx4aDMzT2xxMkNiRkhMaGRoTFg0aDZGQytXTzRTSngyem9Dai9aYXhoOUUwKzNIeQp0TUJISGR4aFlYckY0TUpYWHc9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCi0tLS0tQkVHSU4gQ0VSVElGSUNBVEUtLS0tLQpNSUlGRkRDQ0F2eWdBd0lCQWdJVUFmcFVVOXV4dGU3dlhCYitlRmNmV3RrUlBsc3dEUVlKS29aSWh2Y05BUUVMCkJRQXdJakVPTUF3R0ExVUVDZ3dGU1hOMGFXOHhFREFPQmdOVkJBTU1CMUp2YjNRZ1EwRXdIaGNOTWpRd056STUKTURjeU56VTRXaGNOTXpRd056STNNRGN5TnpVNFdqQWlNUTR3REFZRFZRUUtEQVZKYzNScGJ6RVFNQTRHQTFVRQpBd3dIVW05dmRDQkRRVENDQWlJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dJUEFEQ0NBZ29DZ2dJQkFLY1V1K1VsCkhTNGh2eXllemQ2NjBWU1g5SU5Jek1yWFhHNTJUdTBwZFg0WkpTTHN4VkxJQkdnOE5xUWRzM05LTHk5ejFhRUIKbmN3cFl6UmVBRENGeFpWdHg0OEt2STRHSkNtTnpvM00xTitmZVJvTHZOczBiVE9vTStnYUZwRkU0dlIzVm1YaAp2VXB1MmcvNDdvUDhRTVEvUThDSFJUa2k5M3JhMmRTS1I5TUdWRGFYc2ZReUtwWVJjS3hXSUF4aXV3bXIwajFhClJ3VUFBNWJqaFpCaUZGK0hDaTZKYzhwclRmbGcvZjNxSWpocnR0ZHVjUTArMjByWjQzVmx1YW9OcnRHeGJlaVYKQ2xyZmN5ZjY4UDQyN0ljRTBHYTUwVGZab2Jtd3NjM0MycjNZak5lNnNXR0RNdEtIZS9YdDZ0MThidk8xampJRQo1aG5aaUR1S2hNdUE1OTlRSy9aR0lDR3hsdkRucW9XVW4zY1RYSnpacW1jdlVGSDF2RjZ5dE9YdE9Db0RKb1pQCm0vWFdJUmQ5a2dQWWNXYzdJZXJQcTk5UGlVc0kxNzc4YXQ5ckQwSUpNd2pXQkZROGlpYWMrNkNqVEJBZzRoQlgKNGd0aFFLWHhPdjdNcEFLQm41b1hnbW1DWmhBRm9KdmhlME1FemZNaFJDQjN2N2JOUXdsMWdKekUrTVY5TTBkZQpoK3U2QjNmNXpiMFRQRjNKWlpucVljWFFQOExIdGsyN3IvZlJIVkVzcm9XUHFqaGg4MHVkM1IrWE8vWHhwRzNSClljMzBnTGpNRGJSYlIxRjZYK1daU3ZtN05WS0pHZkt4MG5NN3Y1ekJMSlh3dHg3RnhuenNIZElWTHdNNmVZRVkKOCtEV3RkVDdSNjJ4NXU0OGJnKzFmcng0YmRzRmFOQVA4WVBSQWdNQkFBR2pRakJBTUIwR0ExVWREZ1FXQkJSMQpiK1diWTlwMWRvT1hTZDNiMnZvV3drbkowVEFQQmdOVkhSTUJBZjhFQlRBREFRSC9NQTRHQTFVZER3RUIvd1FFCkF3SUM1REFOQmdrcWhraUc5dzBCQVFzRkFBT0NBZ0VBV2gvNW1MbTZ4c3Y5ZlhkdTdNeGM0NTViS1h0MmdNNjAKdDNuVFo0bTVUVFFxVU5Tdi9wZnZjN2Q1WXRBRk9PTFVWMUVoZ0NwdHM2eUlXMzBUTU0rYjBDUzZNZ1E3eFRRdQpOSnh2Q1I0SHZUTGVqM3lKMyswTjAvcmxyT2VvTjRLUTRVcmV4aTVENTRMWEt6RFdVelpRb2JmVUZ0N240M0l3CmJkV3N2eTdaTHB5MVo3aXlDU2NKcDh5MUxYcGRPN0tyNVBCcHRhbXhrakJEcHpsNVNndjFMMm0wOFZrdnNIRDAKdmJKZysvKzNjSmthc1FNbUVCMWUyRlcrdDFvMTIzRFo5bnBiUTVIYm45QVdBaTN1ZGNWRXZxZjdMTE5BekJNeQovUzZrK25vTmxlOWZhYmN3bnNlZmUxc1Vnb3ZiUlJkUllxeHBKalNOd08vTDh1YXFvblE2YXJTbVNaanplKzBHCnd6c2FiOHVQYTlXcXJVYXl3STRYeHpSUXpaS1kxWW9oeTJvUGRtU1dvUDZwdHIrSkhNOXZQWm53VVlSVTJXOWMKU1lpYUNaS1ZpZ2FKU3VPN2QvOFZRc1lidEdLUXlPYVZ0U3Vxczhaa0dCVHNNSmJudEYrcnUwSDRlU1Qyc3oyOQpWMlpLNFVpU2E2VHd0N0ZyNGt6ajdaQVlDeE5BVWRHSk91ZHhxKzFTNTBxSllBSDFhdnFNUDlOSGl3UzJOZEcvClloMG1uekFxN21CTWZsZ0s3ZnFRcDRSUEdKWitQVUtqaTlNSFBZbjJoVU1tSkgza2lpbFZRZWN4RHRlcjJrbEUKQno0VDF6Lzd1OVlTNUhKR0RJY1VUMitDSTlQNVlraXRLa1h0anl6d1p3c0dkQjQwSlc3MWI4NkFId1FnbzN1TwpRcGxmTDdVdGwxcz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+              root-cert.pem: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZGRENDQXZ5Z0F3SUJBZ0lVQWZwVVU5dXh0ZTd2WEJiK2VGY2ZXdGtSUGxzd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0lqRU9NQXdHQTFVRUNnd0ZTWE4wYVc4eEVEQU9CZ05WQkFNTUIxSnZiM1FnUTBFd0hoY05NalF3TnpJNQpNRGN5TnpVNFdoY05NelF3TnpJM01EY3lOelU0V2pBaU1RNHdEQVlEVlFRS0RBVkpjM1JwYnpFUU1BNEdBMVVFCkF3d0hVbTl2ZENCRFFUQ0NBaUl3RFFZSktvWklodmNOQVFFQkJRQURnZ0lQQURDQ0Fnb0NnZ0lCQUtjVXUrVWwKSFM0aHZ5eWV6ZDY2MFZTWDlJTkl6TXJYWEc1MlR1MHBkWDRaSlNMc3hWTElCR2c4TnFRZHMzTktMeTl6MWFFQgpuY3dwWXpSZUFEQ0Z4WlZ0eDQ4S3ZJNEdKQ21Oem8zTTFOK2ZlUm9Mdk5zMGJUT29NK2dhRnBGRTR2UjNWbVhoCnZVcHUyZy80N29QOFFNUS9ROENIUlRraTkzcmEyZFNLUjlNR1ZEYVhzZlF5S3BZUmNLeFdJQXhpdXdtcjBqMWEKUndVQUE1YmpoWkJpRkYrSENpNkpjOHByVGZsZy9mM3FJamhydHRkdWNRMCsyMHJaNDNWbHVhb05ydEd4YmVpVgpDbHJmY3lmNjhQNDI3SWNFMEdhNTBUZlpvYm13c2MzQzJyM1lqTmU2c1dHRE10S0hlL1h0NnQxOGJ2TzFqaklFCjVoblppRHVLaE11QTU5OVFLL1pHSUNHeGx2RG5xb1dVbjNjVFhKelpxbWN2VUZIMXZGNnl0T1h0T0NvREpvWlAKbS9YV0lSZDlrZ1BZY1djN0llclBxOTlQaVVzSTE3NzhhdDlyRDBJSk13aldCRlE4aWlhYys2Q2pUQkFnNGhCWAo0Z3RoUUtYeE92N01wQUtCbjVvWGdtbUNaaEFGb0p2aGUwTUV6Zk1oUkNCM3Y3Yk5Rd2wxZ0p6RStNVjlNMGRlCmgrdTZCM2Y1emIwVFBGM0paWm5xWWNYUVA4TEh0azI3ci9mUkhWRXNyb1dQcWpoaDgwdWQzUitYTy9YeHBHM1IKWWMzMGdMak1EYlJiUjFGNlgrV1pTdm03TlZLSkdmS3gwbk03djV6QkxKWHd0eDdGeG56c0hkSVZMd002ZVlFWQo4K0RXdGRUN1I2Mng1dTQ4YmcrMWZyeDRiZHNGYU5BUDhZUFJBZ01CQUFHalFqQkFNQjBHQTFVZERnUVdCQlIxCmIrV2JZOXAxZG9PWFNkM2Iydm9Xd2tuSjBUQVBCZ05WSFJNQkFmOEVCVEFEQVFIL01BNEdBMVVkRHdFQi93UUUKQXdJQzVEQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FnRUFXaC81bUxtNnhzdjlmWGR1N014YzQ1NWJLWHQyZ002MAp0M25UWjRtNVRUUXFVTlN2L3BmdmM3ZDVZdEFGT09MVVYxRWhnQ3B0czZ5SVczMFRNTStiMENTNk1nUTd4VFF1Ck5KeHZDUjRIdlRMZWozeUozKzBOMC9ybHJPZW9ONEtRNFVyZXhpNUQ1NExYS3pEV1V6WlFvYmZVRnQ3bjQzSXcKYmRXc3Z5N1pMcHkxWjdpeUNTY0pwOHkxTFhwZE83S3I1UEJwdGFteGtqQkRwemw1U2d2MUwybTA4Vmt2c0hEMAp2YkpnKy8rM2NKa2FzUU1tRUIxZTJGVyt0MW8xMjNEWjlucGJRNUhibjlBV0FpM3VkY1ZFdnFmN0xMTkF6Qk15Ci9TNmsrbm9ObGU5ZmFiY3duc2VmZTFzVWdvdmJSUmRSWXF4cEpqU053Ty9MOHVhcW9uUTZhclNtU1pqemUrMEcKd3pzYWI4dVBhOVdxclVheXdJNFh4elJRelpLWTFZb2h5Mm9QZG1TV29QNnB0citKSE05dlBabndVWVJVMlc5YwpTWWlhQ1pLVmlnYUpTdU83ZC84VlFzWWJ0R0tReU9hVnRTdXFzOFprR0JUc01KYm50RitydTBINGVTVDJzejI5ClYyWks0VWlTYTZUd3Q3RnI0a3pqN1pBWUN4TkFVZEdKT3VkeHErMVM1MHFKWUFIMWF2cU1QOU5IaXdTMk5kRy8KWWgwbW56QXE3bUJNZmxnSzdmcVFwNFJQR0paK1BVS2ppOU1IUFluMmhVTW1KSDNraWlsVlFlY3hEdGVyMmtsRQpCejRUMXovN3U5WVM1SEpHREljVVQyK0NJOVA1WWtpdEtrWHRqeXp3WndzR2RCNDBKVzcxYjg2QUh3UWdvM3VPClFwbGZMN1V0bDFzPQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+        managementPolicies:
+        - Create
+        - Update
+        - Observe
+        - Delete
+        providerConfigRef:
+          name: provider-kubernetes
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-istio-cacerts"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.clusterRef
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.manifest.metadata.name
+      toFieldPath: status.istioCacerts
+  - name: x-helm-istio-base
+    base:
+      apiVersion: helm.crossplane.io/v1beta1
+      kind: Release
+      metadata:
+        name: xplane-helm-istio-base
+        annotations:
+          crossplane.io/external-name: istio-base
+      spec:
+        forProvider:
+          chart:
+            name: base
+            repository: https://istio-release.storage.googleapis.com/charts
+            version: "1.22.3"
+          namespace: istio-system
+          wait: true
+        providerConfigRef:
+          name: provider-helm
+    patches:
+    - type: PatchSet
+      patchSetName: clusterready-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-helm-istio-base"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.clusterRef
+        strategy: string
+        string:
+          fmt: "provider-helm-%s"
+      toFieldPath: spec.providerConfigRef.name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.components.istio-helm.version
+      toFieldPath: spec.forProvider.chart.version
+  - name: x-helm-istio-cni
+    base:
+      apiVersion: helm.crossplane.io/v1beta1
+      kind: Release
+      metadata:
+        name: xplane-helm-istio-cni
+        annotations:
+          crossplane.io/external-name: istio-cni
+      spec:
+        forProvider:
+          chart:
+            name: cni
+            repository: https://istio-release.storage.googleapis.com/charts
+            version: "1.22.3"
+          namespace: istio-system
+          set:
+          - name: profile
+            value: ambient
+          wait: true
+        providerConfigRef:
+          name: provider-helm
+    patches:
+    - type: PatchSet
+      patchSetName: clusterready-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-helm-istio-cni"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.clusterRef
+        strategy: string
+        string:
+          fmt: "provider-helm-%s"
+      toFieldPath: spec.providerConfigRef.name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.components.istio-helm.version
+      toFieldPath: spec.forProvider.chart.version
+  - name: x-istio-cni-patch
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-istio-cni
+      spec:
+        deletionPolicy: Orphan
+        forProvider:
+          manifest:
+            apiVersion: apps/v1
+            kind: DaemonSet
+            metadata:
+              name: istio-cni-node
+              namespace: istio-system
+            spec:
+              template:
+                spec:
+                  affinity:
+                    nodeAffinity:
+                      requiredDuringSchedulingIgnoredDuringExecution:
+                        nodeSelectorTerms:
+                        - matchExpressions:
+                          - key: eks.amazonaws.com/compute-type
+                            operator: NotIn
+                            values:
+                            - fargate
+        managementPolicies:
+        - Create
+        - Update
+        - Observe
+        - LateInitialize
+        providerConfigRef:
+          name: provider-kubernetes
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-istio-cni"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.clusterRef
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name
+  - name: x-helm-istiod
+    base:
+      apiVersion: helm.crossplane.io/v1beta1
+      kind: Release
+      metadata:
+        name: xplane-helm-istiod
+        annotations:
+          crossplane.io/external-name: istiod
+      spec:
+        forProvider:
+          chart:
+            name: istiod
+            repository: https://istio-release.storage.googleapis.com/charts
+            version: "1.22.3"
+          namespace: istio-system
+          set:
+          - name: profile
+            value: ambient
+          - name: global.meshID
+            value: mesh1
+          - name: global.network
+            value: network1
+          - name: global.multiCluster.clusterName
+            value: eksac-cluster00
+          wait: true
+        providerConfigRef:
+          name: provider-helm
+    patches:
+    - type: PatchSet
+      patchSetName: clusterready-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-helm-istiod"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.clusterRef
+        strategy: string
+        string:
+          fmt: "provider-helm-%s"
+      toFieldPath: spec.providerConfigRef.name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.components.istio-helm.version
+      toFieldPath: spec.forProvider.chart.version
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.clusterRef
+      toFieldPath: spec.forProvider.set[3].value
+    - type: FromCompositeFieldPath
+      fromFieldPath: status.istioCacerts
+      toFieldPath: metadata.labels["istioCacerts"]
+      policy:
+        fromFieldPath: Required
+  - name: x-helm-ztunnel
+    base:
+      apiVersion: helm.crossplane.io/v1beta1
+      kind: Release
+      metadata:
+        name: xplane-helm-ztunnel
+        annotations:
+          crossplane.io/external-name: ztunnel
+      spec:
+        forProvider:
+          chart:
+            name: ztunnel
+            repository: https://istio-release.storage.googleapis.com/charts
+            version: "1.22.3"
+          namespace: istio-system
+          set:
+          - name: defaults.multiCluster.clusterName
+            value: eksac-cluster00
+          wait: true
+        providerConfigRef:
+          name: provider-helm
+    patches:
+    - type: PatchSet
+      patchSetName: clusterready-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-helm-ztunnel"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.clusterRef
+        strategy: string
+        string:
+          fmt: "provider-helm-%s"
+      toFieldPath: spec.providerConfigRef.name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.components.istio-helm.version
+      toFieldPath: spec.forProvider.chart.version
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.clusterRef
+      toFieldPath: spec.forProvider.set[0].value
+  - name: x-ztunnel-patch
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-ztunnel
+      spec:
+        deletionPolicy: Orphan
+        forProvider:
+          manifest:
+            apiVersion: apps/v1
+            kind: DaemonSet
+            metadata:
+              name: ztunnel
+              namespace: istio-system
+            spec:
+              template:
+                spec:
+                  affinity:
+                    nodeAffinity:
+                      requiredDuringSchedulingIgnoredDuringExecution:
+                        nodeSelectorTerms:
+                        - matchExpressions:
+                          - key: eks.amazonaws.com/compute-type
+                            operator: NotIn
+                            values:
+                            - fargate
+        managementPolicies:
+        - Create
+        - Update
+        - Observe
+        - LateInitialize
+        providerConfigRef:
+          name: provider-kubernetes
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-ztunnel"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.clusterRef
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name

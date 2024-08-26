@@ -1,0 +1,57 @@
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: Network
+metadata:
+  name: linus-vpc
+  namespace: eksac
+spec:
+  name: linus-vpc
+  location: "ap-southeast-1"
+  vpcCidr: "10.0.0.0/22"
+  subnets:
+    public:
+      z1Cidr: "10.0.0.0/28"
+      z2Cidr: "10.0.0.16/28"
+      z3Cidr: "10.0.0.32/28"
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: EksCluster
+metadata:
+  name: linus-cluster
+  namespace: eksac
+spec:
+  name: linus-cluster
+  location: "ap-southeast-1"
+  awsAccountId: "390945758345"
+  vpcRef: linus-vpc
+  subnets:
+    private:
+      z1Cidr: "10.0.0.128/25"
+      z2Cidr: "10.0.1.0/25"
+      z3Cidr: "10.0.1.128/25"
+  components:
+    ciliumHelm:
+      version: "1.16.1"
+    corednsAddOn:
+      version: "v1.11.1-eksbuild.11"
+    ebscsiAddOn:
+      version: "v1.33.0-eksbuild.1"
+    eks:
+      version: "1.30"
+    karpenterHelm:
+      version: "1.0.1"
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: EksComponents
+metadata:
+  name: linus-components
+  namespace: eksac
+spec:
+  name: linus-components
+  clusterRef: linus-cluster
+  components:
+    aws-loadbalancer-controller-helm:
+      version: "1.8.2"
+    metrics-server-helm:
+      version: "3.12.1"
+    istio-helm:
+      version: "1.23.0"

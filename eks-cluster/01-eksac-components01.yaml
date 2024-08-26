@@ -8,11 +8,11 @@ spec:
   clusterRef: eksac-cluster01
   components:
     aws-loadbalancer-controller-helm:
-      version: "1.8.1"
+      version: "1.8.2"
     metrics-server-helm:
       version: "3.12.1"
-    vault-helm:
-      version: "0.28.1"
+    istio-helm:
+      version: "1.23.0"
 ---
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: EksComponents

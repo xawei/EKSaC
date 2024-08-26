@@ -669,6 +669,7 @@ spec:
           roleArnRef:
             name: xplane-eks-iam
           version: "1.30"
+          bootstrapSelfManagedAddons: false
           vpcConfig:
           - endpointPrivateAccess: true
             endpointPublicAccess: true
@@ -921,6 +922,8 @@ spec:
           region: ap-southeast-1
           addonName: aws-ebs-csi-driver
           addonVersion: v1.31.0-eksbuild.1
+          configurationValues: |
+            {"controller":{"replicaCount":1}}
           clusterNameRef:
             name: xplane-eks-cluster
           serviceAccountRoleArnRef:
@@ -957,49 +960,6 @@ spec:
     - type: FromCompositeFieldPath
       fromFieldPath: spec.components.ebscsiAddOn.version
       toFieldPath: spec.forProvider.addonVersion
-  - name: x-eks-addob-ebs-csi-deployment-replica
-    base:
-      apiVersion: kubernetes.crossplane.io/v1alpha2
-      kind: Object
-      metadata:
-        name: xplane-eks-addob-ebs-csi-deployment-replica
-      metadata:
-        annotations:
-          crossplane.io/external-name: ebs-csi-controller
-      spec:
-        deletionPolicy: Orphan
-        forProvider:
-          manifest:
-            apiVersion: apps/v1
-            kind: Deployment
-            metadata:
-              namespace: kube-system
-              name: ebs-csi-controller
-            spec:
-              replicas: 1
-        managementPolicies:
-        - Observe
-        - Create
-        - Update
-        providerConfigRef:
-          name: provider-kubernetes
-    patches:
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "%s-xplane-eks-addob-ebs-csi-deployment-replica"
-      toFieldPath: metadata.name
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "provider-kubernetes-%s"
-      toFieldPath: spec.providerConfigRef.name
   - name: x-eks-cluster-auth
     base:
       apiVersion: eks.aws.upbound.io/v1beta1
@@ -1136,12 +1096,12 @@ spec:
         string:
           fmt: "%s-xplane-fargate-pod-iam"
       toFieldPath: spec.forProvider.tags.Name
-  - name: x-fargate-profile
+  - name: x-fargate-profile-karpenter
     base:
       apiVersion: eks.aws.upbound.io/v1beta1
       kind: FargateProfile
       metadata:
-        name: xplane-fargate-profile
+        name: xplane-fargate-profile-karpenter
       spec:
         deletionPolicy: Delete
         forProvider:
@@ -1154,12 +1114,15 @@ spec:
             - namespace: kube-system
               labels:
                 app.kubernetes.io/name: karpenter
+            - namespace: kube-system
+              labels:
+                batch.kubernetes.io/job-name: karpenter-post-install-hook
           subnetIdRefs:
             - name: xplane-private-subnet-1a
             - name: xplane-private-subnet-1b
             - name: xplane-private-subnet-1c
           tags:
-            Name: xplane-fargate-profile
+            Name: xplane-fargate-profile-karpenter
             Owner: linus.yong
             Environment: sandbox
         providerConfigRef:
@@ -1173,7 +1136,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-fargate-profile"
+          fmt: "%s-xplane-fargate-profile-karpenter"
       toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:
@@ -1181,7 +1144,7 @@ spec:
         - fromFieldPath: spec.name
         strategy: string
         string:
-          fmt: "%s-xplane-fargate-profile"
+          fmt: "%s-xplane-fargate-profile-karpenter"
       toFieldPath: spec.forProvider.tags.Name
     - type: CombineFromComposite
       combine:
@@ -2015,7 +1978,7 @@ spec:
                       restartPolicy: Never
                       containers:
                         - name: kubectl
-                          image: bitnami/kubectl 
+                          image: bitnami/kubectl
                           command: ["kubectl"]
                           args: ["rollout", "restart", "deployment/karpenter"]
         managementPolicies:
@@ -2042,52 +2005,6 @@ spec:
     #     string:
     #       fmt: "deployment/%s-xplane-helm-karpenter"
     #   toFieldPath: spec.forProvider.manifest.spec.jobTemplate.spec.template.spec.containers[0].args[2]
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "provider-kubernetes-%s"
-      toFieldPath: spec.providerConfigRef.name
-  - name: x-aws-node-patch
-    base:
-      apiVersion: kubernetes.crossplane.io/v1alpha2
-      kind: Object
-      metadata:
-        name: xplane-aws-node
-        annotations:
-          crossplane.io/external-name: aws-node
-      spec:
-        deletionPolicy: Orphan
-        forProvider:
-          manifest:
-            apiVersion: apps/v1
-            kind: DaemonSet
-            metadata:
-              name: aws-node
-              namespace: kube-system
-            spec:
-              template:
-                spec:
-                  nodeSelector:
-                    io.cilium/aws-node-enabled: "true"
-        managementPolicies:
-        - Create
-        - Update
-        - Observe
-        - LateInitialize
-        providerConfigRef:
-          name: provider-kubernetes
-    patches:
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "%s-xplane-aws-node"
-      toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:
         variables:
@@ -2216,6 +2133,59 @@ spec:
         string:
           fmt: "provider-kubernetes-%s"
       toFieldPath: spec.providerConfigRef.name
+  - name: x-cilium-envoy-patch
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-cilium-envoy
+        annotations:
+          crossplane.io/external-name: cilium-envoy
+      spec:
+        deletionPolicy: Orphan
+        forProvider:
+          manifest:
+            apiVersion: apps/v1
+            kind: DaemonSet
+            metadata:
+              name: cilium-envoy
+              namespace: kube-system
+            spec:
+              template:
+                spec:
+                  affinity:
+                    nodeAffinity:
+                      requiredDuringSchedulingIgnoredDuringExecution:
+                        nodeSelectorTerms:
+                        - matchExpressions:
+                          - key: eks.amazonaws.com/compute-type
+                            operator: NotIn
+                            values:
+                            - fargate
+        managementPolicies:
+        - Create
+        - Update
+        - Observe
+        - LateInitialize
+        providerConfigRef:
+          name: provider-kubernetes
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-cilium-envoy"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name
   - name: x-cilium-operator-patch
     base:
       apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -2260,52 +2230,6 @@ spec:
         strategy: string
         string:
           fmt: "%s-xplane-cilium-operator"
-      toFieldPath: metadata.name
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "provider-kubernetes-%s"
-      toFieldPath: spec.providerConfigRef.name
-  - name: x-kube-proxy-patch
-    base:
-      apiVersion: kubernetes.crossplane.io/v1alpha2
-      kind: Object
-      metadata:
-        name: xplane-kube-proxy
-        annotations:
-          consumable.trustbank.sg/allow-kube-proxy: "true"
-      spec:
-        deletionPolicy: Orphan
-        forProvider:
-          manifest:
-            apiVersion: apps/v1
-            kind: DaemonSet
-            metadata:
-              name: kube-proxy
-              namespace: kube-system
-            spec:
-              template:
-                spec:
-                  nodeSelector:
-                    io.cilium/aws-node-enabled: "true"
-        managementPolicies:
-        - Create
-        - Update
-        - Observe
-        - LateInitialize
-        providerConfigRef:
-          name: provider-kubernetes
-    patches:
-    - type: CombineFromComposite
-      combine:
-        variables:
-        - fromFieldPath: spec.name
-        strategy: string
-        string:
-          fmt: "%s-xplane-kube-proxy"
       toFieldPath: metadata.name
     - type: CombineFromComposite
       combine:

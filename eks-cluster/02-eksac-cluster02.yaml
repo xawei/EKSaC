@@ -15,15 +15,15 @@ spec:
       z3Cidr: "10.0.3.0/25"
   components:
     ciliumHelm:
-      version: "1.15.6"
+      version: "1.16.1"
     corednsAddOn:
-      version: "v1.11.1-eksbuild.9"
+      version: "v1.11.1-eksbuild.11"
     ebscsiAddOn:
-      version: "v1.32.0-eksbuild.1"
+      version: "v1.33.0-eksbuild.1"
     eks:
       version: "1.30"
     karpenterHelm:
-      version: "0.37.0"
+      version: "1.0.1"
 ---
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: EksCluster

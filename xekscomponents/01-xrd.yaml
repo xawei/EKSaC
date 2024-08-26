@@ -33,7 +33,7 @@ spec:
                     properties:
                       version:
                         type: string
-                  vault-helm:
+                  istio-helm:
                     type: object
                     properties:
                       version:
@@ -48,6 +48,8 @@ spec:
               oidcIssuer:
                 type: string
               karpenterFargateStatus:
+                type: string
+              istioCacerts:
                 type: string
     served: true
     referenceable: true

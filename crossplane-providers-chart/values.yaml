@@ -9,7 +9,7 @@ provider:
       deploymentTemplate:
         spec:
           replicas: 1
-    version: v1.12.0
+    version: v1.14.0
     providers:
     - name: provider-aws-ec2
       providerConfig:
@@ -26,7 +26,7 @@ provider:
   helm:
     version: v0.19.0
   kubernetes:
-    version: v0.14.1
+    version: v0.15.0
     providers:
     - name: provider-kubernetes
       providerConfig:

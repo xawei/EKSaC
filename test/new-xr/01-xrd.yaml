@@ -1,0 +1,29 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xbuckets.consumable.trustbank.sg
+spec:
+  group: consumable.trustbank.sg
+  names:
+    kind: XBucket
+    plural: xbuckets
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              bucketRegion:
+                type: string
+                oneOf:
+                - pattern: '^ap-southeast-1$'
+            required:
+            - bucketRegion
+    served: true
+    referenceable: true
+  claimNames:
+    kind: Bucket
+    plural: buckets

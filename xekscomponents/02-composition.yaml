@@ -926,3 +926,139 @@ spec:
         string:
           fmt: "provider-kubernetes-%s"
       toFieldPath: spec.providerConfigRef.name
+  - name: x-istio-ingress-namespace
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-istio-ingress-namespace
+      spec:
+        deletionPolicy: Delete
+        forProvider:
+          manifest:
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: istio-ingress
+        managementPolicies:
+        - Create
+        - Update
+        - Observe
+        - Delete
+        providerConfigRef:
+          name: provider-kubernetes
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-istio-ingress-namespace"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.clusterRef
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name  
+  - name: x-helm-istio-ingress
+    base:
+      apiVersion: helm.crossplane.io/v1beta1
+      kind: Release
+      metadata:
+        name: xplane-helm-istio-ingress
+        annotations:
+          crossplane.io/external-name: istio-ingress
+      spec:
+        forProvider:
+          chart:
+            name: gateway
+            repository: https://istio-release.storage.googleapis.com/charts
+            version: "1.22.3"
+          namespace: istio-ingress
+          set:
+          - name: service.annotations.service\.beta\.kubernetes\.io/aws-load-balancer-name
+            value: eksac-cluster00
+          - name: service.annotations.service\.beta\.kubernetes\.io/aws-load-balancer-scheme
+            value: internet-facing
+          - name: service.annotations.service\.beta\.kubernetes\.io/aws-load-balancer-nlb-target-type
+            value: ip
+          - name: service.annotations.service\.beta\.kubernetes\.io/aws-load-balancer-proxy-protocol
+            value: "*"
+          wait: true
+        providerConfigRef:
+          name: provider-helm
+    patches:
+    - type: PatchSet
+      patchSetName: clusterready-patchset
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-helm-istio-ingress"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.clusterRef
+        strategy: string
+        string:
+          fmt: "provider-helm-%s"
+      toFieldPath: spec.providerConfigRef.name
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.components.istio-helm.version
+      toFieldPath: spec.forProvider.chart.version
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.clusterRef
+        strategy: string
+        string:
+          fmt: "%s-ingress"
+      toFieldPath: spec.forProvider.set[0].value
+  - name: x-istio-ingress-service-patch
+    base:
+      apiVersion: kubernetes.crossplane.io/v1alpha2
+      kind: Object
+      metadata:
+        name: xplane-istio-ingress
+      spec:
+        deletionPolicy: Orphan
+        forProvider:
+          manifest:
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: istio-ingress
+              namespace: istio-ingress
+              annotations:
+                service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+        managementPolicies:
+        - Create
+        - Update
+        - Observe
+        - LateInitialize
+        providerConfigRef:
+          name: provider-kubernetes
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.name
+        strategy: string
+        string:
+          fmt: "%s-xplane-istio-ingress"
+      toFieldPath: metadata.name
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.clusterRef
+        strategy: string
+        string:
+          fmt: "provider-kubernetes-%s"
+      toFieldPath: spec.providerConfigRef.name

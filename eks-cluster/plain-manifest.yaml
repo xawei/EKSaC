@@ -23,6 +23,7 @@ spec:
   location: "ap-southeast-1"
   awsAccountId: "390945758345"
   vpcRef: linus-vpc
+  # vpcRef: eksac-vpc01
   subnets:
     private:
       z1Cidr: "10.0.0.128/25"

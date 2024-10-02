@@ -1,0 +1,7 @@
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: Bucket
+metadata:
+  name: example-render
+  namespace: eksac
+spec:
+  bucketRegion: ap-southeast-1

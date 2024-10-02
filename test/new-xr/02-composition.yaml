@@ -1,0 +1,54 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: x-bucket
+spec:
+  compositeTypeRef:
+    apiVersion: consumable.trustbank.sg/v1alpha1
+    kind: XBucket
+  mode: Pipeline
+  pipeline:
+  # - step: patch-and-transform
+  #   functionRef:
+  #     name: function-patch-and-transform
+  #   input:
+  #     apiVersion: pt.fn.crossplane.io/v1beta1
+  #     kind: Resources
+  #     resources:
+  #     - name: storage-bucket
+  #       base:
+  #         apiVersion: s3.aws.upbound.io/v1beta1
+  #         kind: Bucket
+  #         spec:
+  #           providerConfigRef:
+  #             name: provider-aws-s3
+  #       patches:
+  #       - type: FromCompositeFieldPath
+  #         fromFieldPath: spec.bucketRegion
+  #         toFieldPath: spec.forProvider.region
+  - step: render-with-gotemplate
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          ---
+          # Use a getCompisiteResrouce to retrive the XR
+          {{ $xr := getCompositeResource . }}
+
+          apiVersion: s3.aws.upbound.io/v1beta1
+          kind: Bucket
+          metadata:
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ get $xr.metadata "name" }}
+          spec:
+            forProvider:
+              region: {{ get $xr.spec "bucketRegion" }}
+            providerConfigRef:
+              name: provider-aws-s3
+  - step: ready
+    functionRef:
+      name: function-auto-ready

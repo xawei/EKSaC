@@ -31,15 +31,15 @@ spec:
       z3Cidr: "10.0.1.128/25"
   components:
     ciliumHelm:
-      version: "1.16.1"
+      version: "1.16.4"
     corednsAddOn:
-      version: "v1.11.1-eksbuild.11"
+      version: "v1.11.3-eksbuild.2"
     ebscsiAddOn:
-      version: "v1.33.0-eksbuild.1"
+      version: "v1.37.0-eksbuild.1"
     eks:
-      version: "1.30"
+      version: "1.31"
     karpenterHelm:
-      version: "1.0.1"
+      version: "1.1.0"
 ---
 apiVersion: consumable.trustbank.sg/v1alpha1
 kind: EksComponents
@@ -51,8 +51,8 @@ spec:
   clusterRef: linus-cluster
   components:
     aws-loadbalancer-controller-helm:
-      version: "1.8.2"
+      version: "1.10.1"
     metrics-server-helm:
-      version: "3.12.1"
+      version: "3.12.2"
     istio-helm:
-      version: "1.23.0"
+      version: "1.24.1"

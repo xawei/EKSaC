@@ -1769,6 +1769,8 @@ spec:
                     managed-by: karpenter
                 spec:
                   nodeClassRef:
+                    group: karpenter.k8s.aws
+                    kind: EC2NodeClass
                     name: default
                   startupTaints:
                   - key: node.cilium.io/agent-not-ready

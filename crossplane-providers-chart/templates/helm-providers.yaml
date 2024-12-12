@@ -4,7 +4,7 @@ kind: Provider
 metadata:
   name: provider-helm
 spec:
-  package: xpkg.upbound.io/crossplane-contrib/provider-helm:{{ .version }}
+  package: xpkg.upbound.io/upbound/provider-helm:{{ .version }}
 ---
 {{- range $providers := .providers }}
 apiVersion: helm.crossplane.io/v1beta1

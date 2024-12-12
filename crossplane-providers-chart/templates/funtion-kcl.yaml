@@ -1,0 +1,11 @@
+{{- if .Values.function }}{{ if .Values.function.kcl }}
+{{- with .Values.function.kcl }}
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-kcl
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-kcl:{{ .version }}
+---
+{{- end }}
+{{- end }}{{ end }}

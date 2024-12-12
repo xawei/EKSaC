@@ -32,3 +32,10 @@ provider:
       providerConfig:
         credentials:
           source: InjectedIdentity
+function:
+  kcl:
+    version: v0.10.10
+  autoready:
+    version: v0.3.0
+  gotemplateing:
+    version: v0.8.0

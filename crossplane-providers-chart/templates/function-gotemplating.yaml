@@ -1,0 +1,11 @@
+{{- if .Values.function }}{{ if .Values.function.gotemplateing }}
+{{- with .Values.function.gotemplateing }}
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-go-templating
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-go-templating:{{ .version }}
+---
+{{- end }}
+{{- end }}{{ end }}

@@ -1,0 +1,11 @@
+{{- if .Values.function }}{{ if .Values.function.sequencer }}
+{{- with .Values.function.sequencer }}
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-sequencer
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-sequencer::{{ .version }}
+---
+{{- end }}
+{{- end }}{{ end }}

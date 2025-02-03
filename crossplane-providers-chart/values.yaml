@@ -9,7 +9,7 @@ provider:
       deploymentTemplate:
         spec:
           replicas: 1
-    version: v1.17.0
+    version: v1.18.2
     providers:
     - name: provider-aws-ec2
       providerConfig:
@@ -24,9 +24,9 @@ provider:
         credentials:
           source: IRSA
   helm:
-    version: v0.20.0
+    version: v0.20.2
   kubernetes:
-    version: v0.16.0
+    version: v0.16.2
     providers:
     - name: provider-kubernetes
       providerConfig:
@@ -34,8 +34,10 @@ provider:
           source: InjectedIdentity
 function:
   kcl:
-    version: v0.10.10
+    version: v0.11.0
   autoready:
-    version: v0.3.0
+    version: v0.4.0
   gotemplateing:
-    version: v0.8.0
+    version: v0.9.0
+  sequencer:
+    version: v0.2.2

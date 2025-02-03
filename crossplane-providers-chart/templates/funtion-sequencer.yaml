@@ -5,7 +5,7 @@ kind: Function
 metadata:
   name: function-sequencer
 spec:
-  package: xpkg.upbound.io/crossplane-contrib/function-sequencer::{{ .version }}
+  package: xpkg.upbound.io/crossplane-contrib/function-sequencer:{{ .version }}
 ---
 {{- end }}
 {{- end }}{{ end }}

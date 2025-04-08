@@ -1,0 +1,41 @@
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: NetworkKcl
+metadata:
+  name: linus-network
+  namespace: eksac
+spec:
+  name: linus-network
+  location: "ap-southeast-1"
+  vpcCidr: "10.0.0.0/22"
+  subnets:
+    public:
+      1a: "10.0.0.0/28"
+      1b: "10.0.0.16/28"
+      1c: "10.0.0.32/28"
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: EksClusterKcl
+metadata:
+  name: linus-cluster
+  namespace: eksac
+spec:
+  name: linus-cluster
+  location: "ap-southeast-1"
+  awsAccountId: "390945758345"
+  vpcRef: linus-network
+  subnets:
+    private:
+      1a: "10.0.0.128/25"
+      1b: "10.0.1.0/25"
+      1c: "10.0.1.128/25"
+  components:
+    ciliumHelm:
+      version: "1.17.2"
+    corednsAddOn:
+      version: "v1.11.4-eksbuild.2"
+    ebscsiAddOn:
+      version: v1.40.0-eksbuild.1"
+    eks:
+      version: "1.32"
+    karpenterHelm:
+      version: "1.3.1"

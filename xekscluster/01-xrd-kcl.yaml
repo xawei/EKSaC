@@ -46,7 +46,7 @@ spec:
                     properties:
                       version:
                         type: string
-                  corednsAddOn:
+                  corednsHelm:
                     type: object
                     properties:
                       version:

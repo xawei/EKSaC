@@ -31,10 +31,10 @@ spec:
   components:
     ciliumHelm:
       version: "1.17.2"
-    corednsAddOn:
-      version: "v1.11.4-eksbuild.2"
+    corednsHelm:
+      version: "1.39.2"
     ebscsiAddOn:
-      version: v1.40.0-eksbuild.1"
+      version: "v1.40.0-eksbuild.1"
     eks:
       version: "1.32"
     karpenterHelm:

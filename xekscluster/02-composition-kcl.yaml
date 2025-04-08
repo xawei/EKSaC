@@ -879,7 +879,7 @@ spec:
               providerConfigRef.name = oxr.spec.name + "-providerconfig-kubernetes"
             }
           }]
-  - step: create-default-amd64-nodepool-karpenter
+  - step: create-default-arm64-nodepool-karpenter
     functionRef:
       name: function-kcl
     input:
@@ -940,7 +940,7 @@ spec:
                           {
                             key = "karpenter.k8s.aws/instance-cpu"
                             operator = "Gt"
-                            values = ["1"]
+                            values = ["2"]
                           },
                           {
                             key = "karpenter.sh/capacity-type"
@@ -1072,6 +1072,45 @@ spec:
                     }
                   }
                 }
+                wait = True
+              }
+              providerConfigRef.name = oxr.spec.name + "-providerconfig-helm"
+            }
+          }]
+  - step: helm-install-coredns
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "xplane-helm-coredns"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+
+          items = [{
+            apiVersion = "helm.crossplane.io/v1beta1"
+            kind = "Release"
+            metadata.name = oxr.spec.name + "-xplane-helm-coredns"
+            metadata.annotations = {
+                "crossplane.io/external-name" = "coredns"
+            }
+            spec = {
+              forProvider = {
+                chart = {
+                  name = "coredns"
+                  repository = "oci://ghcr.io/coredns/charts"
+                  version = oxr.spec.components.corednsHelm.version
+                }
+                namespace = "kube-system"
+                set = [
+                  {
+                    name = "replicaCount"
+                    value = "1"
+                  }
+                ]
                 wait = True
               }
               providerConfigRef.name = oxr.spec.name + "-providerconfig-helm"
@@ -1224,7 +1263,7 @@ spec:
           karpenterreleasecilium = {
             apiVersion = "apiextensions.crossplane.io/v1beta1"
             kind = "Usage"
-            metadata.name = oxr.spec.name + "-helm-providerconfig-release-after-karpenter"
+            metadata.name = oxr.spec.name + "-karpetner-release-after-cilium"
             spec = {
               of = {
                 apiVersion = "helm.crossplane.io/v1beta1"
@@ -1239,15 +1278,33 @@ spec:
             }
           }
 
-          karpenterreleasenodepool = {
+          karpenterreleasecoredns = {
             apiVersion = "apiextensions.crossplane.io/v1beta1"
             kind = "Usage"
-            metadata.name = oxr.spec.name + "-karpenter-release-after-karpenter"
+            metadata.name = oxr.spec.name + "-karpetner-release-after-coredns"
             spec = {
               of = {
                 apiVersion = "helm.crossplane.io/v1beta1"
                 kind = "Release"
                 resourceRef.name = oxr.spec.name + "-xplane-helm-karpenter"
+              }
+              by = {
+                apiVersion = "helm.crossplane.io/v1beta1"
+                kind = "Release"
+                resourceRef.name = oxr.spec.name + "-xplane-helm-coredns"
+              }
+            }
+          }
+
+          corednsreleasenodepool = {
+            apiVersion = "apiextensions.crossplane.io/v1beta1"
+            kind = "Usage"
+            metadata.name = oxr.spec.name + "-coredns-release-after-nodepool"
+            spec = {
+              of = {
+                apiVersion = "helm.crossplane.io/v1beta1"
+                kind = "Release"
+                resourceRef.name = oxr.spec.name + "-xplane-helm-coredns"
               }
               by = {
                 apiVersion = "kubernetes.crossplane.io/v1alpha2"
@@ -1259,7 +1316,7 @@ spec:
 
           items = [
             clusterreleasekarpanter, clusterauthreleasekarpenter, accessentryreleasekarpenter, accesspolicyassociationreleasekarpenter, 
-            helmproviderconfigreleasekarpenter, karpenterreleasecilium, karpenterreleasenodepool
+            helmproviderconfigreleasekarpenter, karpenterreleasecilium, karpenterreleasecoredns,corednsreleasenodepool
           ]
   - step: auto-ready
     functionRef:

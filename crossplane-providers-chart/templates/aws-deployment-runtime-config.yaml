@@ -8,7 +8,7 @@ spec:
     spec:
       replicas: {{ .deploymentRuntimeConfig.deploymentTemplate.spec.replicas }}
       selector: {}
-      # template:
+      template: {}
       #   spec:
       #     securityContext:
       #       runAsNonRoot: true

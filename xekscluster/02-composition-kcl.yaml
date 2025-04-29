@@ -431,6 +431,120 @@ spec:
           }
 
           items = [cluster, defaultaccessentry, defaultaccesspolicyassociation, crossplaneaccessentry, crossplaneaccesspolicyassociation, karpenteraccessentry]
+  - step: create-pod-identity-agent-addon
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "xplane-eks-addon-pod-identity-agent"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+
+          items = [{
+            apiVersion = "eks.aws.upbound.io/v1beta1"
+            kind = "Addon"
+            metadata.name = oxr.spec.name + "-xplane-eks-addon-pod-identity-agent"
+            spec.forProvider = {
+              region = oxr.spec.location
+              addonName = "eks-pod-identity-agent"
+              addonVersion = oxr.spec.components.podidentityagentAddOn.version
+              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+            }
+            spec.providerConfigRef.name = "provider-aws-eks"
+          }]
+  - step: create-ebs-csi-addon
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "xplane-eks-addon-pod-identity-agent"
+      spec:
+        target: Default
+        source: |
+          import json
+
+          oxr = option("params").oxr
+          ocds = option("params").ocds
+
+          ebscsiiamrole = {
+            apiVersion = "iam.aws.upbound.io/v1beta1"
+            kind = "Role"
+            metadata.name = oxr.spec.name + "-xplane-eks-addon-ebs-csi-iam-role"
+            spec.forProvider = {
+              assumeRolePolicy = json.encode({
+                Version = "2012-10-17"
+                Statement = [        {
+                  "Sid": "AllowEksAuthToAssumeRoleForPodIdentity",
+                  "Effect": "Allow",
+                  "Principal": {
+                      "Service": "pods.eks.amazonaws.com"
+                  },
+                  "Action": [
+                      "sts:AssumeRole",
+                      "sts:TagSession"
+                  ]
+                }]
+              })
+              managedPolicyArns = [
+                "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+              ]
+              tags: {
+                Name = oxr.spec.name + "-xplane-eks-addon-ebs-csi-iam-role"
+                Owner = "linus.yong"
+                Environment = "sandbox"
+                Project = "crossplane"
+              }
+            }
+            spec.providerConfigRef.name = "provider-aws-iam"
+          }
+
+          ebscsipodidentityassociation = {
+            apiVersion = "eks.aws.upbound.io/v1beta1"
+            kind = "PodIdentityAssociation"
+            metadata.name = oxr.spec.name + "-xplane-ebs-csi-pod-identity-association"
+            spec.forProvider = {
+              region = oxr.spec.location
+              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              roleArnRef.name = oxr.spec.name + "-xplane-eks-addon-ebs-csi-iam-role"
+              namespace = "kube-system"
+              serviceAccount = "ebs-csi-controller-sa"
+              tags: {
+                Name = oxr.spec.name + "-xplane-ebs-csi-pod-identity-association"
+                Owner = "linus.yong"
+                Environment = "sandbox"
+                Project = "crossplane"
+              }
+            }
+            spec.providerConfigRef.name = "provider-aws-eks"
+          }
+
+          ebscsiaddon = {
+            apiVersion = "eks.aws.upbound.io/v1beta1"
+            kind = "Addon"
+            metadata.name = oxr.spec.name + "-xplane-eks-addon-aws-ebs-csi-driver"
+            spec.forProvider = {
+              region = oxr.spec.location
+              addonName = "aws-ebs-csi-driver"
+              addonVersion = oxr.spec.components.ebscsiAddOn.version
+              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              configurationValues: json.encode({"controller":{"replicaCount":1}})
+              podIdentityAssociation = [
+                {
+                  roleArn = ocds[oxr.spec.name + "-xplane-eks-addon-ebs-csi-iam-role"]?.Resource?.status?.atProvider?.arn
+                  serviceAccount = "ebs-csi-controller-sa"
+                }
+              ]
+            }
+            spec.providerConfigRef.name = "provider-aws-eks"
+          }
+
+          items = [ebscsiiamrole, ebscsiaddon]
   - step: create-eks-cluster-auth
     functionRef:
       name: function-kcl
@@ -958,6 +1072,136 @@ spec:
               providerConfigRef.name = oxr.spec.name + "-providerconfig-kubernetes"
             }
           }]
+  - step: create-karpenter-restart-cronjob
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "xplane-karpenter-restart-cronjob"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+
+          karpentercronjobrole = {
+            apiVersion = "kubernetes.crossplane.io/v1alpha2"
+            kind = "Object"
+            metadata.name = oxr.spec.name + "-xplane-role-restart-karpenter"
+            spec = {
+              forProvider = {
+                manifest = {
+                  apiVersion = "rbac.authorization.k8s.io/v1"
+                  kind = "Role"
+                  metadata = {
+                    name = oxr.spec.name + "-xplane-role-restart-karpenter"
+                    namespace = "kube-system"
+                  }
+                  rules = [
+                    {
+                      apiGroups = ["apps", "extensions"]
+                      resources = ["deployments"]
+                      resourceNames = ["karpenter"]
+                      verbs = ["get", "list", "patch", "watch"]
+                    }
+                  ]
+                }
+              }
+              providerConfigRef.name = oxr.spec.name + "-providerconfig-kubernetes"
+            }
+          }
+
+          karpentercronjobsa = {
+            apiVersion = "kubernetes.crossplane.io/v1alpha2"
+            kind = "Object"
+            metadata.name = oxr.spec.name + "-xplane-sa-restart-karpenter"
+            spec = {
+              forProvider = {
+                manifest = {
+                  apiVersion = "v1"
+                  kind = "ServiceAccount"
+                  metadata = {
+                    name = oxr.spec.name + "-xplane-sa-restart-karpenter"
+                    namespace = "kube-system"
+                  }
+                }
+              }
+              providerConfigRef.name = oxr.spec.name + "-providerconfig-kubernetes"
+            }
+          }
+
+          karpentercronjobrolebinding = {
+            apiVersion = "kubernetes.crossplane.io/v1alpha2"
+            kind = "Object"
+            metadata.name = oxr.spec.name + "-xplane-rolebinding-restart-karpenter"
+            spec = {
+              forProvider = {
+                manifest = {
+                  apiVersion = "rbac.authorization.k8s.io/v1"
+                  kind = "RoleBinding"
+                  metadata = {
+                    name = oxr.spec.name + "-xplane-rolebinding-restart-karpenter"
+                    namespace = "kube-system"
+                  }
+                  roleRef = {
+                    apiGroup = "rbac.authorization.k8s.io"
+                    kind = "Role"
+                    name = oxr.spec.name + "-xplane-role-restart-karpenter"
+                  }
+                  subjects = [
+                    {
+                      kind = "ServiceAccount"
+                      name = oxr.spec.name + "-xplane-sa-restart-karpenter"
+                      namespace = "kube-system"
+                    }
+                  ]
+                }
+              }
+              providerConfigRef.name = oxr.spec.name + "-providerconfig-kubernetes"
+            }
+          }
+
+          karpentercronjob = {
+            apiVersion = "kubernetes.crossplane.io/v1alpha2"
+            kind = "Object"
+            metadata.name = oxr.spec.name + "-xplane-cronjob-karpenter"
+            spec = {
+              forProvider = {
+                manifest = {
+                  apiVersion = "batch/v1"
+                  kind = "CronJob"
+                  metadata = {
+                    name = oxr.spec.name + "-xplane-cronjob-karpenter"
+                    namespace = "kube-system"
+                  }
+                  spec = {
+                    schedule = "0 0 * * *"
+                    jobTemplate = {
+                      spec = {
+                        template = {
+                          spec = {
+                            serviceAccountName = oxr.spec.name + "-xplane-sa-restart-karpenter"
+                            containers = [
+                              {
+                                name = oxr.spec.name + "-xplane-cronjob-karpenter"
+                                image = "busybox:latest"
+                                command = ["sh", "-c", "kubectl rollout restart deployment karpenter -n kube-system"]
+                              }
+                            ]
+                            restartPolicy = "OnFailure"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              providerConfigRef.name = oxr.spec.name + "-providerconfig-kubernetes"
+            }
+          }
+
+          items = [karpentercronjobrole, karpentercronjobsa, karpentercronjobrolebinding, karpentercronjob]
   - step: helm-install-cilium
     functionRef:
       name: function-kcl
@@ -1109,6 +1353,10 @@ spec:
                   {
                     name = "replicaCount"
                     value = "1"
+                  },
+                  {
+                    name = "service.clusterIP"
+                    value = "172.20.0.10"
                   }
                 ]
                 wait = True

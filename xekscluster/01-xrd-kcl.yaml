@@ -56,6 +56,11 @@ spec:
                     properties:
                       version:
                         type: string
+                  podidentityagentAddOn:
+                    type: object
+                    properties:
+                      version:
+                        type: string
                   eks:
                     type: object
                     properties:

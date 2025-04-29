@@ -34,7 +34,9 @@ spec:
     corednsHelm:
       version: "1.39.2"
     ebscsiAddOn:
-      version: "v1.40.0-eksbuild.1"
+      version: "v1.42.0-eksbuild.1"
+    podidentityagentAddOn:
+      version: "v1.3.5-eksbuild.2"
     eks:
       version: "1.32"
     karpenterHelm:

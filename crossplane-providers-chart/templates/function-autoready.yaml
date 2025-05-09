@@ -5,7 +5,7 @@ kind: Function
 metadata:
   name: function-auto-ready
 spec:
-  package: xpkg.upbound.io/crossplane-contrib/function-auto-ready:{{ .version }}
+  package: xpkg.upbound.io/upbound/function-auto-ready:{{ .version }}
 ---
 {{- end }}
 {{- end }}{{ end }}

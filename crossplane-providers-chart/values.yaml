@@ -9,7 +9,8 @@ provider:
       deploymentTemplate:
         spec:
           replicas: 1
-    version: v1.21.2
+    version: v1
+    # version: v1.22.0
     providers:
     - name: provider-aws-ec2
       providerConfig:
@@ -24,9 +25,11 @@ provider:
         credentials:
           source: IRSA
   helm:
-    version: v0.20.6
+    version: v0
+    # version: v0.20.6
   kubernetes:
-    version: v0.17.3
+    version: v0
+    # version: v0.18.0
     providers:
     - name: provider-kubernetes
       providerConfig:

@@ -30,9 +30,9 @@ spec:
       1c: "10.0.1.128/25"
   components:
     ciliumHelm:
-      version: "1.17.2"
+      version: "1.17.3"
     corednsHelm:
-      version: "1.39.2"
+      version: "1.41.0"
     ebscsiAddOn:
       version: "v1.42.0-eksbuild.1"
     podidentityagentAddOn:
@@ -40,4 +40,4 @@ spec:
     eks:
       version: "1.32"
     karpenterHelm:
-      version: "1.3.1"
+      version: "1.4.0"

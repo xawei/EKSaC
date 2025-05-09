@@ -1009,7 +1009,7 @@ spec:
           items = [{
             apiVersion = "kubernetes.crossplane.io/v1alpha2"
             kind = "Object"
-            metadata.name = oxr.spec.name + "-xplane-default-amd64-nodepool-karpenter"
+            metadata.name = oxr.spec.name + "-xplane-default-arm64-nodepool-karpenter"
             spec = {
               forProvider = {
                 manifest = {
@@ -1065,7 +1065,86 @@ spec:
                         expireAfter = "2h"
                       }
                     }
-                    weight = 50                    
+                    weight = 50
+                  }
+                }
+              }
+              providerConfigRef.name = oxr.spec.name + "-providerconfig-kubernetes"
+            }
+          }]
+  - step: create-default-amd64-nodepool-karpenter
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "xplane-default-amd64-nodepool-karpenter"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+
+          items = [{
+            apiVersion = "kubernetes.crossplane.io/v1alpha2"
+            kind = "Object"
+            metadata.name = oxr.spec.name + "-xplane-default-amd64-nodepool-karpenter"
+            spec = {
+              forProvider = {
+                manifest = {
+                  apiVersion = "karpenter.sh/v1"
+                  kind = "NodePool"
+                  metadata.name = "default-amd64"
+                  spec = {
+                    disruption = {
+                      consolidationPolicy = "WhenEmptyOrUnderutilized"
+                      consolidateAfter = "3s"
+                    }
+                    template = {
+                      metadata = {
+                        labels = {
+                          "managed-by" = "karpenter"
+                        }
+                      }
+                      spec = {
+                        nodeClassRef = {
+                          group = "karpenter.k8s.aws"
+                          kind = "EC2NodeClass"
+                          name = "default"
+                        }
+                        startupTaints = [
+                          {
+                            key = "node.cilium.io/agent-not-ready"
+                            value = "true"
+                            effect = "NoExecute"
+                          }
+                        ]
+                        requirements = [
+                          {
+                            key = "kubernetes.io/arch"
+                            operator = "In"
+                            values = ["amd64"]
+                          },
+                          {
+                            key = "kubernetes.io/os"
+                            operator = "In"
+                            values = ["linux"]
+                          },
+                          {
+                            key = "karpenter.k8s.aws/instance-cpu"
+                            operator = "Gt"
+                            values = ["2"]
+                          },
+                          {
+                            key = "karpenter.sh/capacity-type"
+                            operator = "In"
+                            values = ["spot"]
+                          }
+                        ]
+                        expireAfter = "2h"
+                      }
+                    }
+                    weight = 30
                   }
                 }
               }
@@ -1176,16 +1255,22 @@ spec:
                     namespace = "kube-system"
                   }
                   spec = {
-                    schedule = "0 0 * * *"
+                    schedule = "0 */1 * * *"
+                    successfulJobsHistoryLimit = 1
+                    failedJobsHistoryLimit = 3
+                    concurrencyPolicy = "Forbid"
                     jobTemplate = {
                       spec = {
+                        backoffLimit = 2
+                        activeDeadlineSeconds = 600 
+                        ttlSecondsAfterFinished = 120
                         template = {
                           spec = {
                             serviceAccountName = oxr.spec.name + "-xplane-sa-restart-karpenter"
                             containers = [
                               {
                                 name = oxr.spec.name + "-xplane-cronjob-karpenter"
-                                image = "busybox:latest"
+                                image = "bitnami/kubectl"
                                 command = ["sh", "-c", "kubectl rollout restart deployment karpenter -n kube-system"]
                               }
                             ]

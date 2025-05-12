@@ -793,21 +793,18 @@ spec:
             metadata.name = oxr.spec.name + "-xplane-karpenter-iam-role"
             spec.forProvider = {
               assumeRolePolicy = json.encode({
-                "Version": "2012-10-17",
-                "Statement": [
-                    {
-                        "Effect": "Allow",
-                        "Principal": {
-                            "Federated": "arn:aws:iam::" + oxr.spec.awsAccountId + ":oidc-provider/" + oidcissuer
-                        },
-                        "Action": "sts:AssumeRoleWithWebIdentity",
-                        "Condition": {
-                            "StringEquals": {
-                                oidcissuer + ":sub": "system:serviceaccount:kube-system:karpenter"
-                            }
-                        }
-                    }
-                ]
+                Version = "2012-10-17"
+                Statement = [{
+                  "Sid": "AllowEksAuthToAssumeRoleForPodIdentity",
+                  "Effect": "Allow",
+                  "Principal": {
+                      "Service": "pods.eks.amazonaws.com"
+                  },
+                  "Action": [
+                      "sts:AssumeRole",
+                      "sts:TagSession"
+                  ]
+                }]
               })
               tags: {
                 Name = oxr.spec.name + "-xplane-karpenter-iam-role"
@@ -828,6 +825,20 @@ spec:
               roleRef.name = oxr.spec.name + "-xplane-karpenter-iam-role"
             }
             spec.providerConfigRef.name = "provider-aws-iam"
+          }
+
+          podidentityassociation = {
+            apiVersion = "eks.aws.upbound.io/v1beta1"
+            kind = "PodIdentityAssociation"
+            metadata.name = oxr.spec.name + "-xplane-karpenter-pod-identity-association"
+            spec.forProvider = {
+              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              namespace = "kube-system"
+              region = "ap-southeast-1"
+              roleArnRef.name = oxr.spec.name + "-xplane-karpenter-iam-role"
+              serviceAccount = "karpenter"
+            }
+            spec.providerConfigRef.name = "provider-aws-eks"
           }
 
           noderole = {
@@ -863,7 +874,7 @@ spec:
             spec.providerConfigRef.name = "provider-aws-iam"
           }
 
-          items = [policy, role, attachement, noderole]
+          items = [policy, role, attachement, podidentityassociation, noderole]
   - step: helm-install-karpenter
     functionRef:
       name: function-kcl

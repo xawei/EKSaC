@@ -34,10 +34,24 @@ spec:
     corednsHelm:
       version: "1.41.0"
     ebscsiAddOn:
-      version: "v1.42.0-eksbuild.1"
+      version: "v1.43.0-eksbuild.1"
     podidentityagentAddOn:
       version: "v1.3.5-eksbuild.2"
     eks:
       version: "1.32"
     karpenterHelm:
       version: "1.4.0"
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: EksComponentKcl
+metadata:
+  name: linus-cluster-components
+  namespace: eksac
+spec:
+  name: linus-cluster-components
+  clusterRef: linus-cluster
+  components:
+    metricsserverHelm:
+      version: "3.12.2"
+    awsloadbalancercontrollerHelm:
+      version: "1.13.0"

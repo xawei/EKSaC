@@ -533,7 +533,43 @@ spec:
               addonName = "aws-ebs-csi-driver"
               addonVersion = oxr.spec.components.ebscsiAddOn.version
               clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
-              configurationValues: json.encode({"controller":{"replicaCount":1}})
+              configurationValues: json.encode({
+                "controller": {
+                  "replicaCount": 1,
+                  "tolerations": [
+                    {
+                      "key": "karpenter.sh/nodepool",
+                      "operator": "Equal",
+                      "value": "infra",
+                      "effect": "NoSchedule"
+                    },
+                    {
+                      "key": "CriticalAddonsOnly",
+                      "operator": "Exists"
+                    },
+                    {
+                      "effect": "NoExecute",
+                      "operator": "Exists",
+                      "tolerationSeconds": 300
+                    }
+                  ]
+                },
+                "node": {
+                  "tolerations": [
+                    {
+                      "key": "karpenter.sh/nodepool",
+                      "operator": "Equal",
+                      "value": "infra",
+                      "effect": "NoSchedule"
+                    },
+                    {
+                      "effect": "NoExecute",
+                      "operator": "Exists",
+                      "tolerationSeconds": 300
+                    }
+                  ]
+                }
+              })
               podIdentityAssociation = [
                 {
                   roleArn = ocds[oxr.spec.name + "-xplane-eks-addon-ebs-csi-iam-role"]?.Resource?.status?.atProvider?.arn
@@ -795,15 +831,16 @@ spec:
               assumeRolePolicy = json.encode({
                 Version = "2012-10-17"
                 Statement = [{
-                  "Sid": "AllowEksAuthToAssumeRoleForPodIdentity",
                   "Effect": "Allow",
                   "Principal": {
-                      "Service": "pods.eks.amazonaws.com"
+                    "Federated": "arn:aws:iam::" + oxr.spec.awsAccountId + ":oidc-provider/" + oidcissuer
                   },
-                  "Action": [
-                      "sts:AssumeRole",
-                      "sts:TagSession"
-                  ]
+                  "Action": "sts:AssumeRoleWithWebIdentity",
+                  "Condition": {
+                    "StringEquals": {
+                      oidcissuer + ":sub": "system:serviceaccount:kube-system:karpenter"
+                    }
+                  }
                 }]
               })
               tags: {
@@ -827,20 +864,6 @@ spec:
             spec.providerConfigRef.name = "provider-aws-iam"
           }
 
-          podidentityassociation = {
-            apiVersion = "eks.aws.upbound.io/v1beta1"
-            kind = "PodIdentityAssociation"
-            metadata.name = oxr.spec.name + "-xplane-karpenter-pod-identity-association"
-            spec.forProvider = {
-              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
-              namespace = "kube-system"
-              region = "ap-southeast-1"
-              roleArnRef.name = oxr.spec.name + "-xplane-karpenter-iam-role"
-              serviceAccount = "karpenter"
-            }
-            spec.providerConfigRef.name = "provider-aws-eks"
-          }
-
           noderole = {
             apiVersion = "iam.aws.upbound.io/v1beta1"
             kind = "Role"
@@ -861,7 +884,7 @@ spec:
               managedPolicyArns = [
                 "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
                 "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-                "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+                "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly",
                 "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
               ]
               tags: {
@@ -874,7 +897,7 @@ spec:
             spec.providerConfigRef.name = "provider-aws-iam"
           }
 
-          items = [policy, role, attachement, podidentityassociation, noderole]
+          items = [policy, role, attachement, noderole]
   - step: helm-install-karpenter
     functionRef:
       name: function-kcl
@@ -975,9 +998,6 @@ spec:
                       httpProtocolIPv6 = "disabled"
                     }
                     role = oxr.spec.name + "-xplane-karpenter-node-iam"
-                    subnetSelectorTerms = [
-                      { name = oxr.spec.name + "-xplane-eks-cluster-subnet-private-1" }
-                    ]
                     securityGroupSelectorTerms = [
                       {
                         tags = {
@@ -1026,7 +1046,7 @@ spec:
                 manifest = {
                   apiVersion = "karpenter.sh/v1"
                   kind = "NodePool"
-                  metadata.name = "default-arm64"
+                  metadata.name = "infra-arm64"
                   spec = {
                     disruption = {
                       consolidationPolicy = "WhenEmptyOrUnderutilized"
@@ -1049,6 +1069,13 @@ spec:
                             key = "node.cilium.io/agent-not-ready"
                             value = "true"
                             effect = "NoExecute"
+                          }
+                        ]
+                        taints = [
+                          {
+                            key = "karpenter.sh/nodepool"
+                            value = "infra"
+                            effect = "NoSchedule"
                           }
                         ]
                         requirements = [
@@ -1105,7 +1132,7 @@ spec:
                 manifest = {
                   apiVersion = "karpenter.sh/v1"
                   kind = "NodePool"
-                  metadata.name = "default-amd64"
+                  metadata.name = "infra-amd64"
                   spec = {
                     disruption = {
                       consolidationPolicy = "WhenEmptyOrUnderutilized"
@@ -1128,6 +1155,13 @@ spec:
                             key = "node.cilium.io/agent-not-ready"
                             value = "true"
                             effect = "NoExecute"
+                          }
+                        ]
+                        taints = [
+                          {
+                            key = "karpenter.sh/nodepool"
+                            value = "infra"
+                            effect = "NoSchedule"
                           }
                         ]
                         requirements = [
@@ -1278,6 +1312,14 @@ spec:
                         template = {
                           spec = {
                             serviceAccountName = oxr.spec.name + "-xplane-sa-restart-karpenter"
+                            tolerations = [
+                              {
+                                key = "karpenter.sh/nodepool"
+                                operator = "Equal"
+                                value = "infra"
+                                effect = "NoSchedule"
+                              }
+                            ]
                             containers = [
                               {
                                 name = oxr.spec.name + "-xplane-cronjob-karpenter"
@@ -1455,6 +1497,16 @@ spec:
                     value = "172.20.0.10"
                   }
                 ]
+                values = {
+                  tolerations = [
+                    {
+                      key = "karpenter.sh/nodepool"
+                      operator = "Equal"
+                      value = "infra"
+                      effect = "NoSchedule"
+                    }
+                  ]
+                }
                 wait = True
               }
               providerConfigRef.name = oxr.spec.name + "-providerconfig-helm"

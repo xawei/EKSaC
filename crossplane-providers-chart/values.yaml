@@ -21,7 +21,7 @@ provider:
       # AWS secret configuration (user must create this manually)
       secretName: "aws-secret"
       secretNamespace: "crossplane-system"
-      secretKey: "aws-secret"
+      secretKey: "creds"
       # Optional: Use assumeRoleChain for better security
       enableAssumeRole: true
       # assumeRoleArn will be constructed from accountId and crossplaneIamRoleName above

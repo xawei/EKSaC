@@ -17,10 +17,10 @@ provider:
     # Configuration for local Kind deployment
     localConfig:
       # AWS secret configuration (user must create this manually)
-      # kubectl create secret generic aws-secret -n crossplane-system --from-file=aws-secret=./01-aws-credentials.txt
+      # kubectl create secret generic aws-secret -n crossplane-system --from-file=creds=./01-aws-credentials.txt
       secretName: "aws-secret"
       secretNamespace: "crossplane-system"
-      secretKey: "aws-secret"
+      secretKey: "creds"
       # Use assumeRoleChain for better security (recommended)
       enableAssumeRole: true
     

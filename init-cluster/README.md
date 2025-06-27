@@ -118,7 +118,7 @@ spec:
   source:
     repoURL: https://charts.crossplane.io/stable
     chart: crossplane
-    targetRevision: 1.17.1  # Use latest stable version
+    targetRevision: 1.20.0  # Use latest stable version
     helm:
       valueFiles: []
   destination:

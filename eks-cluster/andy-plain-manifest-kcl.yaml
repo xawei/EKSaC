@@ -1,0 +1,60 @@
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: NetworkKcl
+metadata:
+  name: andy-network
+  namespace: eksac
+spec:
+  name: andy-network
+  location: "ap-southeast-1"
+  vpcCidr: "10.0.0.0/22"
+  subnets:
+    public:
+      1a: "10.0.0.0/28"
+      1b: "10.0.0.16/28"
+      1c: "10.0.0.32/28"
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: EksClusterKcl
+metadata:
+  name: andy-cluster
+  namespace: eksac
+spec:
+  name: andy-cluster
+  location: "ap-southeast-1"
+  awsAccountId: "390945758345"
+  vpcRef: andy-network
+  subnets:
+    private:
+      1a: "10.0.0.128/25"
+      1b: "10.0.1.0/25"
+      1c: "10.0.1.128/25"
+  components:
+    ciliumHelm:
+      version: "1.17.3"
+    corednsHelm:
+      version: "1.42.1"
+    ebscsiAddOn:
+      version: "v1.43.0-eksbuild.1"
+    podidentityagentAddOn:
+      version: "v1.3.7-eksbuild.2"
+    eks:
+      version: "1.32"
+    karpenterHelm:
+      version: "1.4.0"
+---
+# apiVersion: consumable.trustbank.sg/v1alpha1
+# kind: EksComponentKcl
+# metadata:
+#   name: andy-cluster-components
+#   namespace: eksac
+# spec:
+#   name: andy-cluster-components
+#   location: "ap-southeast-1"
+#   clusterRef: andy-cluster
+#   components:
+#     metricsserverHelm:
+#       version: "3.12.2"
+#     awsloadbalancercontrollerHelm:
+#       version: "1.13.0"
+#     istioHelm:
+#       version: "1.26.0"

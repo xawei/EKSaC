@@ -1,8 +1,8 @@
 provider:
   awsFamily:
     name: aws-provider
-    accountId: "390945758345"  # Replace with your AWS account ID
-    crossplaneIamRoleName: "eksac-crossplane-iam-role"
+    accountId: "249140151390"  # Replace with your AWS account ID
+    crossplaneIamRoleName: "CrossPlaneRole"
     region: ap-southeast-1
     deploymentRuntimeConfig:
       name: aws-deployment-runtime-config
@@ -11,35 +11,32 @@ provider:
           replicas: 1
     version: v1
     
-    # Deployment mode configuration
-    # Options: "eks" (for EKS with IRSA) or "local" (for local Kind with secrets)
-    # Default: "eks"
-    deploymentMode: "eks"
+    # Set deployment mode to local for Kind clusters
+    deploymentMode: "local"
     
-    # Configuration for local Kind deployment (only used when deploymentMode: "local")
+    # Configuration for local Kind deployment
     localConfig:
       # AWS secret configuration (user must create this manually)
       # kubectl create secret generic aws-secret -n crossplane-system --from-file=aws-secret=./01-aws-credentials.txt
       secretName: "aws-secret"
       secretNamespace: "crossplane-system"
       secretKey: "aws-secret"
-      # Optional: Use assumeRoleChain for better security (recommended for production)
+      # Use assumeRoleChain for better security (recommended)
       enableAssumeRole: true
-      # assumeRoleArn will be constructed from accountId and crossplaneIamRoleName above
     
     providers:
     - name: provider-aws-ec2
       providerConfig:
         credentials:
-          source: IRSA  # Used when deploymentMode: "eks"
+          source: IRSA  # This will be overridden by deploymentMode setting
     - name: provider-aws-eks
       providerConfig:
         credentials:
-          source: IRSA  # Used when deploymentMode: "eks"
+          source: IRSA  # This will be overridden by deploymentMode setting
     - name: provider-aws-iam
       providerConfig:
         credentials:
-          source: IRSA  # Used when deploymentMode: "eks"
+          source: IRSA  # This will be overridden by deploymentMode setting
   helm:
     version: v0
   kubernetes:
@@ -56,4 +53,4 @@ function:
   autoready:
     version: v0.4.2
   sequencer:
-    version: v0.2.3
+    version: v0.2.3 

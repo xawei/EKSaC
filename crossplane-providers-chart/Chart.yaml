@@ -1,6 +1,6 @@
 apiVersion: v2
 name: crossplane-providers-chart
-description: A Helm chart for Crossplane Providers
+description: A Helm chart for Crossplane Providers with support for both EKS (IRSA) and local Kind (secrets) deployments
 type: application
-version: "0.1.12"
-appVersion: "0.1.12"
+version: "0.2.0"
+appVersion: "0.2.0"

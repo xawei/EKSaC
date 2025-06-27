@@ -11,6 +11,21 @@ provider:
           replicas: 1
     version: v1
     # version: v1.22.0
+    
+    # Deployment mode configuration
+    # Options: "eks" (for EKS with IRSA) or "local" (for local Kind with secrets)
+    deploymentMode: "eks"
+    
+    # Configuration for local Kind deployment
+    localConfig:
+      # AWS secret configuration (user must create this manually)
+      secretName: "aws-secret"
+      secretNamespace: "crossplane-system"
+      secretKey: "aws-secret"
+      # Optional: Use assumeRoleChain for better security
+      enableAssumeRole: true
+      # assumeRoleArn will be constructed from accountId and crossplaneIamRoleName above
+    
     providers:
     - name: provider-aws-ec2
       providerConfig:

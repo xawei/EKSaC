@@ -14,6 +14,18 @@ metadata:
   name: {{ .name }}
 spec:
   credentials:
+    {{- if eq $.Values.provider.awsFamily.deploymentMode "local" }}
+    source: Secret
+    secretRef:
+      namespace: {{ $.Values.provider.awsFamily.localConfig.secretNamespace }}
+      name: {{ $.Values.provider.awsFamily.localConfig.secretName }}
+      key: {{ $.Values.provider.awsFamily.localConfig.secretKey }}
+    {{- if $.Values.provider.awsFamily.localConfig.enableAssumeRole }}
+  assumeRoleChain:
+    - roleARN: "arn:aws:iam::{{ $.Values.provider.awsFamily.accountId }}:role/{{ $.Values.provider.awsFamily.crossplaneIamRoleName }}"
+    {{- end }}
+    {{- else }}
     {{- .providerConfig.credentials | toYaml | trim | nindent 4 }}
+    {{- end }}
 ---
 {{- end }}

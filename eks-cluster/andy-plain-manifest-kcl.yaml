@@ -21,7 +21,7 @@ metadata:
 spec:
   name: andy-cluster
   location: "ap-southeast-1"
-  awsAccountId: "390945758345"
+  awsAccountId: "249140151390" # Replace with your AWS account ID
   vpcRef: andy-network
   subnets:
     private:

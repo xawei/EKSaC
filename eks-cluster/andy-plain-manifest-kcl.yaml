@@ -38,9 +38,9 @@ spec:
     podidentityagentAddOn:
       version: "v1.3.7-eksbuild.2"
     eks:
-      version: "1.32"
+      version: "1.33"
     karpenterHelm:
-      version: "1.4.0"
+      version: "1.5.0"
 ---
 # apiVersion: consumable.trustbank.sg/v1alpha1
 # kind: EksComponentKcl

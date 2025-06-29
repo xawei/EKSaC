@@ -1,1 +1,39 @@
 terraform.tfstate
+
+# Local development data and sensitive information
+local-dev/
+*.pem
+*.key
+*.crt
+*-credentials.txt
+*-config.yaml
+kubeconfig*
+
+# AWS and cloud credentials
+.aws/
+.azure/
+.gcp/
+credentials
+config
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/

@@ -83,6 +83,8 @@ spec:
         source: |
           oxr = option("params").oxr
           private_subnets = oxr.spec.subnets.private
+          labels = oxr.metadata?.labels or {}
+          owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
 
           items = [{
             apiVersion = "ec2.aws.upbound.io/v1beta1"
@@ -94,7 +96,7 @@ spec:
               cidrBlock = cidr
               tags: {
                 Name = oxr.spec.name + "-xplane-private-subnet-" + zone
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -115,6 +117,8 @@ spec:
         source: |
           import json
           oxr = option("params").oxr
+          labels = oxr.metadata?.labels or {}
+          owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
 
           items = [{
             apiVersion = "iam.aws.upbound.io/v1beta1"
@@ -136,7 +140,7 @@ spec:
               ]
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-iam-role"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -155,6 +159,8 @@ spec:
         target: Default
         source: |
           oxr = option("params").oxr
+          labels = oxr.metadata?.labels or {}
+          owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
 
           clustersg = {
             apiVersion = "ec2.aws.upbound.io/v1beta1"
@@ -167,7 +173,7 @@ spec:
               vpcIdRef.name = oxr.spec.vpcRef + "-xplane-vpc"
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-cluster-securitygroup"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -186,7 +192,7 @@ spec:
               vpcIdRef.name = oxr.spec.vpcRef + "-xplane-vpc"
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-node-securitygroup"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -208,7 +214,7 @@ spec:
               securityGroupIdRef.name = oxr.spec.name + "-xplane-eks-cluster-securitygroup"
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-cluster-securitygroup-ingress-rule"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -230,7 +236,7 @@ spec:
               securityGroupIdRef.name = oxr.spec.name + "-xplane-eks-cluster-securitygroup"
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-cluster-securitygroup-egress-rule"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -250,7 +256,7 @@ spec:
               securityGroupIdRef.name = oxr.spec.name + "-xplane-eks-node-securitygroup"
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-node-securitygroup-ingress-rule-nodes"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -272,7 +278,7 @@ spec:
               securityGroupIdRef.name = oxr.spec.name + "-xplane-eks-node-securitygroup"
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-node-securitygroup-ingress-rule-control-plane"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -292,7 +298,7 @@ spec:
               securityGroupIdRef.name = oxr.spec.name + "-xplane-eks-node-securitygroup"
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-node-securitygroup-egress-rule-control-plane"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -312,6 +318,8 @@ spec:
         target: Default
         source: |
           oxr = option("params").oxr
+          labels = oxr.metadata?.labels or {}
+          owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
 
           cluster = {
             apiVersion = "eks.aws.upbound.io/v1beta1"
@@ -339,7 +347,7 @@ spec:
               ]
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-cluster"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -357,7 +365,7 @@ spec:
               principalArn = "arn:aws:iam::" + oxr.spec.awsAccountId + ":role/aws-reserved/sso.amazonaws.com/ap-southeast-1/AWSReservedSSO_sso_sandbox_admin_permission_set_a380a3efed7cd9a1"
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-default-access-entry"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -389,7 +397,7 @@ spec:
               principalArn = "arn:aws:iam::" + oxr.spec.awsAccountId + ":role/eksac-control-plane-crossplane-iam-role"
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-crossplane-access-entry"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -422,7 +430,7 @@ spec:
               type = "EC2_LINUX"
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-karpenter-access-entry"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -470,6 +478,8 @@ spec:
           import json
 
           oxr = option("params").oxr
+          labels = oxr.metadata?.labels or {}
+          owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
           ocds = option("params").ocds
 
           ebscsiiamrole = {
@@ -496,7 +506,7 @@ spec:
               ]
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-addon-ebs-csi-iam-role"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -516,7 +526,7 @@ spec:
               serviceAccount = "ebs-csi-controller-sa"
               tags: {
                 Name = oxr.spec.name + "-xplane-ebs-csi-pod-identity-association"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -620,6 +630,8 @@ spec:
         target: Default
         source: |
           oxr = option("params").oxr
+          labels = oxr.metadata?.labels or {}
+          owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
           ocds = option("params").ocds
 
           items = [{
@@ -632,7 +644,7 @@ spec:
               url = ocds[oxr.spec.name + "-xplane-eks-cluster"]?.Resource?.status?.atProvider?.identity?[0]?.oidc?[0]?.issuer or ""
               tags: {
                 Name = oxr.spec.name + "-xplane-oidc-provider"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -652,6 +664,8 @@ spec:
         source: |
           import json
           oxr = option("params").oxr
+          labels = oxr.metadata?.labels or {}
+          owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
 
           items = [{
             apiVersion = "iam.aws.upbound.io/v1beta1"
@@ -673,7 +687,7 @@ spec:
               ]
               tags: {
                 Name = oxr.spec.name + "-xplane-fargate-pod-iam"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -692,6 +706,8 @@ spec:
         target: Default
         source: |
           oxr = option("params").oxr
+          labels = oxr.metadata?.labels or {}
+          owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
 
           items = [{
             apiVersion = "eks.aws.upbound.io/v1beta1"
@@ -714,7 +730,7 @@ spec:
               ]
               tags: {
                 Name = oxr.spec.name + "-xplane-fargate-profile-karpenter"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -736,6 +752,8 @@ spec:
           import regex
 
           oxr = option("params").oxr
+          labels = oxr.metadata?.labels or {}
+          owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
           ocds = option("params").ocds
 
           oidcissuer = regex.replace(ocds[oxr.spec.name + "-xplane-eks-cluster"]?.Resource?.status?.atProvider?.identity?[0]?.oidc?[0]?.issuer or "", "https://", "")
@@ -815,7 +833,7 @@ spec:
               })
               tags: {
                 Name = oxr.spec.name + "-xplane-karpenter-iam-policy"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -845,7 +863,7 @@ spec:
               })
               tags: {
                 Name = oxr.spec.name + "-xplane-karpenter-iam-role"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -889,7 +907,7 @@ spec:
               ]
               tags: {
                 Name = oxr.spec.name + "-xplane-karpenter-node-iam"
-                Owner = "linus.yong"
+                Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
               }
@@ -965,6 +983,8 @@ spec:
         target: Default
         source: |
           oxr = option("params").oxr
+          labels = oxr.metadata?.labels or {}
+          owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
 
           items = [{
             apiVersion = "kubernetes.crossplane.io/v1alpha2"
@@ -1014,7 +1034,7 @@ spec:
                     ]
                     tags = {
                       Name = oxr.spec.name + "-xplane"
-                      Owner = "linus.yong"
+                      Owner = owner_tag_value
                       Environment = "sandbox"
                       Project = "crossplane"
                     }

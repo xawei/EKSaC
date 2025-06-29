@@ -319,7 +319,10 @@ spec:
         source: |
           oxr = option("params").oxr
           labels = oxr.metadata?.labels or {}
+          annotations = oxr.metadata?.annotations or {}
           owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
+          create_default_access = (annotations["consumable.trustbank.sg/create-default-access-entry"] or "true") == "true"
+          crossplane_role_name = annotations["consumable.trustbank.sg/crossplane-iam-role-name"] or "eksac-control-plane-crossplane-iam-role"
 
           cluster = {
             apiVersion = "eks.aws.upbound.io/v1beta1"
@@ -394,7 +397,7 @@ spec:
             spec.forProvider = {
               region = oxr.spec.location
               clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
-              principalArn = "arn:aws:iam::" + oxr.spec.awsAccountId + ":role/eksac-control-plane-crossplane-iam-role"
+              principalArn = "arn:aws:iam::" + oxr.spec.awsAccountId + ":role/" + crossplane_role_name
               tags: {
                 Name = oxr.spec.name + "-xplane-eks-crossplane-access-entry"
                 Owner = owner_tag_value
@@ -438,7 +441,14 @@ spec:
             spec.providerConfigRef.name = "provider-aws-eks"
           }
 
-          items = [cluster, defaultaccessentry, defaultaccesspolicyassociation, crossplaneaccessentry, crossplaneaccesspolicyassociation, karpenteraccessentry]
+          # Base items that are always created
+          base_items = [cluster, crossplaneaccessentry, crossplaneaccesspolicyassociation, karpenteraccessentry]
+          
+          # Conditionally add default access entry and policy association
+          default_access_items = [defaultaccessentry, defaultaccesspolicyassociation] if create_default_access else []
+          
+          # Combine all items
+          items = base_items + default_access_items
   - step: create-pod-identity-agent-addon
     functionRef:
       name: function-kcl

@@ -649,7 +649,6 @@ spec:
             spec.forProvider = {
               region = oxr.spec.location
               name = "dev/xp/github-creds"
-              description = "GitHub credentials for " + oxr.spec.name + " cluster"
             }
             spec.publishConnectionDetailsTo = {
               name = "github-creds"

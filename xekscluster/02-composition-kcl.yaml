@@ -686,6 +686,7 @@ spec:
             spec.forProvider = {
               name = "testing-create"
               region = oxr.spec.location
+              secretString = "supersecretvalue"
             }
             spec.publishConnectionDetailsTo = {
               name = "testing-github-creds-1"

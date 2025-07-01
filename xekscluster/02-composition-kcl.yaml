@@ -686,7 +686,11 @@ spec:
             spec.forProvider = {
               name = "testing-create"
               region = oxr.spec.location
-              secretString = "supersecretvalue"
+              secretStringSecretRef = {
+                name = "my-k8s-secret"
+                namespace = "eksac"
+                key = "password"
+              }
             }
             spec.publishConnectionDetailsTo = {
               name = "testing-github-creds-1"

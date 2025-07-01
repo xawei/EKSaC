@@ -3,6 +3,8 @@ kind: NetworkKcl
 metadata:
   name: andy-network
   namespace: eksac
+  labels:
+    consumable.trustbank.sg/owner: "andyxin.wei"
 spec:
   name: andy-network
   location: "ap-southeast-1"
@@ -18,6 +20,11 @@ kind: EksClusterKcl
 metadata:
   name: andy-cluster
   namespace: eksac
+  labels:
+    consumable.trustbank.sg/owner: "andyxin.wei"
+  annotations:
+    consumable.trustbank.sg/create-default-access-entry: "false"
+    consumable.trustbank.sg/crossplane-iam-role-name: "CrossPlaneRole"
 spec:
   name: andy-cluster
   location: "ap-southeast-1"

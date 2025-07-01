@@ -660,6 +660,10 @@ spec:
                 }
               }
             }
+            spec.writeConnectionSecretToRef = {
+              name = oxr.spec.name + "-xplane-eks-github-auth"
+              namespace = "eksac"
+            }
             spec.providerConfigRef.name = "provider-aws-secretsmanager"
           }]
   - step: create-oidc-provider

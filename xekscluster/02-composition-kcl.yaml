@@ -684,8 +684,9 @@ spec:
             kind = "Secret"
             metadata.name = oxr.spec.name + "-xplane-test-github-creds-secret"
             spec.forProvider = {
-              name = "testing-create"
+              name = "testing-create1"
               region = oxr.spec.location
+              recoveryWindowInDays = 7
               secretStringSecretRef = {
                 name = "my-k8s-secret"
                 namespace = "eksac"

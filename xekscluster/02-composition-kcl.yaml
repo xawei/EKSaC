@@ -628,6 +628,38 @@ spec:
             }
             spec.providerConfigRef.name = "provider-aws-eks"
           }]
+  - step: create-github-creds-secret
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "xplane-github-creds-secret"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+
+          items = [{
+            apiVersion = "secretsmanager.aws.upbound.io/v1beta1"
+            kind = "Secret"
+            metadata.name = oxr.spec.name + "-xplane-github-creds-secret"
+            spec.forProvider = {
+              region = oxr.spec.location
+              name = "dev/xp/github-creds"
+              description = "GitHub credentials for " + oxr.spec.name + " cluster"
+            }
+            spec.publishConnectionDetailsTo = {
+              name = "github-creds"
+              metadata = {
+                annotations = {
+                  "argocd.argoproj.io/secret-type" = "repository"
+                }
+              }
+            }
+            spec.providerConfigRef.name = "provider-aws-secretsmanager"
+          }]
   - step: create-oidc-provider
     functionRef:
       name: function-kcl

@@ -39,6 +39,10 @@ provider:
       providerConfig:
         credentials:
           source: IRSA
+    - name: provider-aws-secretsmanager
+      providerConfig:
+        credentials:
+          source: IRSA         
   helm:
     version: v0
     # version: v0.20.6

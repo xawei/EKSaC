@@ -666,47 +666,6 @@ spec:
             }
             spec.providerConfigRef.name = "provider-aws-secretsmanager"
           }]
-  - step: test-create-github-creds-secret
-    functionRef:
-      name: function-kcl
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        name: "xplane-test-github-creds-secret"
-      spec:
-        target: Default
-        source: |
-          oxr = option("params").oxr
-
-          items = [{
-            apiVersion = "secretsmanager.aws.upbound.io/v1beta1"
-            kind = "Secret"
-            metadata.name = oxr.spec.name + "-xplane-test-github-creds-secret"
-            spec.forProvider = {
-              name = "testing-create1"
-              region = oxr.spec.location
-              recoveryWindowInDays = 7
-              secretStringSecretRef = {
-                name = "my-k8s-secret"
-                namespace = "eksac"
-                key = "password"
-              }
-            }
-            spec.publishConnectionDetailsTo = {
-              name = "testing-github-creds-1"
-              metadata = {
-                annotations = {
-                  "argocd.argoproj.io/secret-type" = "repository"
-                }
-              }
-            }
-            spec.writeConnectionSecretToRef = {
-              name = oxr.spec.name + "-xplane-test-github-creds-secret-2"
-              namespace = "eksac"
-            }
-            spec.providerConfigRef.name = "provider-aws-secretsmanager"
-          }]
   - step: create-oidc-provider
     functionRef:
       name: function-kcl

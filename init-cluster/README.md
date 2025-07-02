@@ -206,3 +206,7 @@ The Helm chart automatically creates the appropriate ProviderConfigs based on th
 
 ## TODO
 Accelerate imagePull by using contain image cache.
+Write a script to load local images to KIND nodes.
+```
+kind load docker-image
+```

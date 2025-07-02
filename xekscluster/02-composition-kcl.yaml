@@ -690,55 +690,55 @@ spec:
   #         }
 
   #         items = [secret, secretversion]
-  - step: retrieve-github-creds-secret
-    functionRef:
-      name: function-kcl
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        name: "xplane-retrieve-github-creds-secret"
-      spec:
-        target: Default
-        source: |
-          oxr = option("params").oxr
+  # - step: retrieve-github-creds-secret
+  #   functionRef:
+  #     name: function-kcl
+  #   input:
+  #     apiVersion: krm.kcl.dev/v1alpha1
+  #     kind: KCLInput
+  #     metadata:
+  #       name: "xplane-retrieve-github-creds-secret"
+  #     spec:
+  #       target: Default
+  #       source: |
+  #         oxr = option("params").oxr
 
-          secretversion = {
-            apiVersion = "secretsmanager.aws.upbound.io/v1beta1"
-            kind = "SecretVersion"
-            metadata.name = oxr.spec.name + "-xplane-github-creds-secret-version"
-            # don't specify a specific secret veresion
-            # metadata.annotations = {
-            #   "crossplane.io/external-name" = "arn:aws:secretsmanager:ap-southeast-1:249140151390:secret:dev/t1/github-creds-OukH2l|df6a3f5f-c242-4024-b487-4eba84cdd744"
-            # }
-            spec.managementPolicies = ["Observe"]
-            spec.forProvider = {
-              region = oxr.spec.location
-              # secretIdRef.name = oxr.spec.name + "-xplane-github-creds-secret" # this is the name of secrets in provider
-              # secretStringSecretRef = {
-              #   name = "repo-my-github"
-              #   namespace = "argocd"
-              #   key = "configJson"
-              # }
-              secretId = "arn:aws:secretsmanager:ap-southeast-1:249140151390:secret:dev/t1/github-creds-OukH2l"
-              versionStages = ["AWSCURRENT"]
-            }
-            spec.writeConnectionSecretToRef = {
-              name = oxr.spec.name + "-existing-github-auth"
-              namespace = "eksac"
-            }
-            spec.publishConnectionDetailsTo = {
-              name = "published-existing-github-creds"
-              metadata = {
-                annotations = {
-                  "argocd.argoproj.io/secret-type" = "repository"
-                }
-              }
-            }
-            spec.providerConfigRef.name = "provider-aws-secretsmanager"
-          }
+  #         secretversion = {
+  #           apiVersion = "secretsmanager.aws.upbound.io/v1beta1"
+  #           kind = "SecretVersion"
+  #           metadata.name = oxr.spec.name + "-xplane-github-creds-secret-version"
+  #           # don't specify a specific secret veresion
+  #           # metadata.annotations = {
+  #           #   "crossplane.io/external-name" = "arn:aws:secretsmanager:ap-southeast-1:249140151390:secret:dev/t1/github-creds-OukH2l|df6a3f5f-c242-4024-b487-4eba84cdd744"
+  #           # }
+  #           spec.managementPolicies = ["Observe"]
+  #           spec.forProvider = {
+  #             region = oxr.spec.location
+  #             # secretIdRef.name = oxr.spec.name + "-xplane-github-creds-secret" # this is the name of secrets in provider
+  #             # secretStringSecretRef = {
+  #             #   name = "repo-my-github"
+  #             #   namespace = "argocd"
+  #             #   key = "configJson"
+  #             # }
+  #             secretId = "arn:aws:secretsmanager:ap-southeast-1:249140151390:secret:dev/t1/github-creds-OukH2l"
+  #             versionStages = ["AWSCURRENT"]
+  #           }
+  #           spec.writeConnectionSecretToRef = {
+  #             name = oxr.spec.name + "-existing-github-auth"
+  #             namespace = "eksac"
+  #           }
+  #           spec.publishConnectionDetailsTo = {
+  #             name = "published-existing-github-creds"
+  #             metadata = {
+  #               annotations = {
+  #                 "argocd.argoproj.io/secret-type" = "repository"
+  #               }
+  #             }
+  #           }
+  #           spec.providerConfigRef.name = "provider-aws-secretsmanager"
+  #         }
 
-          items = [secretversion]
+  #         items = [secretversion]
   - step: create-oidc-provider
     functionRef:
       name: function-kcl

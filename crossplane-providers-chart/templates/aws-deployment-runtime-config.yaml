@@ -7,12 +7,13 @@ spec:
   deploymentTemplate:
     spec:
       replicas: {{ .deploymentRuntimeConfig.deploymentTemplate.spec.replicas }}
-      selector:
+      selector: {}
+      template:
+        spec:
           containers:
           - name: package-runtime
             args:
             - --enable-external-secret-stores
-      template: {}
       #   spec:
       #     securityContext:
       #       runAsNonRoot: true

@@ -645,12 +645,13 @@ spec:
             apiVersion = "secretsmanager.aws.upbound.io/v1beta1"
             kind = "Secret"
             metadata.name = oxr.spec.name + "-xplane-github-creds-secret"
-            metadata.annotations = {
-              "crossplane.io/external-name" = "dev/xp/github-creds"
-            }
-            spec.managementPolicies = ["Observe"]
+            # metadata.annotations = {
+            #   "crossplane.io/external-name" = "dev/xp/github-creds"
+            # }
+            # spec.managementPolicies = ["Observe"]
             spec.forProvider = {
               region = oxr.spec.location
+              name = "stg/xp/github-creds"
             }
             # spec.publishConnectionDetailsTo = {
             #   name = "github-creds"
@@ -671,7 +672,7 @@ spec:
             apiVersion = "secretsmanager.aws.upbound.io/v1beta1"
             kind = "SecretVersion"
             metadata.name = oxr.spec.name + "-xplane-github-creds-secret-version"
-            spec.managementPolicies = ["Observe"]
+            # spec.managementPolicies = ["Observe"]
             spec.forProvider = {
               region = oxr.spec.location
               secretIdRef.name = oxr.spec.name + "-xplane-github-creds-secret" # this is the name of secrets in provider

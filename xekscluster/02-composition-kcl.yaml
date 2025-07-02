@@ -651,7 +651,7 @@ spec:
             # spec.managementPolicies = ["Observe"]
             spec.forProvider = {
               region = oxr.spec.location
-              name = "stg/xp/github-creds"
+              name = "stg/hello/github-cred"
             }
             # spec.publishConnectionDetailsTo = {
             #   name = "github-creds"

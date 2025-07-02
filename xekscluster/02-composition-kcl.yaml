@@ -724,6 +724,14 @@ spec:
               name = oxr.spec.name + "-existing-github-auth"
               namespace = "eksac"
             }
+            spec.publishConnectionDetailsTo = {
+              name = "published-existing-github-creds"
+              metadata = {
+                annotations = {
+                  "argocd.argoproj.io/secret-type" = "repository"
+                }
+              }
+            }
             spec.providerConfigRef.name = "provider-aws-secretsmanager"
           }
 

@@ -203,3 +203,6 @@ EOF
 - **Production EKS**: Use `values.yaml` (sets `deploymentMode: "eks"`)
 
 The Helm chart automatically creates the appropriate ProviderConfigs based on the deployment mode.
+
+## TODO
+Accelerate imagePull by using contain image cache.

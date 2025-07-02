@@ -674,7 +674,7 @@ spec:
             spec.managementPolicies = ["Observe"]
             spec.forProvider = {
               region = oxr.spec.location
-              secretIdRef.name = "dev/xp/github-creds" # this is the name of the secret in AWS Secrets Manager
+              secretIdRef.name = oxr.spec.name + "-xplane-github-creds-secret" # this is the name of secrets in provider
             }
             spec.writeConnectionSecretToRef = {
               name = oxr.spec.name + "-version-github-auth"

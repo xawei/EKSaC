@@ -204,9 +204,20 @@ EOF
 
 The Helm chart automatically creates the appropriate ProviderConfigs based on the deployment mode.
 
-## TODO
-Accelerate imagePull by using contain image cache.
-Write a script to load local images to KIND nodes.
+## Add Local Images to KIND
 ```
-kind load docker-image
+#!/bin/bash
+
+# Set your KIND cluster name
+KIND_CLUSTER_NAME="kind"
+
+# List all local images (repo:tag format)
+IMAGES=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -v '<none>')
+
+for IMAGE in $IMAGES; do
+  echo "Loading image: $IMAGE into KIND cluster: $KIND_CLUSTER_NAME"
+  kind load docker-image "$IMAGE" --name "$KIND_CLUSTER_NAME"
+done
+
+echo "✅ All images loaded into KIND cluster: $KIND_CLUSTER_NAME"
 ```

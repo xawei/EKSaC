@@ -1,224 +1,106 @@
-# Local Kind Cluster Setup for EKSaC
+# EKSaC Control Plane Setup for KIND
 
-This directory contains the configuration for setting up EKSaC control plane on a local Kind cluster.
-
-## Overview
-
-The local Kind cluster serves as a development environment for the EKSaC control plane. Since this is not running on AWS EKS, special configuration is needed for AWS provider authentication.
+This script automates the complete setup of EKSaC control plane using ArgoCD and Crossplane on a local KIND cluster.
 
 ## Prerequisites
 
-- Docker Desktop
+Ensure you have the following tools installed:
+- Docker Desktop (running)
 - kubectl
-- Helm 3.x
-- Kind
-- AWS CLI configured (for credential generation)
+- helm
+- kind
 
+Install on macOS:
 ```bash
-brew install kubectl helm kind awscli
+brew install kubectl helm kind
 ```
 
-## Quick Setup
+## AWS Credentials Setup
 
-Follow the main setup guide in `../README.md` with these local-specific considerations:
-
-### 1. Create Kind Cluster
-
-```bash
-cd init-cluster/local-kind
-kind create cluster --config kind-config.yaml
+Create the AWS credentials file at `../../local-dev/01-aws-credentials.txt`:
+```
+[default]
+aws_access_key_id = YOUR_ACCESS_KEY
+aws_secret_access_key = YOUR_SECRET_KEY
 ```
 
-### 2. Follow Main Setup
+## Usage
 
-Complete steps 2-5 from the main README:
-- Install ArgoCD
-- Access ArgoCD
-- Create Crossplane Application
-- Deploy EKSaC Components
-
-### 3. Configure AWS Credentials (Local Kind Specific)
-
-**Important**: Local Kind clusters cannot use IRSA (IAM Roles for Service Accounts). You must manually configure AWS credentials.
-
-#### Option A: Direct AWS Credentials
-
-1. **Create AWS credentials file**:
-   ```bash
-   # Create credentials file (replace with your actual AWS credentials)
-   cat > 01-aws-credentials.txt << EOF
-   [default]
-   aws_access_key_id = YOUR_ACCESS_KEY_ID
-   aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
-   EOF
-   ```
-
-2. **Create Kubernetes secret**:
-   ```bash
-   kubectl create secret \
-     generic aws-secret \
-     -n crossplane-system \
-     --from-file=creds=./01-aws-credentials.txt
-   ```
-
-3. **Create ProviderConfig for Secret-based authentication**:
-   ```bash
-   kubectl apply -f - <<EOF
-   apiVersion: aws.upbound.io/v1beta1
-   kind: ProviderConfig
-   metadata:
-     name: default
-   spec:
-     credentials:
-       source: Secret
-       secretRef:
-         namespace: crossplane-system
-         name: aws-secret
-         key: creds
-   EOF
-   ```
-
-#### Option B: Role Assumption (Recommended)
-
-For better security, use role assumption:
-
-1. **Create IAM role in AWS** with necessary permissions for EKS/EC2/IAM operations
-
-2. **Configure credentials with role assumption**:
-   ```bash
-   cat > 01-aws-credentials.txt << EOF
-   [default]
-   aws_access_key_id = YOUR_ACCESS_KEY_ID
-   aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
-   EOF
-   ```
-
-3. **Create the secret**:
-   ```bash
-   kubectl create secret \
-     generic aws-secret \
-     -n crossplane-system \
-     --from-file=creds=./01-aws-credentials.txt
-   ```
-
-4. **Create ProviderConfig with role assumption**:
-   ```bash
-   kubectl apply -f - <<EOF
-   apiVersion: aws.upbound.io/v1beta1
-   kind: ProviderConfig
-   metadata:
-     name: default
-   spec:
-     credentials:
-       source: Secret
-       secretRef:
-         namespace: crossplane-system
-         name: aws-secret
-         key: creds
-     assumeRoleChain:
-       - roleARN: "arn:aws:iam::YOUR_ACCOUNT_ID:role/eksac-crossplane-iam-role"
-   EOF
-   ```
-
-**Note**: Replace `YOUR_ACCOUNT_ID` with your actual AWS account ID. The role `eksac-crossplane-iam-role` should be created in AWS with the necessary permissions for Crossplane operations.
-
-## Verification
+From the `init-cluster/local-kind` directory, simply run:
 
 ```bash
-# Check providers are healthy
-kubectl get providers -n eksac
-
-# Check ProviderConfig is created and using secrets
-kubectl get providerconfig default -o yaml
-
-# Verify the secret exists
-kubectl get secret aws-secret -n crossplane-system
-
-# Test creating a simple AWS resource
-kubectl apply -f - <<EOF
-apiVersion: ec2.aws.crossplane.io/v1beta1
-kind: VPC
-metadata:
-  name: test-vpc
-spec:
-  forProvider:
-    cidrBlock: 10.0.0.0/16
-    region: ap-southeast-1
-  providerConfigRef:
-    name: default
-EOF
-
-# Check if VPC is being created
-kubectl get vpc test-vpc
+./setup-eksac-control-plane.sh
 ```
 
-## Differences from Production EKS
+The script will automatically:
+1. ✅ Check prerequisites
+2. ✅ Create KIND cluster (if it doesn't exist) using `kind-config.yaml`
+3. ✅ Load local Docker images into KIND
+4. ✅ Install ArgoCD
+5. ✅ Create ArgoCD Application for Crossplane
+6. ✅ Create ArgoCD Application for External Secrets Operator
+7. ✅ Deploy EKSaC Components via ArgoCD
+8. ✅ Configure AWS Credentials
 
-| Aspect | Local Kind | Production EKS |
-|--------|------------|----------------|
-| **Authentication** | Manual secrets | IRSA (automatic) |
-| **Security** | Credentials in cluster | No stored credentials |
-| **Setup** | Manual patching | Automated via values.yaml |
-| **Maintenance** | Manual credential rotation | Automatic via AWS |
+## After Setup
 
-## Troubleshooting
+### Access ArgoCD UI
 
-### Provider Not Healthy
+1. Port forward:
+   ```bash
+   kubectl port-forward svc/argocd-server -n argocd 8080:80
+   ```
+
+2. Open: http://localhost:8080
+
+3. Login:
+   - Username: `admin`
+   - Password: (provided by script or get with):
+     ```bash
+     kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d
+     ```
+
+### Verify Installation
+
 ```bash
-# Check provider logs
-kubectl logs -n eksac deployment/provider-aws-ec2 -f
+# Check ArgoCD applications
+kubectl get applications -n argocd
 
-# Check provider config
-kubectl describe providerconfig default-aws-ec2 -n eksac
-```
+# Check Crossplane status
+kubectl get pods -n crossplane-system
 
-### Credential Issues
-```bash
-# Check if secret exists
-kubectl get secret aws-secret -n crossplane-system
-
-# Verify secret content
-kubectl get secret aws-secret -n crossplane-system -o yaml
-
-# Test AWS credentials manually
-aws sts get-caller-identity --profile default
-```
-
-### ProviderConfig Not Found
-```bash
-# List all provider configs
-kubectl get providerconfigs -n eksac
-
-# Check if providers created the configs
-kubectl get providers -n eksac -o wide
+# Check EKSaC resources
+kubectl get xrd
+kubectl get compositions
 ```
 
 ## Cleanup
 
-When done testing:
-
+To delete the KIND cluster:
 ```bash
-# Delete test resources first
-kubectl delete vpc test-vpc
-
-# Follow main cleanup guide
-# Delete applications via ArgoCD
-# Delete Kind cluster: kind delete cluster --name eksac-dev
+kind delete cluster --name eksac-dev
 ```
 
-## Security Notes
+## Configuration
 
-⚠️ **Important Security Considerations**:
+The script uses these configurable variables:
+- `KIND_CLUSTER_NAME`: "eksac-dev" (matches kind-config.yaml)
+- `REPO_URL`: "https://github.com/xawei/EKSaC.git"
+- `CREDENTIALS_FILE`: "../../local-dev/01-aws-credentials.txt"
 
-1. **Never commit credentials** to Git repositories
-2. **Use role assumption** instead of direct access keys when possible
-3. **Rotate credentials regularly**
-4. **Limit IAM permissions** to minimum required for testing
-5. **Delete credentials** when no longer needed
+## Features
 
-## Next Steps
+- **Automated**: No manual steps required
+- **Robust**: Includes error handling and validation
+- **Informative**: Color-coded progress updates
+- **Smart**: Creates KIND cluster only if needed
+- **Complete**: Sets up entire EKSaC control plane
 
-After setup is complete:
-1. Test creating network resources: `kubectl apply -f ../../eks-cluster/00-eksac-public-network.yaml`
-2. Test creating EKS clusters: `kubectl apply -f ../../eks-cluster/01-eksac-cluster01.yaml`
-3. Monitor in ArgoCD UI: `http://localhost:8080`
+## What You Get
+
+After running the script, you'll have:
+- KIND cluster with ArgoCD and Crossplane
+- EKSaC XRDs and Compositions for AWS EKS
+- External Secrets Operator for secret management
+- All local Docker images loaded into KIND
+- Ready-to-use infrastructure as code platform

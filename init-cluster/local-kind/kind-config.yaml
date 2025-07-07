@@ -22,8 +22,6 @@ nodes:
   
   # Worker nodes
   - role: worker
-  - role: worker
-  - role: worker
 
 networking:
   # By default the API server listens on a random open port.

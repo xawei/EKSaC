@@ -103,7 +103,44 @@ spec:
 EOF
 ```
 
-### 5. Deploy EKSaC Components via ArgoCD
+### 5. Create ArgoCD Application for External Secrets Operator
+
+The External Secrets Operator helps manage secrets from external secret stores (like AWS Secrets Manager, HashiCorp Vault, etc.) and sync them to Kubernetes secrets:
+
+```bash
+# Create ArgoCD application for External Secrets Operator
+kubectl apply -f - <<EOF
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: external-secrets-operator
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://charts.external-secrets.io
+    chart: external-secrets
+    targetRevision: 0.18.2  # Use latest stable version
+    helm:
+      values: |
+        installCRDs: true
+        webhook:
+          port: 9443
+        certController:
+          requeueInterval: 20s
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: external-secrets
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+EOF
+```
+
+### 6. Deploy EKSaC Components via ArgoCD
 
 Create ArgoCD applications to manage the EKSaC components:
 
@@ -187,22 +224,14 @@ spec:
 EOF
 ```
 
-### 6. Configure AWS Credentials (Local Development)
-
-**For local Kind clusters**: Since local clusters cannot use IRSA (IAM Roles for Service Accounts), you need to manually configure AWS credentials. The `values-local-kind.yaml` file configures the providers to use Secret-based authentication with optional role assumption for better security.
-
-**Steps for local Kind deployment:**
-1. Create AWS credentials secret (as detailed in [`local-kind/README.md`](local-kind/README.md#configure-aws-credentials-local-kind-specific))
-2. The providers will automatically use the secret-based configuration from `values-local-kind.yaml`
-3. Optional: Configure role assumption for better security practices
-
-**For production EKS clusters**: Use the standard `values.yaml` file which configures providers to use IRSA authentication.
-
-**Deployment Mode Configuration:**
-- **Local Kind**: Use `values-local-kind.yaml` (sets `deploymentMode: "local"`)
-- **Production EKS**: Use `values.yaml` (sets `deploymentMode: "eks"`)
-
-The Helm chart automatically creates the appropriate ProviderConfigs based on the deployment mode.
+### 7. Configure AWS Credentials in Local KIND Cluster
+- put your aws secrets in local-dev/01-aws-credentials.txt
+- ```
+kubectl create secret \
+generic aws-secret \
+-n crossplane-system \
+--from-file=creds=local-dev/01-aws-credentials.txt
+```
 
 ## Add Local Images to KIND
 ```

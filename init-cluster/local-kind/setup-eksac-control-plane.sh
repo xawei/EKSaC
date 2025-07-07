@@ -303,16 +303,29 @@ configure_aws_credentials() {
     log_info "Ensuring crossplane-system namespace exists..."
     kubectl create namespace crossplane-system --dry-run=client -o yaml | kubectl apply -f -
     
-    # Wait a moment for namespace to be fully created
+    # Ensure external-secrets namespace exists
+    log_info "Ensuring external-secrets namespace exists..."
+    kubectl create namespace external-secrets --dry-run=client -o yaml | kubectl apply -f -
+    
+    # Wait a moment for namespaces to be fully created
     sleep 2
     
-    # Create AWS secret in crossplane-system namespace
+    # Create AWS secret in crossplane-system namespace (file-based for Crossplane)
+    log_info "Creating AWS secret for Crossplane..."
     kubectl create secret generic aws-secret \
         -n crossplane-system \
         --from-file=creds="$CREDENTIALS_FILE" \
         --dry-run=client -o yaml | kubectl apply -f -
     
-    log_success "AWS credentials configured successfully"
+    # Create AWS secret in external-secrets namespace (key-value for ESO)
+    log_info "Creating AWS secret for External Secrets Operator..."
+    kubectl create secret generic eso-aws-creds \
+        -n external-secrets \
+        --from-literal=aws_access_key_id=$(grep aws_access_key_id "$CREDENTIALS_FILE" | awk -F' = ' '{print $2}') \
+        --from-literal=aws_secret_access_key=$(grep aws_secret_access_key "$CREDENTIALS_FILE" | awk -F' = ' '{print $2}') \
+        --dry-run=client -o yaml | kubectl apply -f -
+    
+    log_success "AWS credentials configured successfully for both Crossplane and External Secrets Operator"
 }
 
 # Add Local Images to KIND

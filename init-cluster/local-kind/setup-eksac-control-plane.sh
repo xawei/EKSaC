@@ -435,11 +435,20 @@ show_access_instructions() {
     echo "  Cluster name: ${KIND_CLUSTER_NAME}"
     echo "  Context: kind-${KIND_CLUSTER_NAME}"
     echo
+    
+    # Get ArgoCD credentials
+    local argocd_password=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" 2>/dev/null | base64 -d)
+    
     echo "ArgoCD UI:"
     echo "  1. Port forward: kubectl port-forward svc/argocd-server -n argocd 8080:80"
     echo "  2. Open: http://localhost:8080"
-    echo "  3. Username: admin"
-    echo "  4. Password: (see above or run: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)"
+    echo "  3. Login Credentials:"
+    echo "     Username: admin"
+    if [ -n "$argocd_password" ]; then
+        echo "     Password: $argocd_password"
+    else
+        echo "     Password: (retrieving... run: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)"
+    fi
     echo
     echo "Check ArgoCD Applications:"
     echo "  kubectl get applications -n argocd"

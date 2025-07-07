@@ -17,8 +17,6 @@ nodes:
       - containerPort: 443
         hostPort: 8443
         protocol: TCP
-  - role: control-plane
-  - role: control-plane
   
   # Worker nodes
   - role: worker

@@ -342,6 +342,8 @@ add_local_images_to_kind() {
         "eksac"
         "argocd"
         "external-secrets"
+        "ghcr.io/dexidp"
+        "quay.io/argoproj/argocd"
     )
     
     # Get worker node names

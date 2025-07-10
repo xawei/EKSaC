@@ -1,0 +1,16 @@
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: xNetworkKclV2
+metadata:
+  name: andy-network
+  namespace: eksac
+  labels:
+    consumable.trustbank.sg/owner: "andyxin.wei"
+spec:
+  name: andy-network
+  location: "ap-southeast-1"
+  vpcCidr: "10.0.0.0/22"
+  subnets:
+    public:
+      1a: "10.0.0.0/28"
+      1b: "10.0.0.16/28"
+      1c: "10.0.0.32/28"

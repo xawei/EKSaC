@@ -1,0 +1,14 @@
+namespaces:
+  - name: dev-apps
+    annotations:
+      description: "Development applications namespace"
+    labels:
+      environment: "dev"
+      tier: "applications"
+  
+  - name: prod-apps
+    annotations:
+      description: "Production applications namespace"
+    labels:
+      environment: "prod"
+      tier: "applications" 

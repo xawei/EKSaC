@@ -1,0 +1,12 @@
+apiVersion: v2
+name: predefined-namespaces
+description: A Helm chart for managing predefined namespaces with custom annotations and labels
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - namespaces
+  - kubernetes
+  - crossplane
+  - eksac
+home: https://github.com/xawei/EKSaC

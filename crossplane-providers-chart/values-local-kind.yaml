@@ -41,10 +41,6 @@ provider:
       providerConfig:
         credentials:
           source: IRSA  # This will be overridden by deploymentMode setting
-    - name: provider-aws-s3
-      providerConfig:
-        credentials:
-          source: IRSA  # This will be overridden by deploymentMode setting
   helm:
     version: v0
   kubernetes:

@@ -17,6 +17,27 @@ spec:
           spec:
             type: object
             properties:
+              # Standard Crossplane fields
+              compositionRef:
+                type: object
+                properties:
+                  name:
+                    type: string
+                required:
+                - name
+              compositionRevisionRef:
+                type: object
+                properties:
+                  name:
+                    type: string
+                required:
+                - name
+              compositionUpdatePolicy:
+                type: string
+                enum:
+                - Automatic
+                - Manual
+              # Custom fields
               name:
                 type: string
               location:

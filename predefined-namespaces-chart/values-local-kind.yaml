@@ -1,12 +1,12 @@
 namespaces:
-  - name: dev-apps
+  - name: eksac-dev-apps
     annotations:
       description: "Development applications namespace"
     labels:
       environment: "dev"
       tier: "applications"
   
-  - name: prod-apps
+  - name: eksac-prod-apps
     annotations:
       description: "Production applications namespace"
     labels:

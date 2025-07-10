@@ -7,6 +7,7 @@ spec:
   names:
     kind: xNetworkKclV2
     plural: xnetworkskclv2
+  scope: Namespaced
   versions:
   - name: v1alpha1
     schema:

@@ -7,6 +7,7 @@ spec:
   names:
     kind: xNetworkGoV2
     plural: xnetworksgov2
+  scope: Namespaced
   versions:
   - name: v1alpha1
     schema:

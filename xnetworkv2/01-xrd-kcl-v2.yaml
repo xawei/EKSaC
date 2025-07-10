@@ -1,0 +1,47 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xnetworkskclv2.consumable.trustbank.sg
+spec:
+  group: consumable.trustbank.sg
+  names:
+    kind: xNetworkKclV2
+    plural: xnetworkskclv2
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              name:
+                type: string
+              location:
+                type: string
+                oneOf:
+                - pattern: '^ap-southeast-1$'
+              vpcCidr:
+                type: string
+              subnets:
+                type: object
+                properties:
+                  public:
+                    type: object
+                    properties:
+                      1a:
+                        type: string
+                      1b:
+                        type: string
+                      1c:
+                        type: string
+            required:
+            - name
+          status:
+            type: object
+            properties:
+              natGatewayId:
+                type: string
+    served: true
+    referenceable: true

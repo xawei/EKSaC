@@ -2,13 +2,48 @@
 
 # EKSaC Control Plane Setup Script for KIND
 # This script automates the complete setup of EKSaC control plane using ArgoCD and Crossplane
+# 
+# Usage: ./setup-eksac-control-plane.sh [--cp-v2]
+#   --cp-v2: Install Crossplane v2 (2.0.0-rc.0.166.g280a6fc57) instead of v1.20.0
 
 set -e  # Exit on any error
 
-# Configuration
+# Default Configuration
 KIND_CLUSTER_NAME="eksac-dev"  # Must match the name in kind-config.yaml
 REPO_URL="https://github.com/xawei/EKSaC.git"
 CREDENTIALS_FILE="../../local-dev/01-aws-credentials.txt"
+
+# Crossplane Configuration (defaults to v1.20.0)
+CROSSPLANE_V2=false
+CROSSPLANE_REPO_URL="https://charts.crossplane.io/stable"
+CROSSPLANE_VERSION="1.20.0"
+
+# Parse command line arguments
+for arg in "$@"; do
+  case $arg in
+    --cp-v2)
+      CROSSPLANE_V2=true
+      CROSSPLANE_REPO_URL="https://charts.crossplane.io/master/"
+      CROSSPLANE_VERSION="2.0.0-rc.0.166.g280a6fc57"
+      shift
+      ;;
+    --help|-h)
+      echo "Usage: $0 [--cp-v2]"
+      echo ""
+      echo "Options:"
+      echo "  --cp-v2        Install Crossplane v2 (2.0.0-rc.0.166.g280a6fc57)"
+      echo "  --help, -h     Show this help message"
+      echo ""
+      echo "Default: Installs Crossplane v1.20.0 from stable charts"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $arg"
+      echo "Use --help for usage information"
+      exit 1
+      ;;
+  esac
+done
 
 # Colors for output
 RED='\033[0;31m'
@@ -137,7 +172,11 @@ install_argocd() {
 
 # Create ArgoCD Application for Crossplane
 create_crossplane_app() {
-    log_info "Creating ArgoCD Application for Crossplane..."
+    if [ "$CROSSPLANE_V2" = true ]; then
+        log_info "Creating ArgoCD Application for Crossplane v2 (${CROSSPLANE_VERSION})..."
+    else
+        log_info "Creating ArgoCD Application for Crossplane v1 (${CROSSPLANE_VERSION})..."
+    fi
     
     kubectl apply -f - <<EOF
 apiVersion: argoproj.io/v1alpha1
@@ -148,9 +187,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://charts.crossplane.io/stable
+    repoURL: ${CROSSPLANE_REPO_URL}
     chart: crossplane
-    targetRevision: 1.20.0
+    targetRevision: ${CROSSPLANE_VERSION}
     helm:
       valueFiles: []
   destination:
@@ -164,7 +203,7 @@ spec:
       - CreateNamespace=true
 EOF
     
-    log_success "Crossplane ArgoCD Application created"
+    log_success "Crossplane ArgoCD Application created (version: ${CROSSPLANE_VERSION})"
 }
 
 # Create ArgoCD Application for External Secrets Operator
@@ -206,7 +245,15 @@ EOF
 
 # Deploy EKSaC Components via ArgoCD
 deploy_eksac_components() {
-    log_info "Deploying EKSaC Components via ArgoCD..."
+    if [ "$CROSSPLANE_V2" = true ]; then
+        log_info "Deploying EKSaC Components via ArgoCD (using v2 XRDs for namespaced composites)..."
+        XNETWORK_PATH="xnetworkv2"
+        XEKSCLUSTER_PATH="xeksclusterv2"
+    else
+        log_info "Deploying EKSaC Components via ArgoCD (using v1 XRDs with Claims)..."
+        XNETWORK_PATH="xnetwork"
+        XEKSCLUSTER_PATH="xekscluster"
+    fi
     
     # Create eksac namespace
     kubectl create namespace eksac --dry-run=client -o yaml | kubectl apply -f -
@@ -249,7 +296,7 @@ spec:
   project: default
   source:
     repoURL: ${REPO_URL}
-    path: xnetwork
+    path: ${XNETWORK_PATH}
     targetRevision: main
   destination:
     server: 'https://kubernetes.default.svc'
@@ -273,7 +320,7 @@ spec:
   project: default
   source:
     repoURL: ${REPO_URL}
-    path: xekscluster
+    path: ${XEKSCLUSTER_PATH}
     targetRevision: main
   destination:
     server: 'https://kubernetes.default.svc'
@@ -286,7 +333,7 @@ spec:
       - CreateNamespace=true
 EOF
     
-    log_success "EKSaC Components ArgoCD Applications created"
+    log_success "EKSaC Components ArgoCD Applications created (using ${XNETWORK_PATH} and ${XEKSCLUSTER_PATH})"
 }
 
 # Configure AWS Credentials in Local KIND Cluster
@@ -468,6 +515,12 @@ show_access_instructions() {
 # Main execution
 main() {
     log_info "Starting EKSaC Control Plane Setup for KIND..."
+    
+    if [ "$CROSSPLANE_V2" = true ]; then
+        log_info "Configuration: Using Crossplane v2 (${CROSSPLANE_VERSION}) with namespaced composite resources"
+    else
+        log_info "Configuration: Using Crossplane v1 (${CROSSPLANE_VERSION}) with Claims"
+    fi
     
     check_prerequisites
     

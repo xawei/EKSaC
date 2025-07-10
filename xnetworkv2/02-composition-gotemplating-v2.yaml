@@ -1,0 +1,283 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: x-network-go-v2
+spec:
+  compositeTypeRef:
+    apiVersion: consumable.trustbank.sg/v1alpha1
+    kind: xNetworkGoV2
+  mode: Pipeline
+  pipeline:
+  - step: create-vpc
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          ---
+          {{- $claim := .observed.composite.resource }}
+          apiVersion: ec2.aws.upbound.io/v1beta1
+          kind: VPC
+          metadata:
+            name: {{ $claim.spec.name }}-xplane-vpc
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $claim.spec.name }}-xplane-vpc
+          spec:
+            forProvider:
+              region: {{ $claim.spec.location }}
+              cidrBlock: {{ $claim.spec.vpcCidr }}
+              enableDnsHostnames: true
+              enableDnsSupport: true
+              tags:
+                Name: {{ $claim.spec.name }}-xplane-vpc
+                Owner: linus.yong
+                Environment: sandbox
+                Project: crossplane
+            providerConfigRef:
+              name: provider-aws-ec2
+  - step: create-subnets
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          ---
+          {{- $claim := .observed.composite.resource }}
+          {{- range $index, $value := $claim.spec.subnets.public }}
+          apiVersion: ec2.aws.upbound.io/v1beta1
+          kind: Subnet
+          metadata:
+            name: {{ $claim.spec.name }}-xplane-public-subnet-{{ $index }}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $claim.spec.name }}-xplane-public-subnet-{{ $index }}
+          spec:
+            forProvider:
+              region: {{ $claim.spec.location }}
+              availabilityZone: ap-southeast-{{ $index }}
+              cidrBlock: {{ $value }}
+              tags:
+                Name: {{ $claim.spec.name }}-xplane-public-subnet-{{ $index }}
+                Owner: linus.yong
+                Environment: sandbox
+                Project: crossplane
+                kubernetes.io/role/elb: "1"
+              vpcIdRef:
+                name: {{ $claim.spec.name }}-xplane-vpc
+            providerConfigRef:
+              name: provider-aws-ec2
+          ---
+          {{- end }}
+  - step: create-igw
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          ---
+          {{- $claim := .observed.composite.resource }}
+          apiVersion: ec2.aws.upbound.io/v1beta1
+          kind: InternetGateway
+          metadata:
+            name: {{ $claim.spec.name }}-xplane-igw
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $claim.spec.name }}-xplane-igw
+          spec:
+            forProvider:
+              region: {{ $claim.spec.location }}
+              tags:
+                Name: {{ $claim.spec.name }}-xplane-igw
+                Owner: linus.yong
+                Environment: sandbox
+                Project: crossplane
+              vpcIdRef:
+                name: {{ $claim.spec.name }}-xplane-vpc
+            providerConfigRef:
+              name: provider-aws-ec2
+  - step: create-public-rt
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          ---
+          {{- $claim := .observed.composite.resource }}
+          apiVersion: ec2.aws.upbound.io/v1beta1
+          kind: RouteTable
+          metadata:
+            name: {{ $claim.spec.name }}-xplane-public-rt
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $claim.spec.name }}-xplane-public-rt
+          spec:
+            forProvider:
+              region: {{ $claim.spec.location }}
+              tags:
+                Name: {{ $claim.spec.name }}-xplane-public-rt
+                Owner: linus.yong
+                Environment: sandbox
+                Project: crossplane
+              vpcIdRef:
+                name: {{ $claim.spec.name }}-xplane-vpc
+            providerConfigRef:
+              name: provider-aws-ec2
+  - step: create-public-route
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          ---
+          {{- $claim := .observed.composite.resource }}
+          apiVersion: ec2.aws.upbound.io/v1beta1
+          kind: Route
+          metadata:
+            name: {{ $claim.spec.name }}-xplane-public-route
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $claim.spec.name }}-xplane-public-route
+          spec:
+            forProvider:
+              region: {{ $claim.spec.location }}
+              routeTableIdRef:
+                name: {{ $claim.spec.name }}-xplane-public-rt
+              destinationCidrBlock: 0.0.0.0/0
+              gatewayIdRef:
+                name: {{ $claim.spec.name }}-xplane-igw
+            providerConfigRef:
+              name: provider-aws-ec2
+  - step: create-rt-association
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          ---
+          {{- $claim := .observed.composite.resource }}
+          {{- range $index, $value := $claim.spec.subnets.public }}
+          apiVersion: ec2.aws.upbound.io/v1beta1
+          kind: RouteTableAssociation
+          metadata:
+            name: {{ $claim.spec.name }}-xplane-public-rta-{{ $index }}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $claim.spec.name }}-xplane-public-rta-{{ $index }}
+          spec:
+            forProvider:
+              region: {{ $claim.spec.location }}
+              routeTableIdRef:
+                name: {{ $claim.spec.name }}-xplane-public-rt
+              subnetIdRef:
+                name: {{ $claim.spec.name }}-xplane-public-subnet-{{ $index }}
+            providerConfigRef:
+              name: provider-aws-ec2
+          ---
+          {{- end }}
+  - step: create-natgwe-eip
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          ---
+          {{- $claim := .observed.composite.resource }}
+          apiVersion: ec2.aws.upbound.io/v1beta1
+          kind: EIP
+          metadata:
+            name: {{ $claim.spec.name }}-xplane-natgw-eip
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $claim.spec.name }}-xplane-natgw-eip
+          spec:
+            forProvider:
+              region: {{ $claim.spec.location }}
+              tags:
+                Name: {{ $claim.spec.name }}-xplane-natgw-eip
+                Owner: linus.yong
+                Environment: sandbox
+                Project: crossplane
+            providerConfigRef:
+              name: provider-aws-ec2
+  - step: create-natgw
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          ---
+          {{- $claim := .observed.composite.resource }}
+          apiVersion: ec2.aws.upbound.io/v1beta1
+          kind: NATGateway
+          metadata:
+            name: {{ $claim.spec.name }}-xplane-natgw
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $claim.spec.name }}-xplane-natgw
+          spec:
+            forProvider:
+              region: {{ $claim.spec.location }}
+              tags:
+                Name: {{ $claim.spec.name }}-xplane-natgw
+                Owner: linus.yong
+                Environment: sandbox
+                Project: crossplane
+              allocationIdRef:
+                name: {{ $claim.spec.name }}-xplane-natgw-eip
+              subnetIdRef:
+                name: {{ $claim.spec.name }}-xplane-public-subnet-1b
+            providerConfigRef:
+              name: provider-aws-ec2
+  - step: create-default-rt
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          ---
+          {{- $claim := .observed.composite.resource }}
+          {{- $natgw := getComposedResource . (printf "%s%s" $claim.spec.name "-xplane-natgw" ) }}
+          apiVersion: ec2.aws.upbound.io/v1beta1
+          kind: DefaultRouteTable
+          metadata:
+            name: {{ $claim.spec.name }}-xplane-default-rt
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $claim.spec.name }}-xplane-default-rt
+          spec:
+            forProvider:
+              region: {{ $claim.spec.location }}
+              tags:
+                Name: {{ $claim.spec.name }}-xplane-default-rt
+                Owner: linus.yong
+                Environment: sandbox
+                Project: crossplane
+              defaultRouteTableIdRef:
+                name: {{ $claim.spec.name }}-xplane-vpc
+              route:
+              - cidrBlock: 0.0.0.0/0
+                natGatewayId: {{ get $natgw.status.atProvider "id" }}
+            providerConfigRef:
+              name: provider-aws-ec2
+  - step: auto-ready
+    functionRef:
+      name: function-auto-ready

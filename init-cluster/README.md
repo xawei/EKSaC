@@ -226,7 +226,7 @@ EOF
 
 ### 7. Configure AWS Credentials in Local KIND Cluster
 - put your aws secrets in local-dev/01-aws-credentials.txt
-- ```
+```
 kubectl create secret \
 generic aws-secret \
 -n crossplane-system \

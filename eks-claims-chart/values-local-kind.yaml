@@ -1,0 +1,27 @@
+# Local Kind development overrides
+eksCluster:
+  enabled: true
+  claimName: "local-cluster"
+  clusterName: "local-cluster"
+  location: "ap-southeast-1"
+  networkRef: "local-network"
+  nodeSize: "small"
+  minNodeCount: 1
+  tags:
+    owner: "andyxin.wei"
+    environment: "local"
+
+network:
+  enabled: true
+  claimName: "local-network"
+  namespace: "eksac"
+  location: "ap-southeast-1"
+  vpcCidr: "10.0.0.0/22"
+  subnets:
+    public:
+      1a: "10.0.0.0/28"
+      1b: "10.0.0.16/28"
+      1c: "10.0.0.32/28"
+  tags:
+    owner: "andyxin.wei"
+    environment: "local" 

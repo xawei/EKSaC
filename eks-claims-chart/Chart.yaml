@@ -1,0 +1,15 @@
+apiVersion: v2
+name: eks-claims
+description: A Helm chart for deploying EKS cluster and network claims with dynamic namespace creation
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - crossplane
+  - eks
+  - claims
+  - kubernetes
+  - aws
+home: https://github.com/xawei/EKSaC
+sources:
+  - https://github.com/xawei/EKSaC 

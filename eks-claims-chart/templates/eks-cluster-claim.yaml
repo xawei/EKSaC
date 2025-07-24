@@ -1,0 +1,21 @@
+{{- if .Values.eksCluster.enabled }}
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: EksClusterClaim
+metadata:
+  name: {{ .Values.eksCluster.claimName }}
+  namespace: {{ include "eks-claims.clusterNamespace" . }}
+  labels:
+    {{- include "eks-claims.labels" . | nindent 4 }}
+    consumable.trustbank.sg/owner: {{ .Values.eksCluster.tags.owner | quote }}
+spec:
+  name: {{ .Values.eksCluster.clusterName }}
+  location: {{ .Values.eksCluster.location | quote }}
+  networkRef: {{ .Values.eksCluster.networkRef | quote }}
+  nodeSize: {{ .Values.eksCluster.nodeSize | quote }}
+  minNodeCount: {{ .Values.eksCluster.minNodeCount }}
+  compositeDeletePolicy: Foreground
+  {{- if .Values.eksCluster.tags }}
+  tags:
+    {{- include "eks-claims.commonTags" .Values.eksCluster.tags | nindent 4 }}
+  {{- end }}
+{{- end }} 

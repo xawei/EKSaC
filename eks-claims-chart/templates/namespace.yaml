@@ -1,0 +1,15 @@
+{{- if .Values.eksCluster.enabled }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ include "eks-claims.clusterNamespace" . }}
+  labels:
+    {{- include "eks-claims.labels" . | nindent 4 }}
+    crossplane.io/claim-namespace: "true"
+    eksac.trustbank.sg/cluster-name: {{ .Values.eksCluster.clusterName | quote }}
+    eksac.trustbank.sg/claim-name: {{ .Values.eksCluster.claimName | quote }}
+  annotations:
+    description: "Dedicated namespace for EKS cluster: {{ .Values.eksCluster.clusterName }}"
+    eksac.trustbank.sg/cluster-type: "eks"
+    eksac.trustbank.sg/managed-by: "helm-chart"
+{{- end }} 

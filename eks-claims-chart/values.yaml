@@ -1,0 +1,34 @@
+# EKS Cluster configuration
+eksCluster:
+  enabled: true
+  claimName: "cluster01"  # This will create namespace: cluster01-xplane-eks-cluster
+  clusterName: "cluster01"
+  location: "ap-southeast-1"
+  networkRef: "andy-network"
+  nodeSize: "small"
+  minNodeCount: 1
+  tags:
+    owner: "andyxin.wei"
+    environment: "dev"
+
+# Network configuration  
+network:
+  enabled: true
+  claimName: "andy-network"
+  namespace: "eksac"  # Network claim stays in eksac namespace
+  location: "ap-southeast-1"
+  vpcCidr: "10.0.0.0/22"
+  subnets:
+    public:
+      1a: "10.0.0.0/28"
+      1b: "10.0.0.16/28"
+      1c: "10.0.0.32/28"
+  tags:
+    owner: "andyxin.wei"
+    environment: "dev"
+
+# Global settings
+global:
+  labels:
+    managedBy: "helm"
+    chart: "eks-claims" 

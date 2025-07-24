@@ -1,0 +1,24 @@
+{{- if .Values.network.enabled }}
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: NetworkClaim
+metadata:
+  name: {{ .Values.network.claimName }}
+  namespace: {{ .Values.network.namespace }}
+  labels:
+    {{- include "eks-claims.labels" . | nindent 4 }}
+    consumable.trustbank.sg/owner: {{ .Values.network.tags.owner | quote }}
+spec:
+  name: {{ .Values.network.claimName }}
+  location: {{ .Values.network.location | quote }}
+  vpcCidr: {{ .Values.network.vpcCidr | quote }}
+  subnets:
+    public:
+      {{- range $az, $cidr := .Values.network.subnets.public }}
+      {{ $az }}: {{ $cidr | quote }}
+      {{- end }}
+  compositeDeletePolicy: Foreground
+  {{- if .Values.network.tags }}
+  tags:
+    {{- include "eks-claims.commonTags" .Values.network.tags | nindent 4 }}
+  {{- end }}
+{{- end }} 

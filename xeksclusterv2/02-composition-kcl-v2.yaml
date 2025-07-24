@@ -462,6 +462,7 @@ spec:
         source: |
           oxr = option("params").oxr
 
+          # Only create the addon if podidentityagentAddOn is specified
           items = [{
             apiVersion = "eks.aws.upbound.io/v1beta1"
             kind = "Addon"
@@ -473,7 +474,7 @@ spec:
               clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
             }
             spec.providerConfigRef.name = "provider-aws-eks"
-          }]
+          }] if oxr.spec.components?.podidentityagentAddOn else []
   - step: create-ebs-csi-addon
     functionRef:
       name: function-kcl

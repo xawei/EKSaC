@@ -243,38 +243,7 @@ EOF
     log_success "External Secrets Operator ArgoCD Application created"
 }
 
-# Create ArgoCD Application for Predefined Namespaces
-create_predefined_namespaces_app() {
-    log_info "Creating ArgoCD Application for Predefined Namespaces..."
-    
-    kubectl apply -f - <<EOF
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: predefined-namespaces
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: ${REPO_URL}
-    path: predefined-namespaces-chart
-    targetRevision: main
-    helm:
-      valueFiles:
-        - values-local-kind.yaml
-  destination:
-    server: 'https://kubernetes.default.svc'
-    namespace: default
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-EOF
-    
-    log_success "Predefined Namespaces ArgoCD Application created"
-}
+
 
 # Deploy EKSaC Components via ArgoCD
 deploy_eksac_components() {
@@ -544,10 +513,7 @@ show_access_instructions() {
     echo "  kubectl get xrd"
     echo "  kubectl get compositions"
     echo
-    echo "Check predefined namespaces:"
-    echo "  kubectl get namespaces --show-labels"
-    echo "  kubectl get namespaces -l tier=applications"
-    echo
+
     echo "To delete the KIND cluster when done:"
     echo "  kind delete cluster --name ${KIND_CLUSTER_NAME}"
     echo
@@ -580,16 +546,15 @@ main() {
     log_info "Step 5: Creating ArgoCD Application for External Secrets Operator..."
     create_external_secrets_app
     
-    log_info "Step 6: Creating ArgoCD Application for Predefined Namespaces..."
-    create_predefined_namespaces_app
+
     
-    log_info "Step 7: Deploying EKSaC Components via ArgoCD..."
+    log_info "Step 6: Deploying EKSaC Components via ArgoCD..."
     deploy_eksac_components
     
-    log_info "Step 8: Configuring AWS Credentials..."
+    log_info "Step 7: Configuring AWS Credentials..."
     configure_aws_credentials
     
-    log_info "Step 9: Getting ArgoCD admin password..."
+    log_info "Step 8: Getting ArgoCD admin password..."
     get_argocd_password
     
     log_success "EKSaC Control Plane Setup completed successfully!"

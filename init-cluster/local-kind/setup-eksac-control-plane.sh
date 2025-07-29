@@ -251,14 +251,18 @@ deploy_eksac_components() {
         log_info "Deploying EKSaC Components via ArgoCD (using v2 XRDs for namespaced composites)..."
         XNETWORK_PATH="xnetworkv2"
         XEKSCLUSTER_PATH="xeksclusterv2"
+        XBASECOMPONENT_PATH="xbasecomponent"
         XNETWORK_APP_NAME="xnetwork-v2"
         XEKSCLUSTER_APP_NAME="xekscluster-v2"
+        XBASECOMPONENT_APP_NAME="xbasecomponent"
     else
         log_info "Deploying EKSaC Components via ArgoCD (using v1 XRDs with Claims)..."
         XNETWORK_PATH="xnetwork"
         XEKSCLUSTER_PATH="xekscluster"
+        XBASECOMPONENT_PATH="xbasecomponent"
         XNETWORK_APP_NAME="xnetwork"
         XEKSCLUSTER_APP_NAME="xekscluster"
+        XBASECOMPONENT_APP_NAME="xbasecomponent"
     fi
     
     # Create eksac namespace
@@ -344,13 +348,13 @@ EOF
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: xbasecomponent
+  name: ${XBASECOMPONENT_APP_NAME}
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: ${REPO_URL}
-    path: xbasecomponent
+    path: ${XBASECOMPONENT_PATH}
     targetRevision: main
   destination:
     server: 'https://kubernetes.default.svc'
@@ -363,7 +367,7 @@ spec:
       - CreateNamespace=true
 EOF
     
-    log_success "EKSaC Components ArgoCD Applications created: ${XNETWORK_APP_NAME} (${XNETWORK_PATH}), ${XEKSCLUSTER_APP_NAME} (${XEKSCLUSTER_PATH}), and xbasecomponent"
+    log_success "EKSaC Components ArgoCD Applications created: ${XNETWORK_APP_NAME} (${XNETWORK_PATH}), ${XEKSCLUSTER_APP_NAME} (${XEKSCLUSTER_PATH}), and ${XBASECOMPONENT_APP_NAME} (${XBASECOMPONENT_PATH})"
 }
 
 # Configure AWS Credentials in Local KIND Cluster

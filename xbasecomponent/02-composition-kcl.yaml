@@ -55,6 +55,16 @@ spec:
                 }
               ]
             }
+            startupapicheck = {
+              tolerations = [
+                {
+                  key = "karpenter.sh/nodepool"
+                  operator = "Equal"
+                  value = "infra"
+                  effect = "NoSchedule"
+                }
+              ]
+            }
           }
 
           # Only create items if certManager component is specified

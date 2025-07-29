@@ -339,7 +339,31 @@ spec:
       - CreateNamespace=true
 EOF
     
-    log_success "EKSaC Components ArgoCD Applications created: ${XNETWORK_APP_NAME} (${XNETWORK_PATH}) and ${XEKSCLUSTER_APP_NAME} (${XEKSCLUSTER_PATH})"
+    # Create ArgoCD application for xBaseComponent XRDs and Compositions
+    kubectl apply -f - <<EOF
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: xbasecomponent
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ${REPO_URL}
+    path: xbasecomponent
+    targetRevision: main
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: eksac
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+EOF
+    
+    log_success "EKSaC Components ArgoCD Applications created: ${XNETWORK_APP_NAME} (${XNETWORK_PATH}), ${XEKSCLUSTER_APP_NAME} (${XEKSCLUSTER_PATH}), and xbasecomponent"
 }
 
 # Configure AWS Credentials in Local KIND Cluster

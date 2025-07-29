@@ -1,0 +1,13 @@
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: BaseComponent
+metadata:
+  name: my-base-components
+  namespace: default
+spec:
+  name: my-base-components
+  eksClusterRef: "eksac-cluster01"  # Reference to your existing xEksClusterKcl
+  namespace: "default"
+  baseComponents:
+    # Cert Manager - specify component name and version only
+    certManager:
+      version: "v1.13.2" 

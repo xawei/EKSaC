@@ -1,0 +1,52 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xbasecomponentskcl.consumable.trustbank.sg
+spec:
+  group: consumable.trustbank.sg
+  names:
+    kind: xBaseComponentKcl
+    plural: xbasecomponentskcl
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              name:
+                type: string
+              eksClusterRef:
+                type: string
+                description: "Reference to the xEksClusterKcl resource name to deploy components to"
+              namespace:
+                type: string
+                default: "default"
+                description: "Default namespace for components"
+              baseComponents:
+                type: object
+                properties:
+                  certManager:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+            required:
+            - name
+            - eksClusterRef
+          status:
+            type: object
+            properties:
+              installedComponents:
+                type: array
+                items:
+                  type: string
+              ready:
+                type: boolean
+    served: true
+    referenceable: true
+  claimNames:
+    kind: BaseComponent
+    plural: basecomponents 

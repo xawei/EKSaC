@@ -1,0 +1,96 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: x-basecomponent-kcl
+spec:
+  compositeTypeRef:
+    apiVersion: consumable.trustbank.sg/v1alpha1
+    kind: xBaseComponentKcl
+  mode: Pipeline
+  pipeline:
+  - step: helm-install-cert-manager
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "cert-manager"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+          # Check if certManager component exists in baseComponents
+          cert_manager_config = oxr.spec.baseComponents?.certManager
+          version = cert_manager_config?.version or "v1.13.2"
+
+          # Default values for cert-manager with Karpenter tolerations
+          default_values = {
+            installCRDs = True
+            tolerations = [
+              {
+                key = "karpenter.sh/nodepool"
+                operator = "Equal"
+                value = "infra"
+                effect = "NoSchedule"
+              }
+            ]
+            webhook = {
+              tolerations = [
+                {
+                  key = "karpenter.sh/nodepool"
+                  operator = "Equal"
+                  value = "infra"
+                  effect = "NoSchedule"
+                }
+              ]
+            }
+            cainjector = {
+              tolerations = [
+                {
+                  key = "karpenter.sh/nodepool"
+                  operator = "Equal"
+                  value = "infra"
+                  effect = "NoSchedule"
+                }
+              ]
+            }
+          }
+
+          # Only create items if certManager component is specified
+          items = [{
+            apiVersion = "helm.crossplane.io/v1beta1"
+            kind = "Release"
+            metadata.name = oxr.spec.name + "-cert-manager"
+            metadata.annotations = {
+                "crossplane.io/external-name" = "cert-manager"
+            }
+            spec = {
+              forProvider = {
+                chart = {
+                  name = "cert-manager"
+                  repository = "https://charts.jetstack.io"
+                  version = version
+                }
+                namespace = "cert-manager"
+                values = default_values
+                wait = True
+              }
+              providerConfigRef.name = oxr.spec.eksClusterRef + "-providerconfig-helm"
+            }
+          }] if cert_manager_config else []
+  - step: auto-ready
+    functionRef:
+      name: function-auto-ready
+  - step: creation-sequence
+    functionRef:
+      name: function-sequencer
+    input:
+      apiVersion: sequencer.fn.crossplane.io/v1beta1
+      kind: Input
+      metadata:
+        name: creation-sequence
+        namespace: eksac
+      rules:
+      - sequence:
+        - cert-manager$ 

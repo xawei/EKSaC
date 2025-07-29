@@ -237,6 +237,8 @@ spec:
       spec:
         target: Default
         source: |
+          import json
+          
           oxr = option("params").oxr
           ocds = option("params").ocds
           # Check if EFS CSI Driver component exists in baseComponents
@@ -245,6 +247,20 @@ spec:
 
           # Get region from the referenced EKS cluster
           region = ocds[oxr.spec.eksClusterRef]?.Resource?.spec?.location or "ap-southeast-1"
+
+          # Configuration for EFS CSI Driver with Karpenter tolerations
+          efs_csi_config_json = {
+            controller = {
+              tolerations = [
+                {
+                  key = "karpenter.sh/nodepool"
+                  operator = "Equal"
+                  value = "infra"
+                  effect = "NoSchedule"
+                }
+              ]
+            }
+          }
 
           # Only create items if EFS CSI Driver component is specified
           items = [{
@@ -258,6 +274,7 @@ spec:
                 region = region
                 clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
                 resolveConflicts = "OVERWRITE"
+                configurationValues = json.encode(efs_csi_config_json)
                 tags = {
                   Name = oxr.metadata.name + "-efs-csi-driver-addon"
                   ManagedBy = "crossplane"

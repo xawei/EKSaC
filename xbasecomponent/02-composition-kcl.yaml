@@ -58,13 +58,13 @@ spec:
           }
 
           # Only create items if certManager component is specified
-          items = [{
-            apiVersion = "helm.crossplane.io/v1beta1"
-            kind = "Release"
-            metadata.name = oxr.spec.name + "-cert-manager"
-            metadata.annotations = {
-                "crossplane.io/external-name" = "cert-manager"
-            }
+                           items = [{
+                   apiVersion = "helm.crossplane.io/v1beta1"
+                   kind = "Release"
+                   metadata.name = oxr.metadata.name + "-cert-manager"
+                   metadata.annotations = {
+                       "crossplane.io/external-name" = "cert-manager"
+                   }
             spec = {
               forProvider = {
                 chart = {

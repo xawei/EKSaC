@@ -2,11 +2,10 @@ apiVersion: consumable.trustbank.sg/v1alpha1
 kind: BaseComponent
 metadata:
   name: my-base-components
-  namespace: eksac
+  namespace: default
 spec:
-  name: my-base-components
   eksClusterRef: "eksac-cluster01"
   namespace: "default"
   baseComponents:
     certManager:
-      version: "v1.13.3" 
+      version: "v1.13.2" 

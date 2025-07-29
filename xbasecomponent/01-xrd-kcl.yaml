@@ -16,8 +16,6 @@ spec:
           spec:
             type: object
             properties:
-              name:
-                type: string
               eksClusterRef:
                 type: string
                 description: "Reference to the xEksClusterKcl resource name to deploy components to"
@@ -34,7 +32,6 @@ spec:
                       version:
                         type: string
             required:
-            - name
             - eksClusterRef
           status:
             type: object

@@ -5,9 +5,8 @@ metadata:
   namespace: default
 spec:
   name: my-base-components
-  eksClusterRef: "eksac-cluster01"  # Reference to your existing xEksClusterKcl
+  eksClusterRef: "eksac-cluster01"
   namespace: "default"
   baseComponents:
-    # Cert Manager - specify component name and version only
     certManager:
       version: "v1.13.2" 

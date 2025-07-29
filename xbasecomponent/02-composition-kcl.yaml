@@ -226,6 +226,46 @@ spec:
               providerConfigRef.name = "provider-aws-eks"
             }
           }] if pod_identity_config else []
+  - step: eks-addon-efs-csi-driver
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "efs-csi-driver-eks-addon"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+          ocds = option("params").ocds
+          # Check if EFS CSI Driver component exists in baseComponents
+          efs_csi_config = oxr.spec.baseComponents?.awsEfsCsiDriver
+          version = efs_csi_config?.version
+
+          # Get region from the referenced EKS cluster
+          region = ocds[oxr.spec.eksClusterRef]?.Resource?.spec?.location or "ap-southeast-1"
+
+          # Only create items if EFS CSI Driver component is specified
+          items = [{
+            apiVersion = "eks.aws.upbound.io/v1beta1"
+            kind = "Addon"
+            metadata.name = oxr.metadata.name + "-efs-csi-driver-addon"
+            spec = {
+              forProvider = {
+                addonName = "aws-efs-csi-driver"
+                addonVersion = version
+                region = region
+                clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
+                resolveConflicts = "OVERWRITE"
+                tags = {
+                  Name = oxr.metadata.name + "-efs-csi-driver-addon"
+                  ManagedBy = "crossplane"
+                }
+              }
+              providerConfigRef.name = "provider-aws-eks"
+            }
+          }] if efs_csi_config else []
   - step: auto-ready
     functionRef:
       name: function-auto-ready
@@ -245,4 +285,6 @@ spec:
       - sequence:
         - ebs-csi-driver-eks-addon$
       - sequence:
-        - pod-identity-agent-eks-addon$ 
+        - pod-identity-agent-eks-addon$
+      - sequence:
+        - efs-csi-driver-eks-addon$ 

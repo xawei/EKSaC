@@ -13,5 +13,7 @@ spec:
     #   version: "v0.117.0-eksbuild.1"
     awsEbsCsiDriver:
       version: "v1.46.0-eksbuild.1"
-    # eksPodIdentityAgent:
-    #   version: "v1.0.0-eksbuild.1" 
+    eksPodIdentityAgent:
+      version: "v1.0.0-eksbuild.1"
+    awsEfsCsiDriver:
+      version: "v1.3.8-eksbuild.2" 

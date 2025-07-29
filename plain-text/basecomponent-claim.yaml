@@ -12,4 +12,6 @@ spec:
     # adot:
     #   version: "v0.117.0-eksbuild.1"
     awsEbsCsiDriver:
-      version: "v1.46.0-eksbuild.1" 
+      version: "v1.46.0-eksbuild.1"
+    # eksPodIdentityAgent:
+    #   version: "v1.0.0-eksbuild.1" 

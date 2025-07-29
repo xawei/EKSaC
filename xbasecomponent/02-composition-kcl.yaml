@@ -186,6 +186,46 @@ spec:
               providerConfigRef.name = "provider-aws-eks"
             }
           }] if ebs_csi_config else []
+  - step: eks-addon-pod-identity-agent
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "pod-identity-agent-eks-addon"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+          ocds = option("params").ocds
+          # Check if EKS Pod Identity Agent component exists in baseComponents
+          pod_identity_config = oxr.spec.baseComponents?.eksPodIdentityAgent
+          version = pod_identity_config?.version
+
+          # Get region from the referenced EKS cluster
+          region = ocds[oxr.spec.eksClusterRef]?.Resource?.spec?.location or "ap-southeast-1"
+
+          # Only create items if EKS Pod Identity Agent component is specified
+          items = [{
+            apiVersion = "eks.aws.upbound.io/v1beta1"
+            kind = "Addon"
+            metadata.name = oxr.metadata.name + "-pod-identity-agent-addon"
+            spec = {
+              forProvider = {
+                addonName = "eks-pod-identity-agent"
+                addonVersion = version
+                region = region
+                clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
+                resolveConflicts = "OVERWRITE"
+                tags = {
+                  Name = oxr.metadata.name + "-pod-identity-agent-addon"
+                  ManagedBy = "crossplane"
+                }
+              }
+              providerConfigRef.name = "provider-aws-eks"
+            }
+          }] if pod_identity_config else []
   - step: auto-ready
     functionRef:
       name: function-auto-ready
@@ -203,4 +243,6 @@ spec:
       - sequence:
         - adot-eks-addon$
       - sequence:
-        - ebs-csi-driver-eks-addon$ 
+        - ebs-csi-driver-eks-addon$
+      - sequence:
+        - pod-identity-agent-eks-addon$ 

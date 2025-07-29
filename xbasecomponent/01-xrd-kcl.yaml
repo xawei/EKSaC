@@ -49,6 +49,15 @@ spec:
                         description: "AWS EBS CSI Driver add-on version (required, e.g., 'v1.35.0-eksbuild.1')"
                     required:
                     - version
+                  eksPodIdentityAgent:
+                    type: object
+                    description: "EKS Pod Identity Agent add-on - only installed if specified"
+                    properties:
+                      version:
+                        type: string
+                        description: "EKS Pod Identity Agent add-on version (required, e.g., 'v1.0.0-eksbuild.1')"
+                    required:
+                    - version
             required:
             - eksClusterRef
           status:

@@ -71,6 +71,11 @@ spec:
                     properties:
                       version:
                         type: string
+                  argocdHelm:
+                    type: object
+                    properties:
+                      version:
+                        type: string
             required:
             - name
           status:

@@ -48,6 +48,8 @@ spec:
       version: "1.33"
     karpenterHelm:
       version: "1.5.0"
+    argocdHelm:
+      version: "8.0.16"
 ---
 # apiVersion: consumable.trustbank.sg/v1alpha1
 # kind: EksComponentKcl

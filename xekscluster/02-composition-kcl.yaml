@@ -1574,6 +1574,51 @@ spec:
               providerConfigRef.name = oxr.spec.name + "-providerconfig-helm"
             }
           }]
+  - step: helm-install-argocd
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "xplane-helm-argocd"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+
+          items = [{
+            apiVersion = "helm.crossplane.io/v1beta1"
+            kind = "Release"
+            metadata.name = oxr.spec.name + "-xplane-helm-argocd"
+            metadata.annotations = {
+                "crossplane.io/external-name" = "argocd"
+            }
+            spec = {
+              forProvider = {
+                chart = {
+                  name = "argo-cd"
+                  repository = "https://argoproj.github.io/argo-helm"
+                  version = oxr.spec.components.argocdHelm.version
+                }
+                namespace = "argocd"
+                values = {
+                  global = {
+                    tolerations = [
+                      {
+                        key = "karpenter.sh/nodepool"
+                        operator = "Equal"
+                        value = "infra"
+                        effect = "NoSchedule"
+                      }
+                    ]
+                  }
+                }
+                wait = True
+              }
+              providerConfigRef.name = oxr.spec.name + "-providerconfig-helm"
+            }
+          }]
   - step: create-storageclass-gp3
     functionRef:
       name: function-kcl
@@ -1866,9 +1911,27 @@ spec:
             }
           }
 
+          argocdhelmerreleasebeforecluster = {
+            apiVersion = "apiextensions.crossplane.io/v1beta1"
+            kind = "Usage"
+            metadata.name = oxr.spec.name + "-argocd-helm-release-before-cluster"
+            spec = {
+              of = {
+                apiVersion = "helm.crossplane.io/v1beta1"
+                kind = "Release"
+                resourceRef.name = oxr.spec.name + "-xplane-helm-argocd"
+              }
+              by = {
+                apiVersion = "eks.aws.upbound.io/v1beta1"
+                kind = "Cluster"
+                resourceRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              }
+            }
+          }
+
           items = [
             clusterreleasekarpanter, clusterauthreleasekarpenter, accessentryreleasekarpenter, accesspolicyassociationreleasekarpenter, 
-            helmproviderconfigreleasekarpenter, karpenterreleasecilium, karpenterreleasecoredns,corednsreleasenodepool, argocdreleasebeforecluster
+            helmproviderconfigreleasekarpenter, karpenterreleasecilium, karpenterreleasecoredns,corednsreleasenodepool, argocdreleasebeforecluster, argocdhelmerreleasebeforecluster
           ]
   - step: auto-ready
     functionRef:
@@ -1886,4 +1949,5 @@ spec:
       - sequence:
         - xplane-fargate-profile-karpenter$
         - xplane-helm-karpenter$
+        - xplane-helm-argocd$
         - xplane-argocd-app-of-apps$

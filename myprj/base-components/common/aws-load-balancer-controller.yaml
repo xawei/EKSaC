@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aws-load-balancer-controller
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://aws.github.io/eks-charts
+    chart: aws-load-balancer-controller
+    targetRevision: 1.13.2
+    helm:
+      values: |
+        clusterName: REPLACE_CLUSTER_NAME
+        region: ap-southeast-1
+
+        replicaCount: 1 # default is 2
+
+        # Toleration for Karpenter infra nodepool
+        tolerations:
+        - key: "karpenter.sh/nodepool"
+          operator: "Equal"
+          value: "infra"
+          effect: "NoSchedule"
+
+
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: aws-load-balancer-controller
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true 

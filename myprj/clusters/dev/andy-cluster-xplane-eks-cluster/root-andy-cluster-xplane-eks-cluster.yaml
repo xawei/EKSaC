@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-andy-cluster-xplane-eks-cluster
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+  # Source 1: Common applications (common directory)
+  - repoURL: https://github.com/xawei/learning
+    targetRevision: main
+    path: argocd/myprj/base-components/common
+    directory:
+      recurse: true
+      include: "*.yaml"
+  # Source 2: Cluster-specific applications for this cluster
+  - repoURL: https://github.com/xawei/learning
+    targetRevision: main
+    path: argocd/myprj/base-components/dev/andy-cluster-xplane-eks-cluster
+    directory:
+      recurse: true
+      include: "*.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true        # ✅ Automatically remove resources not in Git
+      selfHeal: true     # ✅ Automatically sync when Git changes
+      allowEmpty: false  # ✅ Prevent accidental deletion of all apps
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground  # ✅ Ensure proper cleanup order
+      - PruneLast=false                    # ✅ Prune first to clear stuck resources
+      - Replace=true                       # ✅ Force replace stuck resources
+      - ApplyOutOfSyncOnly=true           # ✅ Only apply what's out of sync
+      - Delete=true                        # ✅ Allow deletion of applications
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m 

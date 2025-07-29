@@ -441,8 +441,40 @@ spec:
             spec.providerConfigRef.name = "provider-aws-eks"
           }
 
+          localuseraccessentry = {
+            apiVersion = "eks.aws.upbound.io/v1beta1"
+            kind = "AccessEntry"
+            metadata.name = oxr.spec.name + "-xplane-eks-crossplane-user-access-entry"
+            spec.forProvider = {
+              region = oxr.spec.location
+              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              principalArn = "arn:aws:iam::" + oxr.spec.awsAccountId + ":user/crossplane-assume-user"
+              tags: {
+                Name = oxr.spec.name + "-xplane-eks-crossplane-user-access-entry"
+                Owner = owner_tag_value
+                Environment = "sandbox"
+                Project = "crossplane"
+              }
+            }
+            spec.providerConfigRef.name = "provider-aws-eks"
+          }
+
+          localuseraccesspolicyassociation = {
+            apiVersion = "eks.aws.upbound.io/v1beta1"
+            kind = "AccessPolicyAssociation"
+            metadata.name = oxr.spec.name + "-xplane-eks-crossplane-user-access-policy-association"
+            spec.forProvider = {
+              region = oxr.spec.location
+              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              accessScope.type = "cluster"
+              policyArn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+              principalArnRef.name =  oxr.spec.name + "-xplane-eks-crossplane-user-access-entry"
+            }
+            spec.providerConfigRef.name = "provider-aws-eks"
+          }
+
           # Base items that are always created
-          base_items = [cluster, crossplaneaccessentry, crossplaneaccesspolicyassociation, karpenteraccessentry]
+          base_items = [cluster, crossplaneaccessentry, crossplaneaccesspolicyassociation, karpenteraccessentry, localuseraccessentry, localuseraccesspolicyassociation]
           
           # Conditionally add default access entry and policy association
           default_access_items = [defaultaccessentry, defaultaccesspolicyassociation] if create_default_access else []

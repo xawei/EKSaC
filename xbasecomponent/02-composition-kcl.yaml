@@ -101,9 +101,13 @@ spec:
         target: Default
         source: |
           oxr = option("params").oxr
+          ocds = option("params").ocds
           # Check if ADOT component exists in baseComponents
           adot_config = oxr.spec.baseComponents?.adot
           version = adot_config?.version
+
+          # Get region from the referenced EKS cluster
+          region = ocds[oxr.spec.eksClusterRef]?.Resource?.spec?.location or "ap-southeast-1"
 
           # Only create items if ADOT component is specified
           items = [{
@@ -114,6 +118,7 @@ spec:
               forProvider = {
                 addonName = "adot"
                 addonVersion = version
+                region = region
                 clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
                 resolveConflicts = "OVERWRITE"
                 tags = {

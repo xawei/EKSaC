@@ -177,7 +177,7 @@ spec:
                 region = region
                 clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
                 resolveConflicts = "OVERWRITE"
-                configuration = json.encode(ebs_csi_config_json)
+                configurationValues = json.encode(ebs_csi_config_json)
                 tags = {
                   Name = oxr.metadata.name + "-ebs-csi-driver-addon"
                   ManagedBy = "crossplane"

@@ -24,15 +24,16 @@ spec:
       # We also override the AWS EBS CSI Driver IAM Role ARN for this cluster
       - name: awsEbsCsiDriver.serviceAccount.roleARN
         value: "arn:aws:iam::249140151390:role/EbsCsiDriverRole-andy-cluster-xplane-eks-cluster"
-      # We also override the AWS EFS CSI Driver IAM Role ARN for this cluster
-      - name: awsEfsCsiDriver.serviceAccount.roleARN
-        value: "arn:aws:iam::249140151390:role/EfsCsiDriverRole-andy-cluster-xplane-eks-cluster"
   # Source 2: Any additional cluster-specific applications
   - repoURL: https://github.com/xawei/learning
     targetRevision: main
     path: argocd/myprj/base-components/dev/andy-cluster-xplane-eks-cluster
-    directory:
-      recurse: true
+    helm:
+      parameters:
+      - name: clusterName
+        value: andy-cluster-xplane-eks-cluster
+      - name: awsEfsCsiDriver.serviceAccount.roleARN
+        value: "arn:aws:iam::249140151390:role/EfsCsiDriverRole-andy-cluster-xplane-eks-cluster"
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd # Deploying the apps themselves into argocd namespace

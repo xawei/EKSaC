@@ -1,0 +1,19 @@
+# This value will be overridden by the root application
+clusterName: "andy-cluster-xplane-eks-cluster"
+
+# AWS EFS CSI Driver Configuration  
+awsEfsCsiDriver:
+  # -- Chart version compatible with Kubernetes 1.18+
+  chartVersion: "3.2.0"
+  
+  serviceAccount:
+    # -- The ARN of the IAM role to associate with the EFS CSI Driver service account.
+    # This will be overridden by the root application for each cluster.
+    roleARN: "arn:aws:iam::ACCOUNT_ID:role/EfsCsiDriverRole-Default"
+  
+  # -- Tolerations for EFS CSI Driver controller pods (not daemonset)
+  tolerations:
+  - key: "karpenter.sh/nodepool"
+    operator: "Equal"
+    value: "infra"
+    effect: "NoSchedule" 

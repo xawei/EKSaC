@@ -18,7 +18,7 @@ spec:
             properties:
               eksClusterRef:
                 type: string
-                description: "Reference to the xEksClusterKcl resource name to deploy components to"
+                description: "Reference to the EksCluster claim name (e.g. 'eksac-cluster01') to deploy components to"
               namespace:
                 type: string
                 default: "default"

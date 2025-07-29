@@ -4,9 +4,8 @@ metadata:
   name: my-base-components
   namespace: eksac
 spec:
-  name: my-base-components
   eksClusterRef: "eksac-cluster01"
   namespace: "default"
   baseComponents:
     certManager:
-      version: "v1.13.3" 
+      version: "v1.13.2" 

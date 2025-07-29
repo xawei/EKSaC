@@ -90,7 +90,6 @@ spec:
       kind: Input
       metadata:
         name: creation-sequence
-        namespace: eksac
       rules:
       - sequence:
         - cert-manager$ 

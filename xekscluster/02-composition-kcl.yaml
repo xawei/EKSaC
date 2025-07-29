@@ -1701,7 +1701,7 @@ spec:
                     source = {
                       repoURL = "https://github.com/xawei/learning"
                       targetRevision = "HEAD"
-                      path = "argocd/myprj/clusters/dev/" + oxr.spec.name
+                      path = "argocd/myprj/clusters/dev/" + oxr.spec.name + "-xplane-eks-cluster"
                     }
                     destination = {
                       server = "https://kubernetes.default.svc"

@@ -40,10 +40,10 @@ spec:
       version: "1.17.3"
     corednsHelm:
       version: "1.42.1"
-    ebscsiAddOn:
-      version: "v1.43.0-eksbuild.1"
-    podidentityagentAddOn:
-      version: "v1.3.7-eksbuild.2"
+    # ebscsiAddOn:
+    #   version: "v1.43.0-eksbuild.1"
+    # podidentityagentAddOn:
+    #   version: "v1.3.7-eksbuild.2"
     eks:
       version: "1.33"
     karpenterHelm:

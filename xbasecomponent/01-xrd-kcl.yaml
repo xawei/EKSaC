@@ -40,6 +40,15 @@ spec:
                         description: "ADOT add-on version (required, e.g., 'v0.88.0-eksbuild.1')"
                     required:
                     - version
+                  awsEbsCsiDriver:
+                    type: object
+                    description: "AWS EBS CSI Driver EKS add-on - only installed if specified"
+                    properties:
+                      version:
+                        type: string
+                        description: "AWS EBS CSI Driver add-on version (required, e.g., 'v1.35.0-eksbuild.1')"
+                    required:
+                    - version
             required:
             - eksClusterRef
           status:

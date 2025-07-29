@@ -31,6 +31,15 @@ spec:
                     properties:
                       version:
                         type: string
+                  adot:
+                    type: object
+                    description: "AWS Distro for OpenTelemetry EKS add-on - only installed if specified"
+                    properties:
+                      version:
+                        type: string
+                        description: "ADOT add-on version (required, e.g., 'v0.88.0-eksbuild.1')"
+                    required:
+                    - version
             required:
             - eksClusterRef
           status:

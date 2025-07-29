@@ -89,6 +89,41 @@ spec:
               providerConfigRef.name = oxr.spec.eksClusterRef + "-providerconfig-helm"
             }
           }] if cert_manager_config else []
+  - step: eks-addon-adot
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "adot-eks-addon"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+          # Check if ADOT component exists in baseComponents
+          adot_config = oxr.spec.baseComponents?.adot
+          version = adot_config?.version
+
+          # Only create items if ADOT component is specified
+          items = [{
+            apiVersion = "eks.aws.upbound.io/v1beta1"
+            kind = "Addon"
+            metadata.name = oxr.metadata.name + "-adot-addon"
+            spec = {
+              forProvider = {
+                addonName = "adot"
+                addonVersion = version
+                clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
+                resolveConflicts = "OVERWRITE"
+                tags = {
+                  Name = oxr.metadata.name + "-adot-addon"
+                  ManagedBy = "crossplane"
+                }
+              }
+              providerConfigRef.name = "provider-aws-eks"
+            }
+          }] if adot_config else []
   - step: auto-ready
     functionRef:
       name: function-auto-ready
@@ -102,4 +137,5 @@ spec:
         name: creation-sequence
       rules:
       - sequence:
-        - cert-manager$ 
+        - cert-manager$
+        - adot-eks-addon$ 

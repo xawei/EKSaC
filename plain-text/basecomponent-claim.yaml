@@ -8,4 +8,6 @@ spec:
   namespace: "eksac"
   baseComponents:
     certManager:
-      version: "v1.13.3" 
+      version: "v1.13.3"
+    # adot:
+    #   version: "v0.88.0-eksbuild.1" 

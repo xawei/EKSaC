@@ -1,0 +1,60 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aws-ebs-csi-driver
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+    chart: aws-ebs-csi-driver
+    targetRevision: {{ .Values.awsEbsCsiDriver.chartVersion }}
+    helm:
+      values: |
+        controller:
+          serviceAccount:
+            create: true
+            annotations:
+              eks.amazonaws.com/role-arn: {{ .Values.awsEbsCsiDriver.serviceAccount.roleARN | quote }}
+          # Apply tolerations only to controller deployment, not node daemonset
+          tolerations:
+{{ .Values.awsEbsCsiDriver.tolerations | toYaml | indent 10 }}
+          resources:
+            requests:
+              cpu: 10m
+              memory: 40Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+        # Node daemonset runs on all nodes, no tolerations needed
+        node:
+          serviceAccount:
+            create: true
+            name: "ebs-csi-node-sa"
+            annotations:
+              eks.amazonaws.com/role-arn: {{ .Values.awsEbsCsiDriver.serviceAccount.roleARN | quote }}
+          resources:
+            requests:
+              cpu: 10m
+              memory: 40Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - Replace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m 

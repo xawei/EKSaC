@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-andy-cluster-xplane-eks-cluster
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+  # Source 1: The common Helm chart
+  - repoURL: https://github.com/xawei/learning
+    targetRevision: main
+    path: argocd/myprj/base-components/common
+    # chart: ./ # This is removed to let ArgoCD auto-detect the chart
+    helm:
+      # This is where we override the clusterName for this specific cluster
+      parameters:
+      - name: clusterName
+        value: andy-cluster-xplane-eks-cluster
+      # We also override the Velero IAM Role ARN for this cluster
+      - name: velero.serviceAccount.roleARN
+        value: "arn:aws:iam::249140151390:role/VeleroRole-andy-cluster-xplane-eks-cluster"
+      # We also override the AWS EBS CSI Driver IAM Role ARN for this cluster
+      - name: awsEbsCsiDriver.serviceAccount.roleARN
+        value: "arn:aws:iam::249140151390:role/EbsCsiDriverRole-andy-cluster-xplane-eks-cluster"
+      # We also override the AWS EFS CSI Driver IAM Role ARN for this cluster
+      - name: awsEfsCsiDriver.serviceAccount.roleARN
+        value: "arn:aws:iam::249140151390:role/EfsCsiDriverRole-andy-cluster-xplane-eks-cluster"
+  # Source 2: Any additional cluster-specific applications
+  - repoURL: https://github.com/xawei/learning
+    targetRevision: main
+    path: argocd/myprj/base-components/dev/andy-cluster-xplane-eks-cluster
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd # Deploying the apps themselves into argocd namespace
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m 

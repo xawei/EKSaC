@@ -10,28 +10,34 @@ spec:
   source:
     repoURL: https://aws.github.io/eks-charts
     chart: aws-load-balancer-controller
-    targetRevision: 1.13.2
+    targetRevision: 1.13.2 # A specific, stable version
     helm:
       values: |
-        clusterName: REPLACE_CLUSTER_NAME
+        # This will now be driven by the Chart's values
+        clusterName: {{ .Values.clusterName }}
         region: ap-southeast-1
-
-        replicaCount: 1 # default is 2
-
-        # Toleration for Karpenter infra nodepool
+        replicaCount: 1
         tolerations:
         - key: "karpenter.sh/nodepool"
           operator: "Equal"
           value: "infra"
           effect: "NoSchedule"
-
-
+        serviceAccount:
+          # This should be created separately with the correct IAM role
+          create: true
+          name: "aws-load-balancer-controller"
   destination:
-    server: 'https://kubernetes.default.svc'
-    namespace: aws-load-balancer-controller
+    server: https://kubernetes.default.svc
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true 
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m 

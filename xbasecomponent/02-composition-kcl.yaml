@@ -149,6 +149,20 @@ spec:
           # Get region from the referenced EKS cluster
           region = ocds[oxr.spec.eksClusterRef]?.Resource?.spec?.location or "ap-southeast-1"
 
+          # Configuration for EBS CSI Driver with Karpenter tolerations
+          ebs_csi_config_json = {
+            controller = {
+              tolerations = [
+                {
+                  key = "karpenter.sh/nodepool"
+                  operator = "Equal"
+                  value = "infra"
+                  effect = "NoSchedule"
+                }
+              ]
+            }
+          }
+
           # Only create items if EBS CSI Driver component is specified
           items = [{
             apiVersion = "eks.aws.upbound.io/v1beta1"
@@ -161,6 +175,7 @@ spec:
                 region = region
                 clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
                 resolveConflicts = "OVERWRITE"
+                configuration = json.encode(ebs_csi_config_json)
                 tags = {
                   Name = oxr.metadata.name + "-ebs-csi-driver-addon"
                   ManagedBy = "crossplane"
@@ -183,5 +198,7 @@ spec:
       rules:
       - sequence:
         - cert-manager$
+      - sequence:
         - adot-eks-addon$
+      - sequence:
         - ebs-csi-driver-eks-addon$ 

@@ -1583,6 +1583,82 @@ spec:
               providerConfigRef.name = oxr.spec.name + "-providerconfig-kubernetes"
             }
           }]
+  - step: create-argocd-app-of-apps
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "xplane-argocd-app-of-apps"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+          labels = oxr.metadata?.labels or {}
+          owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
+
+          items = [{
+            apiVersion = "kubernetes.crossplane.io/v1alpha2"
+            kind = "Object"
+            metadata.name = oxr.spec.name + "-xplane-argocd-app-of-apps"
+            spec = {
+              forProvider = {
+                manifest = {
+                  apiVersion = "argoproj.io/v1alpha1"
+                  kind = "Application"
+                  metadata = {
+                    name = oxr.spec.name + "-app-of-apps"
+                    namespace = "argocd"
+                    labels = {
+                      "app.kubernetes.io/name" = oxr.spec.name + "-app-of-apps"
+                      "app.kubernetes.io/part-of" = "argocd"
+                      "consumable.trustbank.sg/owner" = owner_tag_value
+                    }
+                    finalizers = [
+                      "resources-finalizer.argocd.argoproj.io"
+                    ]
+                  }
+                  spec = {
+                    project = "default"
+                    source = {
+                      repoURL = "https://github.com/xawei/learning"
+                      targetRevision = "HEAD"
+                      path = "argocd/myprj/clusters/dev/" + oxr.spec.name
+                    }
+                    destination = {
+                      server = "https://kubernetes.default.svc"
+                      namespace = "argocd"
+                    }
+                    syncPolicy = {
+                      automated = {
+                        prune = True
+                        selfHeal = True
+                      }
+                      syncOptions = [
+                        "CreateNamespace=true",
+                        "RespectIgnoreDifferences=true"
+                      ]
+                    }
+                    ignoreDifferences = [
+                      {
+                        group = "*"
+                        kind = "Application"
+                        namespace = "*"
+                        jsonPointers = [
+                          "/spec/syncPolicy/automated",
+                          "/metadata/annotations/argocd.argoproj.io~1refresh",
+                          "/operation"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+              managementPolicies = ["Create", "Update", "Observe", "Delete"]
+              providerConfigRef.name = oxr.spec.name + "-providerconfig-kubernetes"
+            }
+          }]
   - step: teardown-sequence
     functionRef:
       name: function-kcl
@@ -1740,9 +1816,27 @@ spec:
             }
           }
 
+          argocdreleasebeforecluster = {
+            apiVersion = "apiextensions.crossplane.io/v1beta1"
+            kind = "Usage"
+            metadata.name = oxr.spec.name + "-argocd-app-release-before-cluster"
+            spec = {
+              of = {
+                apiVersion = "kubernetes.crossplane.io/v1alpha2"
+                kind = "Object"
+                resourceRef.name = oxr.spec.name + "-xplane-argocd-app-of-apps"
+              }
+              by = {
+                apiVersion = "eks.aws.upbound.io/v1beta1"
+                kind = "Cluster"
+                resourceRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              }
+            }
+          }
+
           items = [
             clusterreleasekarpanter, clusterauthreleasekarpenter, accessentryreleasekarpenter, accesspolicyassociationreleasekarpenter, 
-            helmproviderconfigreleasekarpenter, karpenterreleasecilium, karpenterreleasecoredns,corednsreleasenodepool
+            helmproviderconfigreleasekarpenter, karpenterreleasecilium, karpenterreleasecoredns,corednsreleasenodepool, argocdreleasebeforecluster
           ]
   - step: auto-ready
     functionRef:
@@ -1760,3 +1854,4 @@ spec:
       - sequence:
         - xplane-fargate-profile-karpenter$
         - xplane-helm-karpenter$
+        - xplane-argocd-app-of-apps$

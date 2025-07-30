@@ -1747,14 +1747,14 @@ spec:
             metadata.name = oxr.spec.name + "-argocd-app-release-before-cluster"
             spec = {
               of = {
-                apiVersion = "kubernetes.crossplane.io/v1alpha2"
-                kind = "Object"
-                resourceRef.name = oxr.spec.name + "-xplane-argocd-app-of-apps"
-              }
-              by = {
                 apiVersion = "eks.aws.upbound.io/v1beta1"
                 kind = "Cluster"
                 resourceRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              }
+              by = {
+                apiVersion = "kubernetes.crossplane.io/v1alpha2"
+                kind = "Object"
+                resourceRef.name = oxr.spec.name + "-xplane-argocd-app-of-apps"
               }
             }
           }
@@ -1765,14 +1765,14 @@ spec:
             metadata.name = oxr.spec.name + "-argocd-helm-release-before-cluster"
             spec = {
               of = {
-                apiVersion = "helm.crossplane.io/v1beta1"
-                kind = "Release"
-                resourceRef.name = oxr.spec.name + "-xplane-helm-argocd"
-              }
-              by = {
                 apiVersion = "eks.aws.upbound.io/v1beta1"
                 kind = "Cluster"
                 resourceRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              }
+              by = {
+                apiVersion = "helm.crossplane.io/v1beta1"
+                kind = "Release"
+                resourceRef.name = oxr.spec.name + "-xplane-helm-argocd"
               }
             }
           }

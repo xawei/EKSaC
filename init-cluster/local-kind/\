@@ -1,0 +1,321 @@
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  annotations:
+    crossplane.io/composition-resource-name: andy-cluster-xplane-argocd-app-of-apps
+    crossplane.io/external-create-pending: "2025-07-30T04:05:09Z"
+    crossplane.io/external-create-succeeded: "2025-07-30T04:05:10Z"
+    crossplane.io/external-name: andy-cluster-xplane-argocd-app-of-apps
+    usage.crossplane.io/deletion-attempt-with-policy: Background
+  creationTimestamp: "2025-07-30T04:05:09Z"
+  deletionGracePeriodSeconds: 0
+  deletionTimestamp: "2025-07-30T05:12:08Z"
+  finalizers:
+  generateName: andy-cluster-7vbgf-
+  generation: 3
+  labels:
+    crossplane.io/claim-name: andy-cluster
+    crossplane.io/claim-namespace: eksac
+    crossplane.io/composite: andy-cluster-7vbgf
+  name: andy-cluster-xplane-argocd-app-of-apps
+  ownerReferences:
+  - apiVersion: consumable.trustbank.sg/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: xEksClusterKcl
+    name: andy-cluster-7vbgf
+    uid: 2a58587a-e696-4015-8aee-5e48ef2f1150
+  resourceVersion: "649351"
+  uid: 41c3d064-6689-483c-8b71-be47d1bd08ee
+spec:
+  deletionPolicy: Delete
+  forProvider:
+    manifest:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        finalizers:
+        - resources-finalizer.argocd.argoproj.io
+        labels:
+          app.kubernetes.io/name: andy-cluster-app-of-apps
+          app.kubernetes.io/part-of: argocd
+          consumable.trustbank.sg/owner: andyxin.wei
+        name: andy-cluster-app-of-apps
+        namespace: argocd
+      spec:
+        destination:
+          namespace: argocd
+          server: https://kubernetes.default.svc
+        ignoreDifferences:
+        - group: '*'
+          jsonPointers:
+          - /spec/syncPolicy/automated
+          - /metadata/annotations/argocd.argoproj.io~1refresh
+          - /operation
+          kind: Application
+          namespace: '*'
+        project: default
+        source:
+          path: argocd/myprj/clusters/dev/andy-cluster-xplane-eks-cluster
+          repoURL: https://github.com/xawei/learning
+          targetRevision: HEAD
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+          - CreateNamespace=true
+          - RespectIgnoreDifferences=true
+  managementPolicies:
+  - Create
+  - Update
+  - Observe
+  - Delete
+  providerConfigRef:
+    name: andy-cluster-providerconfig-kubernetes
+  readiness:
+    policy: SuccessfulCreate
+  watch: false
+status:
+  atProvider:
+    manifest:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: '{"apiVersion":"argoproj.io/v1alpha1","kind":"Application","metadata":{"finalizers":["resources-finalizer.argocd.argoproj.io"],"labels":{"app.kubernetes.io/name":"andy-cluster-app-of-apps","app.kubernetes.io/part-of":"argocd","consumable.trustbank.sg/owner":"andyxin.wei"},"name":"andy-cluster-app-of-apps","namespace":"argocd"},"spec":{"destination":{"namespace":"argocd","server":"https://kubernetes.default.svc"},"ignoreDifferences":[{"group":"*","jsonPointers":["/spec/syncPolicy/automated","/metadata/annotations/argocd.argoproj.io~1refresh","/operation"],"kind":"Application","namespace":"*"}],"project":"default","source":{"path":"argocd/myprj/clusters/dev/andy-cluster-xplane-eks-cluster","repoURL":"https://github.com/xawei/learning","targetRevision":"HEAD"},"syncPolicy":{"automated":{"prune":true,"selfHeal":true},"syncOptions":["CreateNamespace=true","RespectIgnoreDifferences=true"]}}}'
+        creationTimestamp: "2025-07-30T04:05:10Z"
+        finalizers:
+        - resources-finalizer.argocd.argoproj.io
+        generation: 18
+        labels:
+          app.kubernetes.io/name: andy-cluster-app-of-apps
+          app.kubernetes.io/part-of: argocd
+          consumable.trustbank.sg/owner: andyxin.wei
+        managedFields:
+        - apiVersion: argoproj.io/v1alpha1
+          fieldsType: FieldsV1
+          fieldsV1:
+            f:metadata:
+              f:annotations:
+                .: {}
+                f:kubectl.kubernetes.io/last-applied-configuration: {}
+              f:finalizers:
+                .: {}
+                v:"resources-finalizer.argocd.argoproj.io": {}
+              f:labels:
+                .: {}
+                f:app.kubernetes.io/name: {}
+                f:app.kubernetes.io/part-of: {}
+                f:consumable.trustbank.sg/owner: {}
+            f:spec:
+              .: {}
+              f:destination:
+                .: {}
+                f:namespace: {}
+                f:server: {}
+              f:ignoreDifferences: {}
+              f:project: {}
+              f:source:
+                .: {}
+                f:path: {}
+                f:repoURL: {}
+                f:targetRevision: {}
+              f:syncPolicy:
+                .: {}
+                f:automated:
+                  .: {}
+                  f:prune: {}
+                  f:selfHeal: {}
+                f:syncOptions: {}
+          manager: crossplane-kubernetes-provider
+          operation: Update
+          time: "2025-07-30T04:05:10Z"
+        - apiVersion: argoproj.io/v1alpha1
+          fieldsType: FieldsV1
+          fieldsV1:
+            f:status:
+              .: {}
+              f:controllerNamespace: {}
+              f:health:
+                .: {}
+                f:lastTransitionTime: {}
+                f:status: {}
+              f:history: {}
+              f:operationState:
+                .: {}
+                f:finishedAt: {}
+                f:message: {}
+                f:operation:
+                  .: {}
+                  f:initiatedBy:
+                    .: {}
+                    f:automated: {}
+                  f:retry:
+                    .: {}
+                    f:limit: {}
+                  f:sync:
+                    .: {}
+                    f:prune: {}
+                    f:revision: {}
+                    f:syncOptions: {}
+                f:phase: {}
+                f:startedAt: {}
+                f:syncResult:
+                  .: {}
+                  f:resources: {}
+                  f:revision: {}
+                  f:source:
+                    .: {}
+                    f:path: {}
+                    f:repoURL: {}
+                    f:targetRevision: {}
+              f:reconciledAt: {}
+              f:resourceHealthSource: {}
+              f:resources: {}
+              f:sourceHydrator: {}
+              f:sourceType: {}
+              f:summary: {}
+              f:sync:
+                .: {}
+                f:comparedTo:
+                  .: {}
+                  f:destination:
+                    .: {}
+                    f:namespace: {}
+                    f:server: {}
+                  f:ignoreDifferences: {}
+                  f:source:
+                    .: {}
+                    f:path: {}
+                    f:repoURL: {}
+                    f:targetRevision: {}
+                f:revision: {}
+                f:status: {}
+          manager: argocd-application-controller
+          operation: Update
+          time: "2025-07-30T05:03:03Z"
+        name: andy-cluster-app-of-apps
+        namespace: argocd
+        resourceVersion: "25136"
+        uid: fa6a9c08-df92-4265-845d-5b5b31a87c3f
+      spec:
+        destination:
+          namespace: argocd
+          server: https://kubernetes.default.svc
+        ignoreDifferences:
+        - group: '*'
+          jsonPointers:
+          - /spec/syncPolicy/automated
+          - /metadata/annotations/argocd.argoproj.io~1refresh
+          - /operation
+          kind: Application
+          namespace: '*'
+        project: default
+        source:
+          path: argocd/myprj/clusters/dev/andy-cluster-xplane-eks-cluster
+          repoURL: https://github.com/xawei/learning
+          targetRevision: HEAD
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+          - CreateNamespace=true
+          - RespectIgnoreDifferences=true
+      status:
+        controllerNamespace: argocd
+        health:
+          lastTransitionTime: "2025-07-30T04:05:14Z"
+          status: Healthy
+        history:
+        - deployStartedAt: "2025-07-30T04:05:14Z"
+          deployedAt: "2025-07-30T04:05:14Z"
+          id: 0
+          initiatedBy:
+            automated: true
+          revision: b1e70db6619c75d804f2f7751ef64dd26beef9d0
+          source:
+            path: argocd/myprj/clusters/dev/andy-cluster-xplane-eks-cluster
+            repoURL: https://github.com/xawei/learning
+            targetRevision: HEAD
+        operationState:
+          finishedAt: "2025-07-30T04:05:14Z"
+          message: successfully synced (all tasks run)
+          operation:
+            initiatedBy:
+              automated: true
+            retry:
+              limit: 5
+            sync:
+              prune: true
+              revision: b1e70db6619c75d804f2f7751ef64dd26beef9d0
+              syncOptions:
+              - CreateNamespace=true
+              - RespectIgnoreDifferences=true
+          phase: Succeeded
+          startedAt: "2025-07-30T04:05:14Z"
+          syncResult:
+            resources:
+            - group: argoproj.io
+              hookPhase: Running
+              kind: Application
+              message: application.argoproj.io/root-andy-cluster-xplane-eks-cluster
+                created
+              name: root-andy-cluster-xplane-eks-cluster
+              namespace: argocd
+              status: Synced
+              syncPhase: Sync
+              version: v1alpha1
+            revision: b1e70db6619c75d804f2f7751ef64dd26beef9d0
+            source:
+              path: argocd/myprj/clusters/dev/andy-cluster-xplane-eks-cluster
+              repoURL: https://github.com/xawei/learning
+              targetRevision: HEAD
+        reconciledAt: "2025-07-30T05:03:03Z"
+        resourceHealthSource: appTree
+        resources:
+        - group: argoproj.io
+          kind: Application
+          name: root-andy-cluster-xplane-eks-cluster
+          namespace: argocd
+          status: Synced
+          version: v1alpha1
+        sourceHydrator: {}
+        sourceType: Directory
+        summary: {}
+        sync:
+          comparedTo:
+            destination:
+              namespace: argocd
+              server: https://kubernetes.default.svc
+            ignoreDifferences:
+            - group: '*'
+              jsonPointers:
+              - /spec/syncPolicy/automated
+              - /metadata/annotations/argocd.argoproj.io~1refresh
+              - /operation
+              kind: Application
+              namespace: '*'
+            source:
+              path: argocd/myprj/clusters/dev/andy-cluster-xplane-eks-cluster
+              repoURL: https://github.com/xawei/learning
+              targetRevision: HEAD
+          revision: b1e70db6619c75d804f2f7751ef64dd26beef9d0
+          status: Synced
+  conditions:
+  - lastTransitionTime: "2025-07-30T04:05:11Z"
+    reason: Available
+    status: "True"
+    type: Ready
+  - lastTransitionTime: "2025-07-30T05:10:29Z"
+    message: 'connect failed: cannot build kube client for provider config: cannot
+      get REST config for provider: cannot get credentials: cannot get credentials
+      secret: Secret "andy-cluster-xplane-eks-cluster-auth" not found'
+    reason: ReconcileError
+    status: "False"
+    type: Synced

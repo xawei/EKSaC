@@ -9,9 +9,9 @@ spec:
   project: default
   sources:
   # Source 1: The common Helm chart
-  - repoURL: https://github.com/xawei/learning
+  - repoURL: https://github.com/xawei/EKSaC
     targetRevision: main
-    path: argocd/myprj/base-components/common
+    path: eksac-argocd/base-components/common
     # chart: ./ # This is removed to let ArgoCD auto-detect the chart
     helm:
       # This is where we override the clusterName for this specific cluster
@@ -20,20 +20,20 @@ spec:
         value: andy-cluster-xplane-eks-cluster
       # We also override the Velero IAM Role ARN for this cluster
       - name: velero.serviceAccount.roleARN
-        value: "arn:aws:iam::249140151390:role/VeleroRole-andy-cluster-xplane-eks-cluster"
+        value: "arn:aws:iam::390945758345:role/eksac-control-plane-ebs-csi-iam-role" # Need to change this to the correct role ARN
       # We also override the AWS EBS CSI Driver IAM Role ARN for this cluster
       - name: awsEbsCsiDriver.serviceAccount.roleARN
-        value: "arn:aws:iam::249140151390:role/EbsCsiDriverRole-andy-cluster-xplane-eks-cluster"
+        value: "arn:aws:iam::390945758345:role/eksac-control-plane-ebs-csi-iam-role"
   # Source 2: Any additional cluster-specific applications
-  - repoURL: https://github.com/xawei/learning
+  - repoURL: https://github.com/xawei/EKSaC
     targetRevision: main
-    path: argocd/myprj/base-components/dev/andy-cluster-xplane-eks-cluster
+    path: eksac-argocd/base-components/dev/andy-cluster-xplane-eks-cluster
     helm:
       parameters:
       - name: clusterName
         value: andy-cluster-xplane-eks-cluster
       - name: awsEfsCsiDriver.serviceAccount.roleARN
-        value: "arn:aws:iam::249140151390:role/EfsCsiDriverRole-andy-cluster-xplane-eks-cluster"
+        value: "arn:aws:iam::390945758345:role/EfsCsiDriverRole-andy-cluster-xplane-eks-cluster" # Need to change this to the correct role ARN
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd # Deploying the apps themselves into argocd namespace

@@ -1521,7 +1521,6 @@ spec:
         source: |
           oxr = option("params").oxr
           labels = oxr.metadata?.labels or {}
-          owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
 
           items = [{
             apiVersion = "kubernetes.crossplane.io/v1alpha2"
@@ -1533,32 +1532,27 @@ spec:
                   apiVersion = "argoproj.io/v1alpha1"
                   kind = "ApplicationSet"
                   metadata = {
-                    name = oxr.spec.name + "-applicationset"
+                    name = oxr.spec.name + "-core-components"
                     namespace = "argocd"
                     labels = {
-                      "app.kubernetes.io/name" = oxr.spec.name + "-applicationset"
+                      "app.kubernetes.io/name" = oxr.spec.name + "-core-components"
                       "app.kubernetes.io/part-of" = "argocd"
-                      "consumable.trustbank.sg/owner" = owner_tag_value
                     }
                     finalizers = [
                       "resources-finalizer.argocd.argoproj.io"
                     ]
                   }
                   spec = {
+                    goTemplate = True
+                    goTemplateOptions = ["missingkey=error"]
                     generators = [
                       {
                         git = {
                           repoURL = "https://github.com/xawei/learning"
                           revision = "HEAD"
-                          directories = [
-                            {
-                              path = "argocd/myprj/clusters/dev/" + oxr.spec.name + "-xplane-eks-cluster/*"
-                              exclude = False
-                            }
-                          ]
                           files = [
                             {
-                              path = "argocd/myprj/clusters/dev/" + oxr.spec.name + "-xplane-eks-cluster/*.yaml"
+                              path = "base-components/dev/" + oxr.spec.name + "-xplane-eks-cluster/*.yaml"
                             }
                           ]
                         }
@@ -1566,17 +1560,15 @@ spec:
                     ]
                     template = {
                       metadata = {
-                        name = "{{path.basename}}"
+                        name = "{{.chart.name}}"
                         namespace = "argocd"
                         labels = {
-                          "app.kubernetes.io/name" = "{{path.basename}}"
+                          "app.kubernetes.io/name" = "{{.chart.name}}"
                           "app.kubernetes.io/part-of" = "argocd"
-                          "consumable.trustbank.sg/owner" = owner_tag_value
                           "consumable.trustbank.sg/cluster" = oxr.spec.name + "-xplane-eks-cluster"
-                          "consumable.trustbank.sg/environment" = "{{path[1]}}"
                         }
                         annotations = {
-                          "argocd.argoproj.io/sync-wave" = "{{path.basenameNormalized}}"
+                          "argocd.argoproj.io/sync-wave" = "{{.chart.syncWave | default \"0\"}}"
                         }
                         finalizers = [
                           "resources-finalizer.argocd.argoproj.io"
@@ -1585,14 +1577,11 @@ spec:
                       spec = {
                         project = "default"
                         source = {
-                          repoURL = "{{url}}"
-                          targetRevision = "{{revision}}"
-                          path = "{{path}}"
+                          chart = "{{.chart.name}}"
+                          repoURL = "{{.chart.repoURL}}"
+                          targetRevision = "{{.chart.targetRevision}}"
                           helm = {
-                            valueFiles = [
-                              "values.yaml",
-                              "values-{{path[1]}}.yaml"
-                            ]
+                            values = "{{ toYaml .chart.values }}"
                             parameters = [
                               {
                                 name = "cluster.name"
@@ -1601,21 +1590,13 @@ spec:
                               {
                                 name = "cluster.region"
                                 value = oxr.spec.location
-                              },
-                              {
-                                name = "environment"
-                                value = "{{path[1]}}"
-                              },
-                              {
-                                name = "owner"
-                                value = owner_tag_value
                               }
                             ]
                           }
                         }
                         destination = {
-                          server = "https://kubernetes.default.svc"
-                          namespace = "{{path.basename}}"
+                          name = "in-cluster"
+                          namespace = "{{.chart.namespace}}"
                         }
                         syncPolicy = {
                           automated = {

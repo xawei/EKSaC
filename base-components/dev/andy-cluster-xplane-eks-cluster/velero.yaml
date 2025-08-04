@@ -8,8 +8,6 @@ chart:
     serviceAccount:
       create: true
       name: velero
-      annotations:
-        eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/velero
     tolerations:
       - key: "karpenter.sh/nodepool"
         operator: "Equal"

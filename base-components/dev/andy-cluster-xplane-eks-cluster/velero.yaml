@@ -1,43 +1,17 @@
-{{- if .Values.velero.enabled }}
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
+chart:
   name: velero
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: default
-  source:
-    repoURL: https://vmware-tanzu.github.io/helm-charts
-    chart: velero
-    targetRevision: 10.0.10
-    helm:
-      values: |
-        serviceAccount:
-          server:
-            create: true
-            annotations:
-              eks.amazonaws.com/role-arn: {{ .Values.velero.serviceAccount.roleARN | quote }}
-        credentials:
-          useSecret: false
-        configuration:
-{{ .Values.velero.configuration | toYaml | indent 10 }}
-        initContainers:
-        - name: velero-plugin-for-aws
-          image: {{ index .Values.velero.plugins 0 "image" }}
-          volumeMounts:
-            - mountPath: /target
-              name: plugins
-        tolerations:
-{{ .Values.velero.tolerations | toYaml | indent 8 }}
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: velero
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-{{- end }} 
+  repoURL: https://vmware-tanzu.github.io/helm-charts
+  targetRevision: 10.0.10
+  namespace: velero
+  syncWave: "0"
+  values:
+    serviceAccount:
+      create: true
+      name: velero
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/velero
+    tolerations:
+      - key: "karpenter.sh/nodepool"
+        operator: "Equal"
+        value: "infra"
+        effect: "NoSchedule"

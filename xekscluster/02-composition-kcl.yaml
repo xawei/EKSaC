@@ -1560,15 +1560,15 @@ spec:
                     ]
                     template = {
                       metadata = {
-                        name = "{{.chart.name}}"
+                        name = "{{if .chart}}{{.chart.name}}{{else}}{{.component.name}}{{end}}"
                         namespace = "argocd"
                         labels = {
-                          "app.kubernetes.io/name" = "{{.chart.name}}"
+                          "app.kubernetes.io/name" = "{{if .chart}}{{.chart.name}}{{else}}{{.component.name}}{{end}}"
                           "app.kubernetes.io/part-of" = "argocd"
                           "consumable.trustbank.sg/cluster" = oxr.spec.name + "-xplane-eks-cluster"
                         }
                         annotations = {
-                          "argocd.argoproj.io/sync-wave" = "{{.chart.syncWave | default \"0\"}}"
+                          "argocd.argoproj.io/sync-wave" = "{{if .chart}}{{.chart.syncWave | default \"0\"}}{{else}}{{.component.syncWave | default \"0\"}}{{end}}"
                         }
                         finalizers = [
                           "resources-finalizer.argocd.argoproj.io"
@@ -1577,11 +1577,15 @@ spec:
                       spec = {
                         project = "default"
                         source = {
+                          # Conditional source configuration based on deployment type
+                          "{{- if .chart }}"
                           chart = "{{.chart.name}}"
                           repoURL = "{{.chart.repoURL}}"
                           targetRevision = "{{.chart.targetRevision}}"
                           helm = {
+                            "{{- if .chart.values }}"
                             values = "{{ toYaml .chart.values }}"
+                            "{{- end }}"
                             parameters = [
                               {
                                 name = "cluster.name"
@@ -1593,10 +1597,15 @@ spec:
                               }
                             ]
                           }
+                          "{{- else }}"
+                          repoURL = "{{.component.repoURL}}"
+                          path = "{{.component.path}}"
+                          targetRevision = "{{.component.targetRevision | default \"HEAD\"}}"
+                          "{{- end }}"
                         }
                         destination = {
                           name = "in-cluster"
-                          namespace = "{{.chart.namespace}}"
+                          namespace = "{{if .chart}}{{.chart.namespace}}{{else}}{{.component.namespace}}{{end}}"
                         }
                         syncPolicy = {
                           automated = {

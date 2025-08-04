@@ -1581,7 +1581,9 @@ spec:
                           repoURL = "{{.chart.repoURL}}"
                           targetRevision = "{{.chart.targetRevision}}"
                           helm = {
+                            {{- if .chart.values }}
                             values = "{{ toYaml .chart.values }}"
+                            {{- end }}
                             parameters = [
                               {
                                 name = "cluster.name"

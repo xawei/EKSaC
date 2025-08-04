@@ -1,0 +1,19 @@
+chart:
+  name: aws-load-balancer-controller
+  repoURL: https://aws.github.io/eks-charts
+  targetRevision: 1.13.2
+  namespace: kube-system
+  syncWave: "0"
+  values:
+    clusterName: andy-cluster-xplane-eks-cluster
+    region: ap-southeast-1
+    replicaCount: 1
+    tolerations:
+      - key: "karpenter.sh/nodepool"
+        operator: "Equal"
+        value: "infra"
+        effect: "NoSchedule"
+    serviceAccount:
+      # This should be created separately with the correct IAM role
+      create: true
+      name: "aws-load-balancer-controller"

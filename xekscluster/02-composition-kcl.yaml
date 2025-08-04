@@ -1579,10 +1579,16 @@ spec:
                         source = {
                           repoURL = "{{if .chart}}{{.chart.repoURL}}{{else}}{{.component.repoURL}}{{end}}"
                           targetRevision = "{{if .chart}}{{.chart.targetRevision}}{{else}}{{.component.targetRevision | default \"HEAD\"}}{{end}}"
+                          "{{- if .chart }}"
                           chart = "{{.chart.name}}"
+                          "{{- end }}"
+                          "{{- if .component }}"
                           path = "{{.component.path}}"
+                          "{{- end }}"
                           helm = {
+                            "{{- if .chart }}"
                             values = "{{ toYaml .chart.values }}"
+                            "{{- end }}"
                             parameters = [
                               {
                                 name = "cluster.name"

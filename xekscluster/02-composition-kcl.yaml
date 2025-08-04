@@ -1548,7 +1548,7 @@ spec:
                     generators = [
                       {
                         git = {
-                          repoURL = "https://github.com/xawei/learning"
+                          repoURL = "https://github.com/xawei/EKSaC"
                           revision = "HEAD"
                           files = [
                             {

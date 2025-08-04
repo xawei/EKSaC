@@ -1577,15 +1577,12 @@ spec:
                       spec = {
                         project = "default"
                         source = {
-                          # Conditional source configuration based on deployment type
-                          "{{- if .chart }}"
+                          repoURL = "{{if .chart}}{{.chart.repoURL}}{{else}}{{.component.repoURL}}{{end}}"
+                          targetRevision = "{{if .chart}}{{.chart.targetRevision}}{{else}}{{.component.targetRevision | default \"HEAD\"}}{{end}}"
                           chart = "{{.chart.name}}"
-                          repoURL = "{{.chart.repoURL}}"
-                          targetRevision = "{{.chart.targetRevision}}"
+                          path = "{{.component.path}}"
                           helm = {
-                            "{{- if .chart.values }}"
                             values = "{{ toYaml .chart.values }}"
-                            "{{- end }}"
                             parameters = [
                               {
                                 name = "cluster.name"
@@ -1597,11 +1594,6 @@ spec:
                               }
                             ]
                           }
-                          "{{- else }}"
-                          repoURL = "{{.component.repoURL}}"
-                          path = "{{.component.path}}"
-                          targetRevision = "{{.component.targetRevision | default \"HEAD\"}}"
-                          "{{- end }}"
                         }
                         destination = {
                           name = "in-cluster"

@@ -1,0 +1,6 @@
+chart:
+  name: eks-pod-identity-agent
+  repoURL: https://github.com/aws/eks-pod-identity-agent
+  targetRevision: main # need to specify a specific version tag
+  namespace: kube-system
+  syncWave: "0"

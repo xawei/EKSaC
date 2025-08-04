@@ -1532,10 +1532,10 @@ spec:
                   apiVersion = "argoproj.io/v1alpha1"
                   kind = "ApplicationSet"
                   metadata = {
-                    name = oxr.spec.name + "-core-components"
+                    name = oxr.spec.name + "-base-components"
                     namespace = "argocd"
                     labels = {
-                      "app.kubernetes.io/name" = oxr.spec.name + "-core-components"
+                      "app.kubernetes.io/name" = oxr.spec.name + "-base-components"
                       "app.kubernetes.io/part-of" = "argocd"
                     }
                     finalizers = [

@@ -1560,15 +1560,15 @@ spec:
                     ]
                     template = {
                       metadata = {
-                        name = "{{if .chart}}{{.chart.name}}{{else}}{{.component.name}}{{end}}"
+                        name = "{{.chart.name}}"
                         namespace = "argocd"
                         labels = {
-                          "app.kubernetes.io/name" = "{{if .chart}}{{.chart.name}}{{else}}{{.component.name}}{{end}}"
+                          "app.kubernetes.io/name" = "{{.chart.name}}"
                           "app.kubernetes.io/part-of" = "argocd"
                           "consumable.trustbank.sg/cluster" = oxr.spec.name + "-xplane-eks-cluster"
                         }
                         annotations = {
-                          "argocd.argoproj.io/sync-wave" = "{{if .chart}}{{.chart.syncWave | default \"0\"}}{{else}}{{.component.syncWave | default \"0\"}}{{end}}"
+                          "argocd.argoproj.io/sync-wave" = "{{.chart.syncWave | default \"0\"}}"
                         }
                         finalizers = [
                           "resources-finalizer.argocd.argoproj.io"
@@ -1577,18 +1577,11 @@ spec:
                       spec = {
                         project = "default"
                         source = {
-                          repoURL = "{{if .chart}}{{.chart.repoURL}}{{else}}{{.component.repoURL}}{{end}}"
-                          targetRevision = "{{if .chart}}{{.chart.targetRevision}}{{else}}{{.component.targetRevision | default \"HEAD\"}}{{end}}"
-                          "{{- if .chart }}"
+                          repoURL = "{{.chart.repoURL}}"
+                          targetRevision = "{{.chart.targetRevision}}"
                           chart = "{{.chart.name}}"
-                          "{{- end }}"
-                          "{{- if .component }}"
-                          path = "{{.component.path}}"
-                          "{{- end }}"
                           helm = {
-                            "{{- if .chart }}"
                             values = "{{ toYaml .chart.values }}"
-                            "{{- end }}"
                             parameters = [
                               {
                                 name = "cluster.name"
@@ -1603,7 +1596,7 @@ spec:
                         }
                         destination = {
                           name = "in-cluster"
-                          namespace = "{{if .chart}}{{.chart.namespace}}{{else}}{{.component.namespace}}{{end}}"
+                          namespace = "{{.chart.namespace}}"
                         }
                         syncPolicy = {
                           automated = {

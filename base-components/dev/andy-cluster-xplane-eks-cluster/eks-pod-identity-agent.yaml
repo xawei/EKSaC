@@ -1,8 +1,14 @@
-component:
+chart:
   name: eks-pod-identity-agent
-  repoURL: https://github.com/aws/eks-pod-identity-agent
-  targetRevision: main
-  path: charts/eks-pod-identity-agent  # or wherever the manifests are
+  repoURL: https://eks-charts.amazonaws.com
+  targetRevision: 1.0.3
   namespace: kube-system
   syncWave: "0"
   values:
+    # Add any specific values for the EKS Pod Identity Agent here
+    # For example:
+    # replicaCount: 2
+    # resources:
+    #   limits:
+    #     cpu: 100m
+    #     memory: 128Mi

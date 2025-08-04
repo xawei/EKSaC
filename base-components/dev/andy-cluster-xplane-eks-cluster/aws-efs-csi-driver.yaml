@@ -7,8 +7,9 @@ chart:
   values:
     controller:
       replicaCount: 1
-    tolerations:
-      - key: "karpenter.sh/nodepool"
-        operator: "Equal"
-        value: "infra"
-        effect: "NoSchedule"
+      
+      tolerations:
+        - key: "karpenter.sh/nodepool"
+          operator: "Equal"
+          value: "infra"
+          effect: "NoSchedule"

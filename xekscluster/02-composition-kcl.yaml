@@ -1508,14 +1508,14 @@ spec:
               providerConfigRef.name = oxr.spec.name + "-providerconfig-kubernetes"
             }
           }]
-  - step: create-argocd-app-of-apps
+  - step: create-argocd-applicationset
     functionRef:
       name: function-kcl
     input:
       apiVersion: krm.kcl.dev/v1alpha1
       kind: KCLInput
       metadata:
-        name: "xplane-argocd-app-of-apps"
+        name: "xplane-argocd-applicationset"
       spec:
         target: Default
         source: |
@@ -1526,17 +1526,17 @@ spec:
           items = [{
             apiVersion = "kubernetes.crossplane.io/v1alpha2"
             kind = "Object"
-            metadata.name = oxr.spec.name + "-xplane-argocd-app-of-apps"
+            metadata.name = oxr.spec.name + "-xplane-argocd-applicationset"
             spec = {
               forProvider = {
                 manifest = {
                   apiVersion = "argoproj.io/v1alpha1"
-                  kind = "Application"
+                  kind = "ApplicationSet"
                   metadata = {
-                    name = oxr.spec.name + "-app-of-apps"
+                    name = oxr.spec.name + "-applicationset"
                     namespace = "argocd"
                     labels = {
-                      "app.kubernetes.io/name" = oxr.spec.name + "-app-of-apps"
+                      "app.kubernetes.io/name" = oxr.spec.name + "-applicationset"
                       "app.kubernetes.io/part-of" = "argocd"
                       "consumable.trustbank.sg/owner" = owner_tag_value
                     }
@@ -1545,38 +1545,101 @@ spec:
                     ]
                   }
                   spec = {
-                    project = "default"
-                    source = {
-                      repoURL = "https://github.com/xawei/learning"
-                      targetRevision = "HEAD"
-                      path = "argocd/myprj/clusters/dev/" + oxr.spec.name + "-xplane-eks-cluster"
-                    }
-                    destination = {
-                      server = "https://kubernetes.default.svc"
-                      namespace = "argocd"
-                    }
-                    syncPolicy = {
-                      automated = {
-                        prune = True
-                        selfHeal = True
-                      }
-                      syncOptions = [
-                        "CreateNamespace=true",
-                        "RespectIgnoreDifferences=true"
-                      ]
-                    }
-                    ignoreDifferences = [
+                    generators = [
                       {
-                        group = "*"
-                        kind = "Application"
-                        namespace = "*"
-                        jsonPointers = [
-                          "/spec/syncPolicy/automated",
-                          "/metadata/annotations/argocd.argoproj.io~1refresh",
-                          "/operation"
-                        ]
+                        git = {
+                          repoURL = "https://github.com/xawei/learning"
+                          revision = "HEAD"
+                          directories = [
+                            {
+                              path = "argocd/myprj/clusters/dev/" + oxr.spec.name + "-xplane-eks-cluster/*"
+                              exclude = False
+                            }
+                          ]
+                          files = [
+                            {
+                              path = "argocd/myprj/clusters/dev/" + oxr.spec.name + "-xplane-eks-cluster/*.yaml"
+                            }
+                          ]
+                        }
                       }
                     ]
+                    template = {
+                      metadata = {
+                        name = "{{path.basename}}"
+                        namespace = "argocd"
+                        labels = {
+                          "app.kubernetes.io/name" = "{{path.basename}}"
+                          "app.kubernetes.io/part-of" = "argocd"
+                          "consumable.trustbank.sg/owner" = owner_tag_value
+                          "consumable.trustbank.sg/cluster" = oxr.spec.name + "-xplane-eks-cluster"
+                          "consumable.trustbank.sg/environment" = "{{path[1]}}"
+                        }
+                        annotations = {
+                          "argocd.argoproj.io/sync-wave" = "{{path.basenameNormalized}}"
+                        }
+                        finalizers = [
+                          "resources-finalizer.argocd.argoproj.io"
+                        ]
+                      }
+                      spec = {
+                        project = "default"
+                        source = {
+                          repoURL = "{{url}}"
+                          targetRevision = "{{revision}}"
+                          path = "{{path}}"
+                          helm = {
+                            valueFiles = [
+                              "values.yaml",
+                              "values-{{path[1]}}.yaml"
+                            ]
+                            parameters = [
+                              {
+                                name = "cluster.name"
+                                value = oxr.spec.name + "-xplane-eks-cluster"
+                              },
+                              {
+                                name = "cluster.region"
+                                value = oxr.spec.location
+                              },
+                              {
+                                name = "environment"
+                                value = "{{path[1]}}"
+                              },
+                              {
+                                name = "owner"
+                                value = owner_tag_value
+                              }
+                            ]
+                          }
+                        }
+                        destination = {
+                          server = "https://kubernetes.default.svc"
+                          namespace = "{{path.basename}}"
+                        }
+                        syncPolicy = {
+                          automated = {
+                            prune = True
+                            selfHeal = True
+                          }
+                          syncOptions = [
+                            "CreateNamespace=true",
+                            "Replace=true"
+                          ]
+                        }
+                        ignoreDifferences = [
+                          {
+                            group = "*"
+                            kind = "*"
+                            namespace = "*"
+                            jsonPointers = [
+                              "/metadata/annotations/argocd.argoproj.io~1refresh",
+                              "/operation"
+                            ]
+                          }
+                        ]
+                      }
+                    }
                   }
                 }
               }
@@ -1754,7 +1817,7 @@ spec:
               by = {
                 apiVersion = "kubernetes.crossplane.io/v1alpha2"
                 kind = "Object"
-                resourceRef.name = oxr.spec.name + "-xplane-argocd-app-of-apps"
+                resourceRef.name = oxr.spec.name + "-xplane-argocd-applicationset"
               }
             }
           }
@@ -1798,4 +1861,4 @@ spec:
         - xplane-fargate-profile-karpenter$
         - xplane-helm-karpenter$
         - xplane-helm-argocd$
-        - xplane-argocd-app-of-apps$
+        - xplane-argocd-applicationset$

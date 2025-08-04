@@ -1,6 +1,0 @@
-chart:
-  name: metric-server
-  repoURL: https://kubernetes-sigs.github.io/metrics-server
-  targetRevision: 3.10.0
-  namespace: kube-system
-  syncWave: "0"

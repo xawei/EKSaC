@@ -4,3 +4,4 @@ chart:
   targetRevision: main # need to specify a specific version tag
   namespace: kube-system
   syncWave: "0"
+  values:

@@ -1,9 +1,14 @@
 chart:
   name: aws-efs-csi-driver
   repoURL: https://kubernetes-sigs.github.io/aws-efs-csi-driver/
-  targetRevision: 1.1.0
+  targetRevision: 3.2.0
   namespace: kube-system
   syncWave: "0"
   values:
     controller:
       replicaCount: 1
+    tolerations:
+      - key: "karpenter.sh/nodepool"
+        operator: "Equal"
+        value: "infra"
+        effect: "NoSchedule"

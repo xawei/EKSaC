@@ -1,0 +1,87 @@
+chart:
+  name: external-dns
+  repoURL: https://kubernetes-sigs.github.io/external-dns/
+  targetRevision: 1.18.0
+  namespace: external-dns
+  syncWave: "0"
+  values:
+    # AWS Route53 provider configuration
+    provider:
+      name: aws
+    
+    # AWS specific configuration
+    aws:
+      region: "{{ .Values.cluster.region }}"
+      zoneType: public
+      assumeRole: ""
+      batchChangeSize: 1000
+      batchChangeInterval: "1s"
+      evaluateTargetHealth: true
+    
+    # Service account with IAM role for IRSA
+    serviceAccount:
+      create: true
+      annotations:
+        eks.amazonaws.com/role-arn: "arn:aws:iam::{{ .Values.cluster.awsAccountId }}:role/ExternalDNSRole-{{ .Values.cluster.name }}"
+    
+    # Resource management
+    resources:
+      requests:
+        cpu: 10m
+        memory: 50Mi
+      limits:
+        cpu: 50m
+        memory: 100Mi
+    
+    tolerations:
+      - key: "karpenter.sh/nodepool"
+        operator: "Equal"
+        value: "infra"
+        effect: "NoSchedule"
+    
+    # DNS configuration
+    policy: upsert-only
+    registry: txt
+    txtOwnerId: "{{ .Values.cluster.name }}"
+    txtPrefix: "external-dns-"
+    
+    # Sync configuration
+    interval: "1m"
+    triggerLoopOnEvent: false
+    
+    # Sources to watch
+    sources:
+      - service
+      - ingress
+    
+    # Domain filters (configure based on your hosted zones)
+    domainFilters: []
+    # Example:
+    # domainFilters:
+    #   - "example.com"
+    #   - "subdomain.example.com"
+    
+    # Exclude domains
+    excludeDomains: []
+    
+    # Log configuration
+    logLevel: info
+    logFormat: text
+    
+    # Metrics
+    metrics:
+      enabled: true
+      port: 7979
+    
+    # Deployment strategy
+    deploymentStrategy:
+      type: Recreate
+    
+    # Pod disruption budget
+    podDisruptionBudget:
+      enabled: false
+    
+    # RBAC
+    rbac:
+      create: true
+      additionalPermissions: []

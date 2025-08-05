@@ -23,56 +23,31 @@ spec:
                 type: string
                 default: "default"
                 description: "Default namespace for components"
-              baseComponents:
-                type: object
-                properties:
-                  certManager:
-                    type: object
-                    properties:
-                      version:
-                        type: string
-                  adot:
-                    type: object
-                    description: "AWS Distro for OpenTelemetry EKS add-on - only installed if specified"
-                    properties:
-                      version:
-                        type: string
-                        description: "ADOT add-on version (required, e.g., 'v0.88.0-eksbuild.1')"
-                    required:
-                    - version
-                  awsEbsCsiDriver:
-                    type: object
-                    description: "AWS EBS CSI Driver EKS add-on - only installed if specified"
-                    properties:
-                      version:
-                        type: string
-                        description: "AWS EBS CSI Driver add-on version (required, e.g., 'v1.35.0-eksbuild.1')"
-                    required:
-                    - version
-                  eksPodIdentityAgent:
-                    type: object
-                    description: "EKS Pod Identity Agent add-on - only installed if specified"
-                    properties:
-                      version:
-                        type: string
-                        description: "EKS Pod Identity Agent add-on version (required, e.g., 'v1.0.0-eksbuild.1')"
-                    required:
-                    - version
-                  awsEfsCsiDriver:
-                    type: object
-                    description: "AWS EFS CSI Driver EKS add-on - only installed if specified"
-                    properties:
-                      version:
-                        type: string
-                        description: "AWS EFS CSI Driver add-on version (required, e.g., 'v1.7.7-eksbuild.1')"
-                    required:
-                    - version
+              eksAddons:
+                type: array
+                description: "List of EKS addons to install"
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: "EKS addon name (e.g., 'adot', 'aws-ebs-csi-driver', 'eks-pod-identity-agent', 'aws-efs-csi-driver')"
+                    version:
+                      type: string
+                      description: "EKS addon version (e.g., 'v0.88.0-eksbuild.1')"
+                    configurationValues:
+                      type: object
+                      description: "Optional configuration values for the addon"
+                      x-kubernetes-preserve-unknown-fields: true
+                  required:
+                  - name
+                  - version
             required:
             - eksClusterRef
           status:
             type: object
             properties:
-              installedComponents:
+              installedAddons:
                 type: array
                 items:
                   type: string
@@ -82,4 +57,4 @@ spec:
     referenceable: true
   claimNames:
     kind: BaseComponent
-    plural: basecomponents 
+    plural: basecomponents

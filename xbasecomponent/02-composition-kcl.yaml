@@ -8,135 +8,14 @@ spec:
     kind: xBaseComponentKcl
   mode: Pipeline
   pipeline:
-  - step: helm-install-cert-manager
+  - step: install-eks-addons
     functionRef:
       name: function-kcl
     input:
       apiVersion: krm.kcl.dev/v1alpha1
       kind: KCLInput
       metadata:
-        name: "cert-manager"
-      spec:
-        target: Default
-        source: |
-          oxr = option("params").oxr
-          # Check if certManager component exists in baseComponents
-          cert_manager_config = oxr.spec.baseComponents?.certManager
-          version = cert_manager_config?.version or "v1.13.2"
-
-          # Default values for cert-manager with Karpenter tolerations
-          default_values = {
-            installCRDs = True
-            tolerations = [
-              {
-                key = "karpenter.sh/nodepool"
-                operator = "Equal"
-                value = "infra"
-                effect = "NoSchedule"
-              }
-            ]
-            webhook = {
-              tolerations = [
-                {
-                  key = "karpenter.sh/nodepool"
-                  operator = "Equal"
-                  value = "infra"
-                  effect = "NoSchedule"
-                }
-              ]
-            }
-            cainjector = {
-              tolerations = [
-                {
-                  key = "karpenter.sh/nodepool"
-                  operator = "Equal"
-                  value = "infra"
-                  effect = "NoSchedule"
-                }
-              ]
-            }
-            startupapicheck = {
-              tolerations = [
-                {
-                  key = "karpenter.sh/nodepool"
-                  operator = "Equal"
-                  value = "infra"
-                  effect = "NoSchedule"
-                }
-              ]
-            }
-          }
-
-          # Only create items if certManager component is specified
-          items = [{
-            apiVersion = "helm.crossplane.io/v1beta1"
-            kind = "Release"
-            metadata.name = oxr.metadata.name + "-cert-manager"
-            metadata.annotations = {
-                "crossplane.io/external-name" = "cert-manager"
-            }
-            spec = {
-              forProvider = {
-                chart = {
-                  name = "cert-manager"
-                  repository = "https://charts.jetstack.io"
-                  version = version
-                }
-                namespace = "cert-manager"
-                values = default_values
-                wait = True
-              }
-              providerConfigRef.name = oxr.spec.eksClusterRef + "-providerconfig-helm"
-            }
-          }] if cert_manager_config else []
-  - step: eks-addon-adot
-    functionRef:
-      name: function-kcl
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        name: "adot-eks-addon"
-      spec:
-        target: Default
-        source: |
-          oxr = option("params").oxr
-          ocds = option("params").ocds
-          # Check if ADOT component exists in baseComponents
-          adot_config = oxr.spec.baseComponents?.adot
-          version = adot_config?.version
-
-          # Get region from the referenced EKS cluster
-          region = ocds[oxr.spec.eksClusterRef]?.Resource?.spec?.location or "ap-southeast-1"
-
-          # Only create items if ADOT component is specified
-          items = [{
-            apiVersion = "eks.aws.upbound.io/v1beta1"
-            kind = "Addon"
-            metadata.name = oxr.metadata.name + "-adot-addon"
-            spec = {
-              forProvider = {
-                addonName = "adot"
-                addonVersion = version
-                region = region
-                clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
-                resolveConflicts = "OVERWRITE"
-                tags = {
-                  Name = oxr.metadata.name + "-adot-addon"
-                  ManagedBy = "crossplane"
-                }
-              }
-              providerConfigRef.name = "provider-aws-eks"
-            }
-          }] if adot_config else []
-  - step: eks-addon-ebs-csi-driver
-    functionRef:
-      name: function-kcl
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        name: "ebs-csi-driver-eks-addon"
+        name: "eks-addons"
       spec:
         target: Default
         source: |
@@ -144,164 +23,65 @@ spec:
           
           oxr = option("params").oxr
           ocds = option("params").ocds
-          # Check if EBS CSI Driver component exists in baseComponents
-          ebs_csi_config = oxr.spec.baseComponents?.awsEbsCsiDriver
-          version = ebs_csi_config?.version
-
-          # Get region from the referenced EKS cluster
-          region = ocds[oxr.spec.eksClusterRef]?.Resource?.spec?.location or "ap-southeast-1"
-
-          # Configuration for EBS CSI Driver with Karpenter tolerations
-          ebs_csi_config_json = {
-            controller = {
-              tolerations = [
-                {
-                  key = "karpenter.sh/nodepool"
-                  operator = "Equal"
-                  value = "infra"
-                  effect = "NoSchedule"
-                }
-              ]
-            }
-          }
-
-          # Only create items if EBS CSI Driver component is specified
-          items = [{
-            apiVersion = "eks.aws.upbound.io/v1beta1"
-            kind = "Addon"
-            metadata.name = oxr.metadata.name + "-ebs-csi-driver-addon"
-            spec = {
-              forProvider = {
-                addonName = "aws-ebs-csi-driver"
-                addonVersion = version
-                region = region
-                clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
-                resolveConflicts = "OVERWRITE"
-                configurationValues = json.encode(ebs_csi_config_json)
-                tags = {
-                  Name = oxr.metadata.name + "-ebs-csi-driver-addon"
-                  ManagedBy = "crossplane"
-                }
-              }
-              providerConfigRef.name = "provider-aws-eks"
-            }
-          }] if ebs_csi_config else []
-  - step: eks-addon-pod-identity-agent
-    functionRef:
-      name: function-kcl
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        name: "pod-identity-agent-eks-addon"
-      spec:
-        target: Default
-        source: |
-          oxr = option("params").oxr
-          ocds = option("params").ocds
-          # Check if EKS Pod Identity Agent component exists in baseComponents
-          pod_identity_config = oxr.spec.baseComponents?.eksPodIdentityAgent
-          version = pod_identity_config?.version
-
-          # Get region from the referenced EKS cluster
-          region = ocds[oxr.spec.eksClusterRef]?.Resource?.spec?.location or "ap-southeast-1"
-
-          # Only create items if EKS Pod Identity Agent component is specified
-          items = [{
-            apiVersion = "eks.aws.upbound.io/v1beta1"
-            kind = "Addon"
-            metadata.name = oxr.metadata.name + "-pod-identity-agent-addon"
-            spec = {
-              forProvider = {
-                addonName = "eks-pod-identity-agent"
-                addonVersion = version
-                region = region
-                clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
-                resolveConflicts = "OVERWRITE"
-                tags = {
-                  Name = oxr.metadata.name + "-pod-identity-agent-addon"
-                  ManagedBy = "crossplane"
-                }
-              }
-              providerConfigRef.name = "provider-aws-eks"
-            }
-          }] if pod_identity_config else []
-  - step: eks-addon-efs-csi-driver
-    functionRef:
-      name: function-kcl
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        name: "efs-csi-driver-eks-addon"
-      spec:
-        target: Default
-        source: |
-          import json
           
-          oxr = option("params").oxr
-          ocds = option("params").ocds
-          # Check if EFS CSI Driver component exists in baseComponents
-          efs_csi_config = oxr.spec.baseComponents?.awsEfsCsiDriver
-          version = efs_csi_config?.version
-
           # Get region from the referenced EKS cluster
           region = ocds[oxr.spec.eksClusterRef]?.Resource?.spec?.location or "ap-southeast-1"
-
-          # Configuration for EFS CSI Driver with Karpenter tolerations
-          efs_csi_config_json = {
-            controller = {
-              tolerations = [
-                {
-                  key = "karpenter.sh/nodepool"
-                  operator = "Equal"
-                  value = "infra"
-                  effect = "NoSchedule"
-                }
-              ]
+          
+          # Default configuration values for different addons
+          default_configs = {
+            "aws-ebs-csi-driver": {
+              controller = {
+                tolerations = [
+                  {
+                    key = "karpenter.sh/nodepool"
+                    operator = "Equal"
+                    value = "infra"
+                    effect = "NoSchedule"
+                  }
+                ]
+              }
+            }
+            "aws-efs-csi-driver": {
+              controller = {
+                tolerations = [
+                  {
+                    key = "karpenter.sh/nodepool"
+                    operator = "Equal"
+                    value = "infra"
+                    effect = "NoSchedule"
+                  }
+                ]
+              }
             }
           }
-
-          # Only create items if EFS CSI Driver component is specified
-          items = [{
-            apiVersion = "eks.aws.upbound.io/v1beta1"
-            kind = "Addon"
-            metadata.name = oxr.metadata.name + "-efs-csi-driver-addon"
-            spec = {
-              forProvider = {
-                addonName = "aws-efs-csi-driver"
-                addonVersion = version
-                region = region
-                clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
-                resolveConflicts = "OVERWRITE"
-                configurationValues = json.encode(efs_csi_config_json)
-                tags = {
-                  Name = oxr.metadata.name + "-efs-csi-driver-addon"
-                  ManagedBy = "crossplane"
+          
+          # Create addon resources for each addon in the list
+          items = [
+            {
+              apiVersion = "eks.aws.upbound.io/v1beta1"
+              kind = "Addon"
+              metadata.name = oxr.metadata.name + "-" + addon.name.replace("_", "-") + "-addon"
+              spec = {
+                forProvider = {
+                  addonName = addon.name
+                  addonVersion = addon.version
+                  region = region
+                  clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
+                  resolveConflicts = "OVERWRITE"
+                  configurationValues = json.encode(
+                    addon.configurationValues if addon.configurationValues else 
+                    default_configs[addon.name] if addon.name in default_configs else {}
+                  ) if (addon.configurationValues or addon.name in default_configs) else None
+                  tags = {
+                    Name = oxr.metadata.name + "-" + addon.name + "-addon"
+                    ManagedBy = "crossplane"
+                  }
                 }
+                providerConfigRef.name = "provider-aws-eks"
               }
-              providerConfigRef.name = "provider-aws-eks"
             }
-          }] if efs_csi_config else []
+            for addon in (oxr.spec.eksAddons or [])
+          ]
   - step: auto-ready
     functionRef:
       name: function-auto-ready
-  - step: creation-sequence
-    functionRef:
-      name: function-sequencer
-    input:
-      apiVersion: sequencer.fn.crossplane.io/v1beta1
-      kind: Input
-      metadata:
-        name: creation-sequence
-      rules:
-      - sequence:
-        - cert-manager$
-      - sequence:
-        - adot-eks-addon$
-      - sequence:
-        - ebs-csi-driver-eks-addon$
-      - sequence:
-        - pod-identity-agent-eks-addon$
-      - sequence:
-        - efs-csi-driver-eks-addon$ 

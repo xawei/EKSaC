@@ -1,0 +1,49 @@
+chart:
+  name: metrics-server
+  repoURL: https://kubernetes-sigs.github.io/metrics-server/
+  targetRevision: 3.12.1
+  namespace: kube-system
+  syncWave: "0"
+  values:
+    # Enable metrics-server for HPA and kubectl top commands
+    args:
+      - --cert-dir=/tmp
+      - --secure-port=4443
+      - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+      - --kubelet-use-node-status-port
+      - --metric-resolution=15s
+    
+    # Resource requests and limits
+    resources:
+      requests:
+        cpu: 100m
+        memory: 200Mi
+      limits:
+        cpu: 1000m
+        memory: 1000Mi
+    
+    tolerations:
+      - key: "karpenter.sh/nodepool"
+        operator: "Equal"
+        value: "infra"
+        effect: "NoSchedule"
+    
+    # Security context
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+    
+    # Service configuration
+    service:
+      type: ClusterIP
+      port: 443
+    
+    # Deployment configuration
+    replicas: 1

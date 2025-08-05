@@ -27,3 +27,17 @@ chart:
     installCRDs: false
     # Or use upgrade CRDs hook
     upgradeCRDs: false
+    # AWS provider configuration
+    configuration:
+      provider: aws
+      backupStorageLocation:
+        name: default
+        provider: aws
+        bucket: velero-backup-andy-cluster-xplane-eks-cluster  # Replace with your actual S3 bucket name
+        config:
+          region: ap-southeast-1  # Replace with your AWS region
+      volumeSnapshotLocation:
+        name: default
+        provider: aws
+        config:
+          region: ap-southeast-1  # Replace with your AWS region

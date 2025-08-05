@@ -1,7 +1,7 @@
 chart:
   name: eks-pod-identity-agent
-  repoURL: https://eks-charts.amazonaws.com
-  targetRevision: 1.0.3
+  repoURL: oci://ghcr.io/xawei
+  targetRevision: 1.2.0
   namespace: kube-system
   syncWave: "0"
   values:

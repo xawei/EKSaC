@@ -6,14 +6,6 @@ metadata:
 spec:
   eksClusterRef: "andy-cluster"
   namespace: "eksac"
-  baseComponents:
-    certManager:
-      version: "v1.13.3"
-    # adot:
-    #   version: "v0.117.0-eksbuild.1"
-    awsEbsCsiDriver:
-      version: "v1.46.0-eksbuild.1"
-    eksPodIdentityAgent:
-      version: "v1.0.0-eksbuild.1"
-    awsEfsCsiDriver:
-      version: "v2.1.9-eksbuild.1" 
+  eksAddons:
+  - name: "eks-pod-identity-agent"
+    version: "v1.0.0-eksbuild.1"

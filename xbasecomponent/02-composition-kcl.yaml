@@ -69,8 +69,9 @@ spec:
                   clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
                   resolveConflicts = "OVERWRITE"
                   configurationValues = json.encode(
-                    addon.configurationValues if addon.configurationValues else 
-                    default_configs[addon.name] if addon.name in default_configs else {}
+                    addon.configurationValues if addon.configurationValues else (
+                      default_configs[addon.name] if addon.name in default_configs else {}
+                    )
                   ) if (addon.configurationValues or addon.name in default_configs) else None
                   tags = {
                     Name = oxr.metadata.name + "-" + addon.name + "-addon"

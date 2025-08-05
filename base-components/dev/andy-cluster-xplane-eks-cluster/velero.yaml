@@ -23,3 +23,7 @@ chart:
         operator: "Equal"
         value: "infra"
         effect: "NoSchedule"
+    # Disable CRD installation to avoid conflicts
+    installCRDs: false
+    # Or use upgrade CRDs hook
+    upgradeCRDs: false

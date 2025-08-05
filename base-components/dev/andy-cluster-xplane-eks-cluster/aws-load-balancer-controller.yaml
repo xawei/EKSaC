@@ -6,7 +6,7 @@ chart:
   syncWave: "0"
   values:
     clusterName: andy-cluster-xplane-eks-cluster
-    region: ap-southeast-1
+    region: "{{ .Values.cluster.region }}"
     replicaCount: 1
     tolerations:
       - key: "karpenter.sh/nodepool"

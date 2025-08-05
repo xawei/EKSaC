@@ -1685,7 +1685,7 @@ spec:
 
           items = [
             clusterreleasekarpanter, clusterauthreleasekarpenter, accessentryreleasekarpenter, accesspolicyassociationreleasekarpenter, 
-            helmproviderconfigreleasekarpenter, karpenterreleasecilium, karpenterreleasecoredns,corednsreleasenodepool, argocdreleasebeforecluster, argocdhelmerreleasebeforecluster
+            helmproviderconfigreleasekarpenter, karpenterreleasecilium, karpenterreleasecoredns,corednsreleasenodepool, argocdhelmerreleasebeforecluster
           ]
   - step: auto-ready
     functionRef:

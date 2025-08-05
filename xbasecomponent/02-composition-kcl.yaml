@@ -82,6 +82,165 @@ spec:
             }
             for addon in (oxr.spec.eksAddons or [])
           ]
+  - step: create-argocd-applicationset
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "xplane-argocd-applicationset"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+          ocds = option("params").ocds
+          labels = oxr.metadata?.labels or {}
+          
+          # Get information from the referenced EKS cluster
+          eks_cluster_resource = ocds[oxr.spec.eksClusterRef]?.Resource
+          cluster_name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
+          region = eks_cluster_resource?.spec?.location or "ap-southeast-1"
+          aws_account_id = eks_cluster_resource?.spec?.awsAccountId or "unknown"
+
+          items = [{
+            apiVersion = "kubernetes.crossplane.io/v1alpha2"
+            kind = "Object"
+            metadata.name = oxr.metadata.name + "-xplane-argocd-applicationset"
+            spec = {
+              forProvider = {
+                manifest = {
+                  apiVersion = "argoproj.io/v1alpha1"
+                  kind = "ApplicationSet"
+                  metadata = {
+                    name = cluster_name + "-base-components"
+                    namespace = "argocd"
+                    labels = {
+                      "app.kubernetes.io/name" = cluster_name + "-base-components"
+                      "app.kubernetes.io/part-of" = "argocd"
+                    }
+                    finalizers = [
+                      "resources-finalizer.argocd.argoproj.io"
+                    ]
+                  }
+                  spec = {
+                    goTemplate = True
+                    goTemplateOptions = ["missingkey=error"]
+                    generators = [
+                      {
+                        git = {
+                          repoURL = "https://github.com/xawei/EKSaC"
+                          revision = "HEAD"
+                          files = [
+                            {
+                              path = "base-components/dev/" + cluster_name + "/*.yaml"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                    template = {
+                      metadata = {
+                        name = "{{.chart.name}}"
+                        namespace = "argocd"
+                        labels = {
+                          "app.kubernetes.io/name" = "{{.chart.name}}"
+                          "app.kubernetes.io/part-of" = "argocd"
+                          "consumable.trustbank.sg/cluster" = cluster_name
+                        }
+                        annotations = {
+                          "argocd.argoproj.io/sync-wave" = "{{.chart.syncWave | default \"0\"}}"
+                        }
+                        finalizers = [
+                          "resources-finalizer.argocd.argoproj.io"
+                        ]
+                      }
+                      spec = {
+                        project = "default"
+                        source = {
+                          repoURL = "{{.chart.repoURL}}"
+                          targetRevision = "{{.chart.targetRevision}}"
+                          chart = "{{.chart.name}}"
+                          helm = {
+                            values = "{{ toYaml .chart.values }}"
+                            parameters = [
+                              {
+                                name = "cluster.name"
+                                value = cluster_name
+                              },
+                              {
+                                name = "cluster.region"
+                                value = region
+                              },
+                              {
+                                name = "cluster.awsAccountId"
+                                value = aws_account_id
+                              }
+                            ]
+                          }
+                        }
+                        destination = {
+                          name = "in-cluster"
+                          namespace = "{{.chart.namespace}}"
+                        }
+                        syncPolicy = {
+                          automated = {
+                            prune = True
+                            selfHeal = True
+                          }
+                          syncOptions = [
+                            "CreateNamespace=true",
+                            "Replace=true"
+                          ]
+                        }
+                        ignoreDifferences = [
+                          {
+                            group = "*"
+                            kind = "*"
+                            namespace = "*"
+                            jsonPointers = [
+                              "/metadata/annotations/argocd.argoproj.io~1refresh",
+                              "/operation"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+              managementPolicies = ["Create", "Update", "Observe", "Delete"]
+              providerConfigRef.name = oxr.spec.eksClusterRef + "-providerconfig-kubernetes"
+            }
+          }]
+  - step: teardown-sequence
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: teardown-sequence
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+
+          # No Usage resources needed for now
+          items = []
   - step: auto-ready
     functionRef:
       name: function-auto-ready
+  - step: creation-sequence
+    functionRef:
+      name: function-sequencer
+    input:
+      apiVersion: sequencer.fn.crossplane.io/v1beta1
+      kind: Input
+      metadata:
+        name: creation-sequence
+        namespace: eksac
+      rules:
+      - sequence:
+        - "eks-addons"
+        - "xplane-argocd-applicationset"

@@ -29,7 +29,6 @@ chart:
     upgradeCRDs: false
     # AWS provider configuration
     configuration:
-      provider: aws
       backupStorageLocation:
         - name: default
           provider: aws

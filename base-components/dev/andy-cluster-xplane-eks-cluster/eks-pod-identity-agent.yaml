@@ -1,6 +1,6 @@
 chart:
   name: eks-pod-identity-agent
-  repoURL: oci://ghcr.io/xawei
+  repoURL: https://csxawei.github.io/helm-repo
   targetRevision: 1.2.0
   namespace: kube-system
   syncWave: "0"

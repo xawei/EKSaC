@@ -11,7 +11,7 @@ chart:
       server:
         create: true
         annotations:
-          eks.amazonaws.com/role-arn: arn:aws:iam::249140151390:role/VeleroRole-andy-cluster-xplane-eks-cluster
+          eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Values.cluster.awsAccountId }}:role/VeleroRole-{{ .Values.cluster.name }}
     initContainers:
       - name: velero-plugin-for-aws
         image: velero/velero-plugin-for-aws:v1.5.0
@@ -33,11 +33,11 @@ chart:
       backupStorageLocation:
         name: default
         provider: aws
-        bucket: velero-backup-andy-cluster-xplane-eks-cluster  # Replace with your actual S3 bucket name
+        bucket: velero-backup-{{ .Values.cluster.name }}
         config:
-          region: ap-southeast-1  # Replace with your AWS region
+          region: {{ .Values.cluster.region }}
       volumeSnapshotLocation:
         name: default
         provider: aws
         config:
-          region: ap-southeast-1  # Replace with your AWS region
+          region: {{ .Values.cluster.region }}

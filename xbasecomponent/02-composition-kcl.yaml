@@ -224,8 +224,26 @@ spec:
         source: |
           oxr = option("params").oxr
 
-          # No Usage resources needed for now
-          items = []
+          # Only need ApplicationSet usage to ensure it's deleted before the EKS cluster
+          applicationset_usage = {
+            apiVersion = "apiextensions.crossplane.io/v1alpha1"
+            kind = "Usage"
+            metadata.name = oxr.metadata.name + "-applicationset-usage"
+            spec = {
+              of = {
+                apiVersion = "kubernetes.crossplane.io/v1alpha2"
+                kind = "Object"
+                resourceRef.name = oxr.metadata.name + "-xplane-argocd-applicationset"
+              }
+              by = {
+                apiVersion = "consumable.trustbank.sg/v1alpha1"
+                kind = "xEksClusterKcl"
+                resourceRef.name = oxr.spec.eksClusterRef
+              }
+            }
+          }
+
+          items = [applicationset_usage]
   - step: auto-ready
     functionRef:
       name: function-auto-ready

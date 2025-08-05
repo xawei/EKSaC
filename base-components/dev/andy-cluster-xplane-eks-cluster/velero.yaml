@@ -31,13 +31,13 @@ chart:
     configuration:
       provider: aws
       backupStorageLocation:
-        name: default
-        provider: aws
-        bucket: "velero-backup-{{ .Values.cluster.name }}"
-        config:
-          region: "{{ .Values.cluster.region }}"
+        - name: default
+          provider: aws
+          bucket: "velero-backup-{{ .Values.cluster.name }}"
+          config:
+            region: "{{ .Values.cluster.region }}"
       volumeSnapshotLocation:
-        name: default
-        provider: aws
-        config:
-          region: "{{ .Values.cluster.region }}"
+        - name: default
+          provider: aws
+          config:
+            region: "{{ .Values.cluster.region }}"

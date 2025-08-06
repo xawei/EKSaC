@@ -26,6 +26,14 @@ spec:
                 type: string
                 oneOf:
                 - pattern: '^ap-southeast-1$'
+              enableVelero:
+                type: boolean
+                default: false
+                description: "Enable Velero backup solution with S3 bucket creation"
+              enableEFSCSIDriver:
+                type: boolean
+                default: false
+                description: "Enable EFS CSI driver with EFS filesystem creation"
               namespace:
                 type: string
                 default: "default"

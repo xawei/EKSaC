@@ -79,6 +79,80 @@ spec:
             }
             for addon in (oxr.spec.eksAddons or [])
           ]
+  - step: create-s3-bucket-for-velero
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "s3-bucket-velero"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+          
+          cluster_name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
+          region = oxr.spec.location
+          
+          # Only create S3 bucket if Velero is enabled
+          items = [
+            {
+              apiVersion = "s3.aws.upbound.io/v1beta1"
+              kind = "Bucket"
+              metadata.name = oxr.metadata.name + "-velero-backup-bucket"
+              spec = {
+                forProvider = {
+                  bucket = cluster_name + "-velero-backup-" + oxr.metadata.name
+                  region = region
+                  tags = {
+                    Name = cluster_name + "-velero-backup"
+                    ManagedBy = "crossplane"
+                    Purpose = "velero-backup"
+                  }
+                }
+                providerConfigRef.name = "provider-aws-s3"
+              }
+            }
+          ] if (oxr.spec.enableVelero or False) else []
+  - step: create-efs-filesystem
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: "efs-filesystem"
+      spec:
+        target: Default
+        source: |
+          oxr = option("params").oxr
+          
+          cluster_name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
+          region = oxr.spec.location
+          
+          # Only create EFS if EFS CSI driver is enabled
+          items = [
+            {
+              apiVersion = "efs.aws.upbound.io/v1beta1"
+              kind = "FileSystem"
+              metadata.name = oxr.metadata.name + "-efs-filesystem"
+              spec = {
+                forProvider = {
+                  region = region
+                  performanceMode = "generalPurpose"
+                  throughputMode = "provisioned"
+                  provisionedThroughputInMibps = 100
+                  tags = {
+                    Name = cluster_name + "-efs"
+                    ManagedBy = "crossplane"
+                    Purpose = "efs-csi-driver"
+                  }
+                }
+                providerConfigRef.name = "provider-aws-efs"
+              }
+            }
+          ] if (oxr.spec.enableEFSCSIDriver or False) else []
   - step: create-argocd-applicationset
     functionRef:
       name: function-kcl
@@ -91,12 +165,59 @@ spec:
         target: Default
         source: |
           oxr = option("params").oxr
-          # ocds = option("params").ocds 
+          ocds = option("params").ocds
           labels = oxr.metadata?.labels or {}
           
           cluster_name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
           region = oxr.spec.location or "unknown"
           aws_account_id = oxr.spec.awsAccountId or "unknown"
+          
+          # Get S3 bucket name if Velero is enabled
+          s3_bucket_name = ""
+          if oxr.spec.enableVelero:
+              s3_bucket_resource = ocds[oxr.metadata.name + "-velero-backup-bucket"]?.Resource
+              s3_bucket_name = s3_bucket_resource?.spec?.forProvider?.bucket or ""
+          
+          # Get EFS filesystem ID if EFS CSI driver is enabled
+          efs_filesystem_id = ""
+          if oxr.spec.enableEFSCSIDriver:
+              efs_resource = ocds[oxr.metadata.name + "-efs-filesystem"]?.Resource
+              efs_filesystem_id = efs_resource?.status?.atProvider?.id or ""
+
+          # Build base parameters
+          base_parameters = [
+            {
+              name = "cluster.name"
+              value = cluster_name
+            },
+            {
+              name = "cluster.region"
+              value = region
+            },
+            {
+              name = "cluster.awsAccountId"
+              value = aws_account_id
+            }
+          ]
+          
+          # Add Velero S3 bucket parameter if enabled
+          velero_parameters = [
+            {
+              name = "velero.s3BucketName"
+              value = s3_bucket_name
+            }
+          ] if oxr.spec.enableVelero and s3_bucket_name else []
+          
+          # Add EFS filesystem ID parameter if enabled
+          efs_parameters = [
+            {
+              name = "efs.filesystemId"
+              value = efs_filesystem_id
+            }
+          ] if oxr.spec.enableEFSCSIDriver and efs_filesystem_id else []
+          
+          # Combine all parameters
+          all_parameters = base_parameters + velero_parameters + efs_parameters
 
           items = [{
             apiVersion = "kubernetes.crossplane.io/v1alpha2"
@@ -158,20 +279,7 @@ spec:
                           chart = "{{.chart.name}}"
                           helm = {
                             values = "{{ toYaml .chart.values }}"
-                            parameters = [
-                              {
-                                name = "cluster.name"
-                                value = cluster_name
-                              },
-                              {
-                                name = "cluster.region"
-                                value = region
-                              },
-                              {
-                                name = "cluster.awsAccountId"
-                                value = aws_account_id
-                              }
-                            ]
+                            parameters = all_parameters
                           }
                         }
                         destination = {
@@ -256,4 +364,6 @@ spec:
       rules:
       - sequence:
         - "eks-addons"
+        - "s3-bucket-velero"
+        - "efs-filesystem"
         - "xplane-argocd-applicationset"

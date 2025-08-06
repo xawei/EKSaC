@@ -16,4 +16,4 @@ chart:
     serviceAccount:
       # This should be created separately with the correct IAM role
       create: true
-      name: "aws-load-balancer-controller"
+      name: "aws-load-balancer-controller-{{ .Values.cluster.region }}"

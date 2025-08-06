@@ -98,7 +98,7 @@ spec:
           # Only create S3 bucket if Velero is enabled
           items = [
             {
-              apiVersion = "s3.aws.upbound.io/v1beta1"
+              apiVersion = "s3.aws.upbound.io/v1beta2"
               kind = "Bucket"
               metadata.name = oxr.metadata.name + "-velero-backup-bucket"
               spec = {

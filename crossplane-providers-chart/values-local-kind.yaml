@@ -9,7 +9,7 @@ provider:
       deploymentTemplate:
         spec:
           replicas: 1
-    version: v1
+    version: v1.23.2
     
     # Set deployment mode to local for Kind clusters
     deploymentMode: "local"

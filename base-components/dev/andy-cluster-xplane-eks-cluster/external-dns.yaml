@@ -13,10 +13,8 @@ chart:
     serviceAccount:
       create: true
       name: "external-dns-sa"
-      labels:
-        eks.amazonaws.com/role-arn: "arn:aws:iam::{{ .Values.cluster.awsAccountId }}:role/ExternalDNSRole-{{ .Values.cluster.name }}"
       annotations:
-        eks.amazonaws.com/role-arn: "arn:aws:iam::{{ .Values.cluster.awsAccountId }}:role/ExternalDNSRole-{{ .Values.cluster.name }}"
+        eks.amazonaws.com/role-arn: "arn:aws:iam::{{ .Values.cluster.awsAccountId }}:role/ExternalDNS-{{ .Values.cluster.name }}"
     
     # Resource management
     resources:

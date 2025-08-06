@@ -40,3 +40,13 @@ chart:
           provider: aws
           config:
             region: "{{ .Values.cluster.region }}"
+    # Current setup
+    # schedules:
+    #   daily-backup-all:
+    #     disabled: true
+    #     schedule: "0 17 * * *"
+    #     useOwnerReferencesInBackup: false
+    #     template:
+    #       ttl: "168h0m0s"
+    #       includedNamespaces:
+    #         - "*"

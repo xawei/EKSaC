@@ -6,6 +6,6 @@ metadata:
 spec:
   eksClusterRef: "andy-cluster"
   namespace: "eksac"
-  eksAddons:
-  - name: "eks-pod-identity-agent"
-    version: "v1.0.0-eksbuild.1"
+  # eksAddons:
+  # - name: "eks-pod-identity-agent"
+  #   version: "v1.0.0-eksbuild.1"

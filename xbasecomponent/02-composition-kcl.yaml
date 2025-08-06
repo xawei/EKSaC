@@ -224,7 +224,7 @@ spec:
         source: |
           oxr = option("params").oxr
 
-          # Only need ApplicationSet usage to ensure it's deleted before the EKS cluster
+          # Reference the actual EKS cluster managed resource instead of the composite
           applicationset_usage = {
             apiVersion = "apiextensions.crossplane.io/v1alpha1"
             kind = "Usage"
@@ -236,9 +236,9 @@ spec:
                 resourceRef.name = oxr.metadata.name + "-xplane-argocd-applicationset"
               }
               by = {
-                apiVersion = "consumable.trustbank.sg/v1alpha1"
-                kind = "xEksClusterKcl"
-                resourceRef.name = oxr.spec.eksClusterRef
+                apiVersion = "eks.aws.upbound.io/v1beta1"
+                kind = "Cluster"
+                resourceRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
               }
             }
           }

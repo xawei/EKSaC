@@ -47,6 +47,7 @@ spec:
                   - version
             required:
             - eksClusterRef
+            - awsAccountId
           status:
             type: object
             properties:

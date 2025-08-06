@@ -6,7 +6,7 @@ chart:
   syncWave: "0"
   values:
     clusterName: andy-cluster-xplane-eks-cluster
-    region: "{{ .Values.cluster.region }}"
+    # region: "{{ .Values.cluster.region }}"
     watchNamespace: "{{ .Values.cluster.region }}"
     replicaCount: 1
     tolerations:

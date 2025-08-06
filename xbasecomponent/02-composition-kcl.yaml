@@ -100,10 +100,14 @@ spec:
             {
               apiVersion = "s3.aws.upbound.io/v1beta2"
               kind = "Bucket"
-              metadata.name = oxr.metadata.name + "-velero-backup-bucket"
+              metadata = {
+                name = oxr.metadata.name + "-velero-backup-bucket"
+                annotations = {
+                  "crossplane.io/external-name" = cluster_name + "-velero-backup-" + oxr.metadata.name
+                }
+              }
               spec = {
                 forProvider = {
-                  bucket = cluster_name + "-velero-backup-" + oxr.metadata.name
                   region = region
                   tags = {
                     Name = cluster_name + "-velero-backup"

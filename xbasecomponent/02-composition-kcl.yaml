@@ -113,6 +113,7 @@ spec:
                     Name = cluster_name + "-velero-backup"
                     ManagedBy = "crossplane"
                     Purpose = "velero-backup"
+                    "kubernetes.io/cluster/" + cluster_name = "owned"
                   }
                 }
                 providerConfigRef.name = "provider-aws-s3"

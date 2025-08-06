@@ -17,7 +17,7 @@ chart:
           value: "infra"
           effect: "NoSchedule"
 
-    storageClass:
+    storageClasses:
       - name: efs-sc
         annotations:
           "storageclass.kubernetes.io/is-default-class": "false"

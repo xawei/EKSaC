@@ -25,7 +25,7 @@ chart:
           - tls
         parameters:
           provisioningMode: efs-ap
-          # fileSystemId: fs-01234567890abcdef # need to create in advance
+          fileSystemId: "{{ .Values.efs.filesystemId }}" # need to create in advance
           directoryPerms: "700"
           gidRangeStart: "1000"
           gidRangeEnd: "5000"

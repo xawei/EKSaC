@@ -29,12 +29,12 @@ chart:
     upgradeCRDs: false
     # AWS provider configuration
     configuration:
-      backupStorageLocation:
-        - name: default
-          provider: aws
-          # bucket: "{{ .Values.velero.s3BucketName }}"
-          config:
-            region: "{{ .Values.cluster.region }}"
+      # backupStorageLocation:
+      #   - name: default
+      #     provider: aws
+      #     bucket: "{{ .Values.velero.s3BucketName }}"
+      #     config:
+      #       region: "{{ .Values.cluster.region }}"
       volumeSnapshotLocation:
         - name: default
           provider: aws

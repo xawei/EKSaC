@@ -22,6 +22,10 @@ spec:
               awsAccountId:
                 type: string
                 description: "AWS Account ID where the EKS cluster is deployed"
+              location:
+                type: string
+                oneOf:
+                - pattern: '^ap-southeast-1$'
               namespace:
                 type: string
                 default: "default"
@@ -48,6 +52,7 @@ spec:
             required:
             - eksClusterRef
             - awsAccountId
+            - location
           status:
             type: object
             properties:

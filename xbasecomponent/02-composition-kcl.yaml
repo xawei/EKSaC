@@ -22,10 +22,9 @@ spec:
           import json
           
           oxr = option("params").oxr
-          ocds = option("params").ocds
+          # ocds = option("params").ocds
           
-          # Get region from the referenced EKS cluster
-          region = ocds[oxr.spec.eksClusterRef]?.Resource?.spec?.location or "ap-southeast-1"
+          region = oxr.spec.location
           
           # Default configuration values for different addons
           default_configs = {
@@ -92,13 +91,11 @@ spec:
         target: Default
         source: |
           oxr = option("params").oxr
-          ocds = option("params").ocds 
+          # ocds = option("params").ocds 
           labels = oxr.metadata?.labels or {}
           
-          # Get information from the referenced EKS cluster
-          eks_cluster_resource = ocds[oxr.spec.eksClusterRef]?.Resource
           cluster_name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
-          region = eks_cluster_resource?.spec?.forProvider?.region or "unknown"
+          region = oxr.spec.location or "unknown"
           aws_account_id = oxr.spec.awsAccountId or "unknown"
 
           items = [{

@@ -6,6 +6,7 @@ metadata:
 spec:
   eksClusterRef: "andy-cluster"
   awsAccountId: "249140151390" # Replace with your AWS account ID
+  location: "ap-southeast-1"
   namespace: "eksac"
   # eksAddons:
   # - name: "eks-pod-identity-agent"

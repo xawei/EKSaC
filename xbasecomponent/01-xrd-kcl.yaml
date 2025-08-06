@@ -19,6 +19,9 @@ spec:
               eksClusterRef:
                 type: string
                 description: "Reference to the EksCluster claim name (e.g. 'eksac-cluster01') to deploy components to"
+              awsAccountId:
+                type: string
+                description: "AWS Account ID where the EKS cluster is deployed"
               namespace:
                 type: string
                 default: "default"

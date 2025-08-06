@@ -4,6 +4,85 @@
 CLUSTER_NAME="andy-cluster-xplane-eks-cluster"
 REGION="ap-southeast-1"
 
+# Clean up EKS cluster and associated resources
+echo "Checking for EKS cluster: $CLUSTER_NAME"
+EKS_CLUSTER=$(aws eks describe-cluster --region $REGION --name $CLUSTER_NAME --query 'cluster.name' --output text 2>/dev/null || echo "")
+
+if [ ! -z "$EKS_CLUSTER" ] && [ "$EKS_CLUSTER" != "None" ]; then
+  echo "Found EKS cluster: $EKS_CLUSTER"
+  
+  # Delete node groups first
+  echo "Checking for node groups..."
+  NODE_GROUPS=$(aws eks list-nodegroups --region $REGION --cluster-name $CLUSTER_NAME --query 'nodegroups' --output text 2>/dev/null || echo "")
+  
+  if [ ! -z "$NODE_GROUPS" ]; then
+    echo "Found node groups: $NODE_GROUPS"
+    for ng in $NODE_GROUPS; do
+      echo "Deleting node group: $ng"
+      aws eks delete-nodegroup --region $REGION --cluster-name $CLUSTER_NAME --nodegroup-name $ng
+    done
+    
+    # Wait for node groups to be deleted
+    echo "Waiting for node groups to be deleted..."
+    for ng in $NODE_GROUPS; do
+      aws eks wait nodegroup-deleted --region $REGION --cluster-name $CLUSTER_NAME --nodegroup-name $ng
+      echo "Node group $ng deleted."
+    done
+  else
+    echo "No node groups found."
+  fi
+  
+  # Delete Fargate profiles
+  echo "Checking for Fargate profiles..."
+  FARGATE_PROFILES=$(aws eks list-fargate-profiles --region $REGION --cluster-name $CLUSTER_NAME --query 'fargateProfileNames' --output text 2>/dev/null || echo "")
+  
+  if [ ! -z "$FARGATE_PROFILES" ]; then
+    echo "Found Fargate profiles: $FARGATE_PROFILES"
+    for fp in $FARGATE_PROFILES; do
+      echo "Deleting Fargate profile: $fp"
+      aws eks delete-fargate-profile --region $REGION --cluster-name $CLUSTER_NAME --fargate-profile-name $fp
+    done
+    
+    # Wait for Fargate profiles to be deleted
+    echo "Waiting for Fargate profiles to be deleted..."
+    for fp in $FARGATE_PROFILES; do
+      aws eks wait fargate-profile-deleted --region $REGION --cluster-name $CLUSTER_NAME --fargate-profile-name $fp
+      echo "Fargate profile $fp deleted."
+    done
+  else
+    echo "No Fargate profiles found."
+  fi
+  
+  # Delete addons
+  echo "Checking for EKS addons..."
+  ADDONS=$(aws eks list-addons --region $REGION --cluster-name $CLUSTER_NAME --query 'addons' --output text 2>/dev/null || echo "")
+  
+  if [ ! -z "$ADDONS" ]; then
+    echo "Found addons: $ADDONS"
+    for addon in $ADDONS; do
+      echo "Deleting addon: $addon"
+      aws eks delete-addon --region $REGION --cluster-name $CLUSTER_NAME --addon-name $addon
+    done
+    
+    # Wait for addons to be deleted
+    echo "Waiting for addons to be deleted..."
+    sleep 30  # Give some time for addons to start deletion
+  else
+    echo "No addons found."
+  fi
+  
+  # Finally delete the cluster
+  echo "Deleting EKS cluster: $CLUSTER_NAME"
+  aws eks delete-cluster --region $REGION --name $CLUSTER_NAME
+  
+  # Wait for cluster to be deleted
+  echo "Waiting for EKS cluster to be deleted..."
+  aws eks wait cluster-deleted --region $REGION --name $CLUSTER_NAME
+  echo "EKS cluster $CLUSTER_NAME deleted."
+else
+  echo "No EKS cluster found with name: $CLUSTER_NAME"
+fi
+
 # Clean up any orphaned EC2 instances using AWS EKS cluster tag
 echo "Checking for orphaned EC2 instances with EKS cluster tag..."
 ORPHANED_INSTANCES=$(aws ec2 describe-instances \

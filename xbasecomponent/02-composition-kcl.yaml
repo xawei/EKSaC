@@ -103,7 +103,7 @@ spec:
               metadata = {
                 name = oxr.metadata.name + "-velero-backup-bucket"
                 annotations = {
-                  "crossplane.io/external-name" = cluster_name + "-velero-backup-" + oxr.metadata.name
+                  "crossplane.io/external-name" = cluster_name + "-velero-backup"
                 }
               }
               spec = {

@@ -11,9 +11,7 @@ chart:
       server:
         create: true
         annotations:
-          # Testing
-          eks.amazonaws.com/role-arn: "arn:aws:iam::{{ .Values.cluster.awsAccountId }}:role/ExternalDNSRole-{{ .Values.cluster.name }}"
-          # eks.amazonaws.com/role-arn: "arn:aws:iam::{{ .Values.cluster.awsAccountId }}:role/VeleroRole-{{ .Values.cluster.name }}"
+          eks.amazonaws.com/role-arn: "arn:aws:iam::{{ .Values.cluster.awsAccountId }}:role/VeleroRole-{{ .Values.cluster.name }}"
     initContainers:
       - name: velero-plugin-for-aws
         image: velero/velero-plugin-for-aws:v1.5.0
@@ -31,12 +29,12 @@ chart:
     upgradeCRDs: false
     # AWS provider configuration
     configuration:
-      # backupStorageLocation:
-      #   - name: default
-      #     provider: aws
-      #     bucket: "{{ .Values.velero.s3BucketName }}"
-      #     config:
-      #       region: "{{ .Values.cluster.region }}"
+      backupStorageLocation:
+        - name: default
+          provider: aws
+          bucket: "{{ .Values.velero.s3BucketName }}"
+          config:
+            region: "{{ .Values.cluster.region }}"
       volumeSnapshotLocation:
         - name: default
           provider: aws

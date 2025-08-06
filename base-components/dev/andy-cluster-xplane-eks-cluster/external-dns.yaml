@@ -37,10 +37,6 @@ chart:
     txtOwnerId: "{{ .Values.cluster.name }}"
     txtPrefix: "external-dns-"
     
-    # Sync configuration
-    interval: "1m"
-    triggerLoopOnEvent: false
-    
     # Sources to watch
     sources:
       - service
@@ -52,28 +48,3 @@ chart:
     # domainFilters:
     #   - "example.com"
     #   - "subdomain.example.com"
-    
-    # Exclude domains
-    excludeDomains: []
-    
-    # Log configuration
-    logLevel: info
-    logFormat: text
-    
-    # Metrics
-    metrics:
-      enabled: true
-      port: 7979
-    
-    # Deployment strategy
-    deploymentStrategy:
-      type: Recreate
-    
-    # Pod disruption budget
-    podDisruptionBudget:
-      enabled: false
-    
-    # RBAC
-    rbac:
-      create: true
-      additionalPermissions: []

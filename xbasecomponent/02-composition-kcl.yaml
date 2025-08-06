@@ -173,16 +173,16 @@ spec:
           aws_account_id = oxr.spec.awsAccountId or "unknown"
           
           # Get S3 bucket name if Velero is enabled
-          s3_bucket_name = ""
+          _s3_bucket_name = ""
           if oxr.spec.enableVelero:
               s3_bucket_resource = ocds[oxr.metadata.name + "-velero-backup-bucket"]?.Resource
-              s3_bucket_name = s3_bucket_resource?.spec?.forProvider?.bucket or ""
+              _s3_bucket_name = s3_bucket_resource?.spec?.forProvider?.bucket or ""
           
           # Get EFS filesystem ID if EFS CSI driver is enabled
-          efs_filesystem_id = ""
+          _efs_filesystem_id = ""
           if oxr.spec.enableEFSCSIDriver:
               efs_resource = ocds[oxr.metadata.name + "-efs-filesystem"]?.Resource
-              efs_filesystem_id = efs_resource?.status?.atProvider?.id or ""
+              _efs_filesystem_id = efs_resource?.status?.atProvider?.id or ""
 
           # Build base parameters
           base_parameters = [
@@ -204,17 +204,17 @@ spec:
           velero_parameters = [
             {
               name = "velero.s3BucketName"
-              value = s3_bucket_name
+              value = _s3_bucket_name
             }
-          ] if oxr.spec.enableVelero and s3_bucket_name else []
+          ] if oxr.spec.enableVelero and _s3_bucket_name else []
           
           # Add EFS filesystem ID parameter if enabled
           efs_parameters = [
             {
               name = "efs.filesystemId"
-              value = efs_filesystem_id
+              value = _efs_filesystem_id
             }
-          ] if oxr.spec.enableEFSCSIDriver and efs_filesystem_id else []
+          ] if oxr.spec.enableEFSCSIDriver and _efs_filesystem_id else []
           
           # Combine all parameters
           all_parameters = base_parameters + velero_parameters + efs_parameters

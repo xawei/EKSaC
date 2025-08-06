@@ -7,6 +7,7 @@ chart:
   values:
     clusterName: andy-cluster-xplane-eks-cluster
     region: "{{ .Values.cluster.region }}"
+    watchNamespace: "{{ .Values.cluster.awsAccountId }}"
     replicaCount: 1
     tolerations:
       - key: "karpenter.sh/nodepool"

@@ -6,6 +6,9 @@ chart:
   syncWave: "0"
   values:
     controller:
+      # serviceAccount:
+      #   create: true
+      #   name: efs-csi-driver-controller-sa
       replicaCount: 1
 
       tolerations:
@@ -14,4 +17,18 @@ chart:
           value: "infra"
           effect: "NoSchedule"
 
-    # IAM role and other values
+    storageClass:
+      - name: efs-sc
+        annotations:
+          "storageclass.kubernetes.io/is-default-class": "false"
+        mountOptions:
+          - tls
+        parameters:
+          provisioningMode: efs-ap
+          # fileSystemId: fs-01234567890abcdef # need to create in advance
+          directoryPerms: "700"
+          gidRangeStart: "1000"
+          gidRangeEnd: "5000"
+          basePath: "/dynamic_provisioning"
+        reclaimPolicy: Delete
+        volumeBindingMode: Immediate

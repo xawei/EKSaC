@@ -13,10 +13,6 @@ chart:
         operator: "Equal"
         value: "infra"
         effect: "NoSchedule"
-      - key: "testing.io/render-value"
-        operator: "Equal"
-        value: "{{ .Values.cluster.region }}"
-        effect: "NoSchedule"
     serviceAccount:
       # This should be created separately with the correct IAM role
       create: true

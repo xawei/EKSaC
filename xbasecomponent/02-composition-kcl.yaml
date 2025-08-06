@@ -180,7 +180,7 @@ spec:
           _s3_bucket_name = ""
           if oxr.spec.enableVelero:
               s3_bucket_resource = ocds[oxr.metadata.name + "-velero-backup-bucket"]?.Resource
-              _s3_bucket_name = s3_bucket_resource?.spec?.forProvider?.bucket or ""
+              _s3_bucket_name = s3_bucket_resource?.status?.atProvider?.id or ""
           
           # Get EFS filesystem ID if EFS CSI driver is enabled
           _efs_filesystem_id = ""

@@ -21,56 +21,7 @@ check_aws_connectivity() {
 # Check AWS connectivity first
 check_aws_connectivity
 
-# Clean up Crossplane managed resources
-echo "Cleaning up Crossplane managed resources..."
-
-# List of Crossplane resource types to clean up
-CROSSPLANE_RESOURCES=(
-  "object.kubernetes.crossplane.io"
-  "release.helm.crossplane.io"
-  "clusterauth.eks.aws.upbound.io"
-  "accesspolicyassociation.eks.aws.upbound.io"
-  "accessentry.eks.aws.upbound.io"
-  "cluster.eks.aws.upbound.io"
-)
-
-# Function to remove finalizers and delete resources
-cleanup_crossplane_resource() {
-  local resource_type=$1
-  echo "Checking for $resource_type resources..."
-  
-  # Get all resources of this type
-  local resources=$(kubectl get $resource_type -o name 2>/dev/null || echo "")
-  
-  if [ ! -z "$resources" ]; then
-    echo "Found $resource_type resources: $resources"
-    
-    for resource in $resources; do
-      echo "Processing $resource..."
-      
-      # Remove finalizers
-      echo "Removing finalizers from $resource"
-      kubectl patch $resource -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || echo "Could not patch $resource"
-      
-      # Delete the resource
-      echo "Deleting $resource"
-      kubectl delete $resource --timeout=60s 2>/dev/null || echo "Could not delete $resource"
-    done
-  else
-    echo "No $resource_type resources found."
-  fi
-}
-
-# Clean up each resource type
-for resource_type in "${CROSSPLANE_RESOURCES[@]}"; do
-  cleanup_crossplane_resource $resource_type
-done
-
-# Wait a bit for resources to be cleaned up
-echo "Waiting for Crossplane resources to be cleaned up..."
-sleep 30
-
-# Clean up EKS cluster and associated resources
+# Clean up EKS cluster and associated resources FIRST
 echo "Checking for EKS cluster: $CLUSTER_NAME"
 echo "This may take a moment..."
 
@@ -146,10 +97,8 @@ if [ ! -z "$EKS_CLUSTER" ] && [ "$EKS_CLUSTER" != "None" ] && [ "$EKS_CLUSTER" !
   echo "Deleting EKS cluster: $CLUSTER_NAME"
   aws eks delete-cluster --region $REGION --name $CLUSTER_NAME
   
-  # Wait for cluster to be deleted
-  echo "Waiting for EKS cluster to be deleted... This can take 10-15 minutes."
-  aws eks wait cluster-deleted --region $REGION --name $CLUSTER_NAME || echo "Timeout or error waiting for cluster deletion"
-  echo "EKS cluster $CLUSTER_NAME deletion process completed."
+  # Don't wait for cluster deletion here - let it run in background
+  echo "EKS cluster deletion initiated. Continuing with other cleanup..."
 else
   echo "No EKS cluster found with name: $CLUSTER_NAME"
 fi
@@ -165,11 +114,77 @@ ORPHANED_INSTANCES=$(aws ec2 describe-instances \
 if [ ! -z "$ORPHANED_INSTANCES" ]; then
   echo "Terminating orphaned instances: $ORPHANED_INSTANCES"
   aws ec2 terminate-instances --region $REGION --instance-ids $ORPHANED_INSTANCES
-  echo "Waiting for instances to terminate..."
-  aws ec2 wait instance-terminated --region $REGION --instance-ids $ORPHANED_INSTANCES || echo "Timeout or error waiting for instance termination"
-  echo "All orphaned instances termination process completed."
+  echo "Instance termination initiated. Continuing with other cleanup..."
 else
   echo "No orphaned instances found."
+fi
+
+# Clean up Crossplane managed resources
+echo "Cleaning up Crossplane managed resources..."
+
+# List of Crossplane resource types to clean up
+CROSSPLANE_RESOURCES=(
+  "object.kubernetes.crossplane.io"
+  "release.helm.crossplane.io"
+  "clusterauth.eks.aws.upbound.io"
+  "accesspolicyassociation.eks.aws.upbound.io"
+  "accessentry.eks.aws.upbound.io"
+  "cluster.eks.aws.upbound.io"
+)
+
+# Function to remove finalizers and delete resources
+cleanup_crossplane_resource() {
+  local resource_type=$1
+  echo "Checking for $resource_type resources..."
+  
+  # Get all resources of this type
+  local resources=$(kubectl get $resource_type -o name 2>/dev/null || echo "")
+  
+  if [ ! -z "$resources" ]; then
+    echo "Found $resource_type resources: $resources"
+    
+    for resource in $resources; do
+      echo "Processing $resource..."
+      
+      # Remove finalizers
+      echo "Removing finalizers from $resource"
+      kubectl patch $resource -p '{"metadata":{"finalizers":[]}}' --type=merge 2>/dev/null || echo "Could not patch $resource"
+      
+      # Delete the resource
+      echo "Deleting $resource"
+      kubectl delete $resource --timeout=60s 2>/dev/null || echo "Could not delete $resource"
+    done
+  else
+    echo "No $resource_type resources found."
+  fi
+}
+
+# Clean up each resource type
+for resource_type in "${CROSSPLANE_RESOURCES[@]}"; do
+  cleanup_crossplane_resource $resource_type
+done
+
+# Wait a bit for resources to be cleaned up
+echo "Waiting for Crossplane resources to be cleaned up..."
+sleep 30
+
+# Check if EKS cluster deletion is complete
+echo "Checking EKS cluster deletion status..."
+EKS_STATUS=$(aws eks describe-cluster --region $REGION --name $CLUSTER_NAME --query 'cluster.status' --output text 2>/dev/null || echo "DELETED")
+
+if [ "$EKS_STATUS" != "DELETED" ] && [ ! -z "$EKS_STATUS" ] && [ "$EKS_STATUS" != "None" ]; then
+  echo "EKS cluster is still being deleted (status: $EKS_STATUS). Waiting for completion..."
+  aws eks wait cluster-deleted --region $REGION --name $CLUSTER_NAME || echo "Timeout or error waiting for cluster deletion"
+  echo "EKS cluster $CLUSTER_NAME deletion process completed."
+else
+  echo "EKS cluster $CLUSTER_NAME has been deleted."
+fi
+
+# Check if EC2 instances are terminated
+if [ ! -z "$ORPHANED_INSTANCES" ]; then
+  echo "Waiting for EC2 instances to terminate..."
+  aws ec2 wait instance-terminated --region $REGION --instance-ids $ORPHANED_INSTANCES || echo "Timeout or error waiting for instance termination"
+  echo "All orphaned instances termination process completed."
 fi
 
 # Clean up orphaned EBS volumes

@@ -1,9 +1,10 @@
-chart:
-  name: aws-load-balancer-controller
-  repoURL: https://aws.github.io/eks-charts
-  targetRevision: 1.13.4
-  namespace: kube-system
-  syncWave: "0"
+repoURL: https://aws.github.io/eks-charts
+targetRevision: 1.13.4
+namespace: kube-system
+wave: "0"
+
+helm:
+  chart: aws-load-balancer-controller
   values:
     clusterName: andy-cluster-xplane-eks-cluster
     # region: "{{ .Values.cluster.region }}"

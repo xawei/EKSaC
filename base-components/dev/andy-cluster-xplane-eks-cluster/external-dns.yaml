@@ -1,9 +1,10 @@
-chart:
-  name: external-dns
-  repoURL: https://kubernetes-sigs.github.io/external-dns/
-  targetRevision: 1.18.0
-  namespace: external-dns
-  syncWave: "0"
+repoURL: https://kubernetes-sigs.github.io/external-dns/
+targetRevision: 1.18.0
+namespace: external-dns
+wave: "0"
+
+helm:
+  chart: external-dns
   values:
     # AWS Route53 provider configuration
     provider:

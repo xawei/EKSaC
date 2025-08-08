@@ -1,9 +1,10 @@
-chart:
-  name: aws-efs-csi-driver
-  repoURL: https://kubernetes-sigs.github.io/aws-efs-csi-driver/
-  targetRevision: 3.2.0
-  namespace: kube-system
-  syncWave: "0"
+repoURL: https://kubernetes-sigs.github.io/aws-efs-csi-driver/
+targetRevision: 3.2.0
+namespace: kube-system
+wave: "0"
+
+helm:
+  chart: aws-efs-csi-driver
   values:
     controller:
       # serviceAccount:

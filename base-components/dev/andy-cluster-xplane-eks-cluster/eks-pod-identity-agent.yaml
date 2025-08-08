@@ -1,9 +1,10 @@
-chart:
-  name: eks-pod-identity-agent
-  repoURL: https://csxawei.github.io/helm-repo
-  targetRevision: 1.2.0
-  namespace: kube-system
-  syncWave: "0"
+repoURL: https://csxawei.github.io/helm-repo
+targetRevision: 1.2.0
+namespace: kube-system
+wave: "0"
+
+helm:
+  chart: eks-pod-identity-agent
   values:
     # Add any specific values for the EKS Pod Identity Agent here
     # For example:

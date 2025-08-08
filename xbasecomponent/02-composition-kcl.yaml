@@ -189,40 +189,43 @@ spec:
               efs_resource = ocds[oxr.metadata.name + "-efs-filesystem"]?.Resource
               _efs_filesystem_id = efs_resource?.status?.atProvider?.id or ""
 
-          # Build base parameters
-          base_parameters = [
-            {
-              name = "cluster.name"
-              value = cluster_name
-            },
-            {
-              name = "cluster.region"
-              value = region
-            },
-            {
-              name = "cluster.awsAccountId"
-              value = aws_account_id
-            }
-          ]
-          
-          # Add Velero S3 bucket parameter if enabled
-          velero_parameters = [
-            {
-              name = "velero.s3BucketName"
-              value = _s3_bucket_name
-            }
-          ] if oxr.spec.enableVelero and _s3_bucket_name else []
-          
-          # Add EFS filesystem ID parameter if enabled
-          efs_parameters = [
-            {
-              name = "efs.filesystemId"
-              value = _efs_filesystem_id
-            }
-          ] if oxr.spec.enableEFSCSIDriver and _efs_filesystem_id else []
-          
-          # Combine all parameters
-          all_parameters = base_parameters + velero_parameters + efs_parameters
+          # Build values for git generator - these will be available to all applications
+          app_values = {
+            "aws-efs-csi-driver": (
+              "[" +
+              "{" +
+                "\"name\": \"efs.filesystemId\"," +
+                "\"value\": \"" + _efs_filesystem_id + "\"" +
+              "}" +
+              "]"
+            ) if oxr.spec.enableEFSCSIDriver and _efs_filesystem_id else "[]"
+            
+            "velero": (
+              "[" +
+              "{" +
+                "\"name\": \"velero.s3BucketName\"," +
+                "\"value\": \"" + _s3_bucket_name + "\"" +
+              "}" +
+              "]"
+            ) if oxr.spec.enableVelero and _s3_bucket_name else "[]"
+            
+            "cluster": (
+              "[" +
+              "{" +
+                "\"name\": \"cluster.name\"," +
+                "\"value\": \"" + cluster_name + "\"" +
+              "}," +
+              "{" +
+                "\"name\": \"cluster.region\"," +
+                "\"value\": \"" + region + "\"" +
+              "}," +
+              "{" +
+                "\"name\": \"cluster.awsAccountId\"," +
+                "\"value\": \"" + aws_account_id + "\"" +
+              "}" +
+              "]"
+            )
+          }
 
           items = [{
             apiVersion = "kubernetes.crossplane.io/v1alpha2"
@@ -234,10 +237,10 @@ spec:
                   apiVersion = "argoproj.io/v1alpha1"
                   kind = "ApplicationSet"
                   metadata = {
-                    name = cluster_name + "-base-components"
+                    name = "base-components"
                     namespace = "argocd"
                     labels = {
-                      "app.kubernetes.io/name" = cluster_name + "-base-components"
+                      "app.kubernetes.io/name" = "base-components"
                       "app.kubernetes.io/part-of" = "argocd"
                     }
                     finalizers = [
@@ -257,39 +260,22 @@ spec:
                               path = "base-components/dev/" + cluster_name + "/*.yaml"
                             }
                           ]
+                          values = app_values
                         }
                       }
                     ]
                     template = {
                       metadata = {
-                        name = "{{.chart.name}}"
-                        namespace = "argocd"
-                        labels = {
-                          "app.kubernetes.io/name" = "{{.chart.name}}"
-                          "app.kubernetes.io/part-of" = "argocd"
-                          "consumable.trustbank.sg/cluster" = cluster_name
-                        }
+                        name = "{{ trimSuffix \".yaml\" .path.filenameNormalized }}"
                         annotations = {
-                          "argocd.argoproj.io/sync-wave" = "{{.chart.syncWave | default \"0\"}}"
+                          "argocd.argoproj.io/sync-wave" = "{{ .wave }}"
                         }
-                        finalizers = [
-                          "resources-finalizer.argocd.argoproj.io"
-                        ]
                       }
                       spec = {
                         project = "default"
-                        source = {
-                          repoURL = "{{.chart.repoURL}}"
-                          targetRevision = "{{.chart.targetRevision}}"
-                          chart = "{{.chart.name}}"
-                          helm = {
-                            values = "{{ toYaml .chart.values }}"
-                            parameters = all_parameters
-                          }
-                        }
                         destination = {
                           name = "in-cluster"
-                          namespace = "{{.chart.namespace}}"
+                          namespace = "{{.namespace}}"
                         }
                         syncPolicy = {
                           automated = {
@@ -301,17 +287,40 @@ spec:
                             "Replace=true"
                           ]
                         }
-                        ignoreDifferences = [
-                          {
-                            group = "*"
-                            kind = "*"
-                            namespace = "*"
-                            jsonPointers = [
-                              "/metadata/annotations/argocd.argoproj.io~1refresh",
-                              "/operation"
-                            ]
-                          }
-                        ]
+                        templatePatch = """|- 
+{{ $chartName := trimSuffix \".yaml\" .path.filenameNormalized }}
+spec:
+  sources:
+    - repoURL: '{{.repoURL}}'
+      targetRevision: '{{.targetRevision}}'
+      {{- if index . \"helm\" }}
+      chart: {{.helm.chart}}
+      helm:
+        {{- if index .helm \"values\" }}
+        valuesObject: {{ toJson .helm.values }}
+        {{- end }}
+        {{- if index .helm \"valueFiles\" }}
+        valueFiles: {{ toJson .helm.valueFiles }}
+        {{- end }}
+      {{- end }}
+      {{- if index .values $chartName }}
+      parameters:
+        {{- range $parameter := fromJson (index .values $chartName) }}
+          {{- if and (index $.helm \"parameterOverrides\") (index $.helm.parameterOverrides $parameter.name) }}
+        - name: {{ index $.helm.parameterOverrides $parameter.name }}
+          value: {{ $parameter.value }}
+          {{- else }}
+        - name: {{ $parameter.name }}
+          value: {{ $parameter.value }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if index . \"repoPath\" }}
+      path: {{.repoPath}}
+      {{- end }}
+      {{- if and (index . \"helm\") (index .helm \"valueFilesSource\") }}
+    - {{ toJson .helm.valueFilesSource }}
+      {{- end }}"""
                       }
                     }
                   }

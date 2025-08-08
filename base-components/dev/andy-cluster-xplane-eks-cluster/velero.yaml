@@ -1,9 +1,10 @@
-chart:
-  name: velero
-  repoURL: https://vmware-tanzu.github.io/helm-charts
-  targetRevision: 10.0.10
-  namespace: velero
-  syncWave: "0"
+repoURL: https://vmware-tanzu.github.io/helm-charts
+targetRevision: 10.0.10
+namespace: velero
+wave: "0"
+
+helm:
+  chart: velero
   values:
     credentials:
       useSecret: false

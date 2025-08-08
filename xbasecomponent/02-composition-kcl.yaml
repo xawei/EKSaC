@@ -169,6 +169,8 @@ spec:
         spec:
           target: Default
           source: |
+            import json
+
             oxr = option("params").oxr
             ocds = option("params").ocds
             labels = oxr.metadata?.labels or {}
@@ -190,41 +192,30 @@ spec:
                 _efs_filesystem_id = efs_resource?.status?.atProvider?.id or ""
 
             # Build values for git generator - these will be available to all applications
+            efs_params = [
+              {
+                "name": "efs.filesystemId",
+                "value": _efs_filesystem_id
+              }
+            ] if (oxr.spec.enableEFSCSIDriver and _efs_filesystem_id) else []
+
+            velero_params = [
+              {
+                "name": "velero.s3BucketName",
+                "value": _s3_bucket_name
+              }
+            ] if (oxr.spec.enableVelero and _s3_bucket_name) else []
+
+            cluster_params = [
+              {"name": "cluster.name", "value": cluster_name},
+              {"name": "cluster.region", "value": region},
+              {"name": "cluster.awsAccountId", "value": aws_account_id},
+            ]
+
             app_values = {
-              "aws-efs-csi-driver": (
-                "[" +
-                "{" +
-                  ""name": "efs.filesystemId"," +
-                  ""value": "" + _efs_filesystem_id + """ +
-                "}" +
-                "]"
-              ) if oxr.spec.enableEFSCSIDriver and _efs_filesystem_id else "[]"
-
-              "velero": (
-                "[" +
-                "{" +
-                  ""name": "velero.s3BucketName"," +
-                  ""value": "" + _s3_bucket_name + """ +
-                "}" +
-                "]"
-              ) if oxr.spec.enableVelero and _s3_bucket_name else "[]"
-
-              "cluster": (
-                "[" +
-                "{" +
-                  ""name": "cluster.name"," +
-                  ""value": "" + cluster_name + """ +
-                "}," +
-                "{" +
-                  ""name": "cluster.region"," +
-                  ""value": "" + region + """ +
-                "}," +
-                "{" +
-                  ""name": "cluster.awsAccountId"," +
-                  ""value": "" + aws_account_id + """ +
-                "}" +
-                "]"
-              )
+              "aws-efs-csi-driver": json.encode(efs_params),
+              "velero": json.encode(velero_params),
+              "cluster": json.encode(cluster_params),
             }
 
             items = [{
@@ -288,39 +279,39 @@ spec:
                             ]
                           }
                           templatePatch = """
-              {{ $chartName := trimSuffix ".yaml" .path.filenameNormalized }}
-              spec:
-                sources:
-                  - repoURL: '{{.repoURL}}'
-                    targetRevision: '{{.targetRevision}}'
-                    {{- if index . "helm" }}
-                    chart: {{.helm.chart}}
-                    helm:
-                      {{- if index .helm "values" }}
-                      valuesObject: {{ toJson .helm.values }}
-                      {{- end }}
-                      {{- if index .helm "valueFiles" }}
-                      valueFiles: {{ toJson .helm.valueFiles }}
+            {{ $chartName := trimSuffix ".yaml" .path.filenameNormalized }}
+            spec:
+              sources:
+                - repoURL: '{{.repoURL}}'
+                  targetRevision: '{{.targetRevision}}'
+                  {{- if index . "helm" }}
+                  chart: {{.helm.chart}}
+                  helm:
+                    {{- if index .helm "values" }}
+                    valuesObject: {{ toJson .helm.values }}
+                    {{- end }}
+                    {{- if index .helm "valueFiles" }}
+                    valueFiles: {{ toJson .helm.valueFiles }}
+                    {{- end }}
+                  {{- end }}
+                  {{- if index .values $chartName }}
+                  parameters:
+                    {{- range $parameter := fromJson (index .values $chartName) }}
+                      {{- if and (index $.helm "parameterOverrides") (index $.helm.parameterOverrides $parameter.name) }}
+                    - name: {{ index $.helm.parameterOverrides $parameter.name }}
+                      value: {{ $parameter.value }}
+                      {{- else }}
+                    - name: {{ $parameter.name }}
+                      value: {{ $parameter.value }}
                       {{- end }}
                     {{- end }}
-                    {{- if index .values $chartName }}
-                    parameters:
-                      {{- range $parameter := fromJson (index .values $chartName) }}
-                        {{- if and (index $.helm "parameterOverrides") (index $.helm.parameterOverrides $parameter.name) }}
-                      - name: {{ index $.helm.parameterOverrides $parameter.name }}
-                        value: {{ $parameter.value }}
-                        {{- else }}
-                      - name: {{ $parameter.name }}
-                        value: {{ $parameter.value }}
-                        {{- end }}
-                      {{- end }}
-                    {{- end }}
-                    {{- if index . "repoPath" }}
-                    path: {{.repoPath}}
-                    {{- end }}
-                    {{- if and (index . "helm") (index .helm "valueFilesSource") }}
-                  - {{ toJson .helm.valueFilesSource }}
-                    {{- end }}"""
+                  {{- end }}
+                  {{- if index . "repoPath" }}
+                  path: {{.repoPath}}
+                  {{- end }}
+                  {{- if and (index . "helm") (index .helm "valueFilesSource") }}
+                - {{ toJson .helm.valueFilesSource }}
+                  {{- end }}"""
                         }
                       }
                     }

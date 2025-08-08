@@ -51,19 +51,18 @@ spec:
     argocdHelm:
       version: "8.0.16"
 ---
-# apiVersion: consumable.trustbank.sg/v1alpha1
-# kind: EksComponentKcl
-# metadata:
-#   name: andy-cluster-components
-#   namespace: eksac
-# spec:
-#   name: andy-cluster-components
-#   location: "ap-southeast-1"
-#   clusterRef: andy-cluster
-#   components:
-#     metricsserverHelm:
-#       version: "3.12.2"
-#     awsloadbalancercontrollerHelm:
-#       version: "1.13.0"
-#     istioHelm:
-#       version: "1.26.0"
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: BaseComponent
+metadata:
+  name: andy-cluster-base-components
+  namespace: eksac
+spec:
+  eksClusterRef: "andy-cluster"
+  awsAccountId: "249140151390" # Replace with your AWS account ID
+  location: "ap-southeast-1"
+  namespace: "eksac"
+  # eksAddons:
+  # - name: "eks-pod-identity-agent"
+  #   version: "v1.0.0-eksbuild.1"
+  enableVelero: true
+  enableEFSCSIDriver: true

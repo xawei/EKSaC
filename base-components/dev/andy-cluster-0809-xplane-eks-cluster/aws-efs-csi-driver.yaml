@@ -1,0 +1,35 @@
+repoURL: https://kubernetes-sigs.github.io/aws-efs-csi-driver/
+targetRevision: 3.2.0
+namespace: kube-system
+wave: "0"
+
+helm:
+  chart: aws-efs-csi-driver
+  values:
+    controller:
+      # serviceAccount:
+      #   create: true
+      #   name: efs-csi-driver-controller-sa
+      replicaCount: 1
+
+      tolerations:
+        - key: "karpenter.sh/nodepool"
+          operator: "Equal"
+          value: "infra"
+          effect: "NoSchedule"
+
+    storageClasses:
+      - name: efs-sc
+        annotations:
+          "storageclass.kubernetes.io/is-default-class": "false"
+        mountOptions:
+          - tls
+        parameters:
+          provisioningMode: efs-ap
+          fileSystemId: "{{ .Values.efs.filesystemId }}" # need to create in advance
+          directoryPerms: "700"
+          gidRangeStart: "1000"
+          gidRangeEnd: "5000"
+          basePath: "/dynamic_provisioning"
+        reclaimPolicy: Delete
+        volumeBindingMode: Immediate

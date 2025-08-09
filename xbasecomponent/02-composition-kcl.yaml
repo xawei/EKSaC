@@ -262,20 +262,58 @@ spec:
                     ]
                     template = {
               metadata = {
-                name = "{{ trimSuffix ".yaml" .path.filenameNormalized }}"
+                name = "{{ trimSuffix \".yaml\" .path.filenameNormalized }}"
                 annotations = { "argocd.argoproj.io/sync-wave" = "{{ .wave }}" }
               }
               spec = {
                 project = "default"
-                destination = { name = "in-cluster", namespace = "{{.namespace}}" }
+                destination = { server = "https://kubernetes.default.svc", namespace = "{{ .namespace }}" }
+                sources = []
                 syncPolicy = {
                   automated  = { prune = True, selfHeal = True }
                   syncOptions = ["CreateNamespace=true", "Replace=true"]
                 }
-                templatePatch = """\n{{ $chartName := trimSuffix \".yaml\" .path.filenameNormalized }}\nsources:\n  - repoURL: \"{{.repoURL}}\"\n    targetRevision: \"{{.targetRevision}}\"\n{{- if index . \"helm\" }}\n    chart: {{.helm.chart}}\n    helm:\n{{- if index .helm \"values\" }}\n      valuesObject: {{ toJson .helm.values }}\n{{- end }}\n{{- if index .helm \"valueFiles\" }}\n      valueFiles: {{ toJson .helm.valueFiles }}\n{{- end }}\n{{- end }}\n{{- if index .values $chartName }}\n    parameters:\n{{- range $p := fromJson (index .values $chartName) }}\n{{- if and (index $.helm \"parameterOverrides\") (index $.helm.parameterOverrides $p.name) }}\n      - name: {{ index $.helm.parameterOverrides $p.name }}\n        value: {{ $p.value }}\n{{- else }}\n      - name: {{ $p.name }}\n        value: {{ $p.value }}\n{{- end }}\n{{- end }}\n{{- else }}\n    parameters:\n{{- end }}\n      - name: cluster.name\n        value: \""+ cluster_name +"\"\n      - name: cluster.region\n        value: \""+ region +"\"\n      - name: cluster.awsAccountId\n        value: \""+ aws_account_id +"\"\n{{- if index . \"repoPath\" }}\n    path: {{.repoPath}}\n{{- end }}\n{{- if and (index . \"helm\") (index .helm \"valueFilesSource\") }}\n- {{ toJson .helm.valueFilesSource }}\n{{- end }}\n"""
               }
             }
 
+                    templatePatch = """
+                      {{- $chartName := trimSuffix ".yaml" .path.filenameNormalized }}
+                      {{- $hasHelm := index . "helm" }}
+                      {{- $hasValuesForChart := (and (index . "values") (index .values $chartName)) }}
+                      
+                      spec:
+                      sources:
+                      - repoURL: '{{ .repoURL }}'
+                      targetRevision: '{{ .targetRevision }}'
+                      {{- if $hasHelm }}
+                      chart: {{ .helm.chart }}
+                      helm:
+                      {{- if index .helm "values" }}
+                      valuesObject: {{ toJson .helm.values }}
+                      {{- end }}
+                      {{- if index .helm "valueFiles" }}
+                      valueFiles: {{ toJson .helm.valueFiles }}
+                      {{- end }}
+                      {{- end }}
+                      {{- if $hasValuesForChart }}
+                      parameters:
+                      {{- range $parameter := fromJson (index .values $chartName) }}
+                      {{- if and (index $.helm "parameterOverrides") (index $.helm.parameterOverrides $parameter.name) }}
+                      - name: {{ index $.helm.parameterOverrides $parameter.name }}
+                      value: {{ $parameter.value }}
+                      {{- else }}
+                      - name: {{ $parameter.name }}
+                      value: {{ $parameter.value }}
+                      {{- end }}
+                      {{- end }}
+                      {{- end }}
+                      {{- if index . "repoPath" }}
+                      path: {{ .repoPath }}
+                      {{- end }}
+                      {{- if and $hasHelm (index .helm "valueFilesSource") }}
+                      - {{ toJson .helm.valueFilesSource }}
+                      {{- end }}
+                    """
                   }
                 }
               }

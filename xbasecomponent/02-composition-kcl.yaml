@@ -288,13 +288,13 @@ spec:
                             {{- if $hasHelm }}
                             chart: {{ .helm.chart }}
                             helm:
-                            {{- if index .helm "values" }}
-                            valuesObject: {{ toJson .helm.values }}
-                            {{- end }}
-                            {{- if index .helm "valueFiles" }}
-                            valueFiles: {{ toJson .helm.valueFiles }}
-                            {{- end }}
-                            {{- end }}
+                              {{- if index .helm "values" }}
+                              valuesObject: {{ toJson .helm.values }}
+                              {{- end }}
+                              {{- if index .helm "valueFiles" }}
+                              valueFiles: {{ toJson .helm.valueFiles }}
+                              {{- end }}
+                              {{- end }}
                             {{- if $hasValuesForChart }}
                             parameters:
                             {{- range $parameter := fromJson (index .values $chartName) }}
@@ -307,7 +307,7 @@ spec:
                             {{- end }}
                         {{- if and $hasHelm (index .helm "valueFilesSource") }}
                           - {{ toJson .helm.valueFilesSource }}
-                        {{- end }}
+                              {{- end }}
                     """
                   }
                 }

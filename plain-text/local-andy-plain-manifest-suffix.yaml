@@ -1,0 +1,68 @@
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: NetworkKcl
+metadata:
+  name: andy-network-0809
+  namespace: eksac
+  labels:
+    consumable.trustbank.sg/owner: "andyxin.wei"
+spec:
+  name: andy-network-0809
+  location: "ap-southeast-1"
+  vpcCidr: "10.0.0.0/22"
+  subnets:
+    public:
+      1a: "10.0.0.0/28"
+      1b: "10.0.0.16/28"
+      1c: "10.0.0.32/28"
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: EksClusterKcl
+metadata:
+  name: andy-cluster-0809
+  namespace: eksac
+  labels:
+    consumable.trustbank.sg/owner: "andyxin.wei"
+  annotations:
+    consumable.trustbank.sg/create-default-access-entry: "false"
+    consumable.trustbank.sg/crossplane-iam-role-name: "CrossPlaneRole"
+spec:
+  name: andy-cluster-0809
+  location: "ap-southeast-1"
+  awsAccountId: "249140151390" # Replace with your AWS account ID
+  vpcRef: andy-network-0809
+  subnets:
+    private:
+      1a: "10.0.0.128/25"
+      1b: "10.0.1.0/25"
+      1c: "10.0.1.128/25"
+  components:
+    ciliumHelm:
+      version: "1.17.3"
+    corednsHelm:
+      version: "1.42.1"
+    # ebscsiAddOn:
+    #   version: "v1.43.0-eksbuild.1"
+    # podidentityagentAddOn:
+    #   version: "v1.3.7-eksbuild.2"
+    eks:
+      version: "1.33"
+    karpenterHelm:
+      version: "1.5.0"
+    argocdHelm:
+      version: "8.0.16"
+---
+apiVersion: consumable.trustbank.sg/v1alpha1
+kind: BaseComponent
+metadata:
+  name: andy-cluster-base-components-0809
+  namespace: eksac
+spec:
+  eksClusterRef: "andy-cluster-0809"
+  awsAccountId: "249140151390" # Replace with your AWS account ID
+  location: "ap-southeast-1"
+  namespace: "eksac"
+  # eksAddons:
+  # - name: "eks-pod-identity-agent"
+  #   version: "v1.0.0-eksbuild.1"
+  enableVelero: false
+  enableEFSCSIDriver: false

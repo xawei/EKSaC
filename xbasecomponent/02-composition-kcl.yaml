@@ -282,37 +282,32 @@ spec:
                       {{- $hasValuesForChart := (and (index . "values") (index .values $chartName)) }}
                       
                       spec:
-                      sources:
-                      - repoURL: '{{ .repoURL }}'
-                      targetRevision: '{{ .targetRevision }}'
-                      {{- if $hasHelm }}
-                      chart: {{ .helm.chart }}
-                      helm:
-                      {{- if index .helm "values" }}
-                      valuesObject: {{ toJson .helm.values }}
-                      {{- end }}
-                      {{- if index .helm "valueFiles" }}
-                      valueFiles: {{ toJson .helm.valueFiles }}
-                      {{- end }}
-                      {{- end }}
-                      {{- if $hasValuesForChart }}
-                      parameters:
-                      {{- range $parameter := fromJson (index .values $chartName) }}
-                      {{- if and (index $.helm "parameterOverrides") (index $.helm.parameterOverrides $parameter.name) }}
-                      - name: {{ index $.helm.parameterOverrides $parameter.name }}
-                      value: {{ $parameter.value }}
-                      {{- else }}
-                      - name: {{ $parameter.name }}
-                      value: {{ $parameter.value }}
-                      {{- end }}
-                      {{- end }}
-                      {{- end }}
-                      {{- if index . "repoPath" }}
-                      path: {{ .repoPath }}
-                      {{- end }}
-                      {{- if and $hasHelm (index .helm "valueFilesSource") }}
-                      - {{ toJson .helm.valueFilesSource }}
-                      {{- end }}
+                        sources:
+                          - repoURL: '{{ .repoURL }}'
+                            targetRevision: '{{ .targetRevision }}'
+                            {{- if $hasHelm }}
+                            chart: {{ .helm.chart }}
+                            helm:
+                            {{- if index .helm "values" }}
+                            valuesObject: {{ toJson .helm.values }}
+                            {{- end }}
+                            {{- if index .helm "valueFiles" }}
+                            valueFiles: {{ toJson .helm.valueFiles }}
+                            {{- end }}
+                            {{- end }}
+                            {{- if $hasValuesForChart }}
+                            parameters:
+                            {{- range $parameter := fromJson (index .values $chartName) }}
+                            - name: {{ index $.helm "parameterOverrides" $parameter.name | default $parameter.name }}
+                              value: {{ $parameter.value }}
+                            {{- end }}
+                            {{- end }}
+                            {{- if index . "repoPath" }}
+                            path: {{ .repoPath }}
+                            {{- end }}
+                        {{- if and $hasHelm (index .helm "valueFilesSource") }}
+                          - {{ toJson .helm.valueFilesSource }}
+                        {{- end }}
                     """
                   }
                 }

@@ -1,12 +1,12 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: xbasecomponentskcl.consumable.trustbank.sg
+  name: xbasecomponents.consumable.trustbank.sg
 spec:
   group: consumable.trustbank.sg
   names:
-    kind: xBaseComponentKcl
-    plural: xbasecomponentskcl
+    kind: xBaseComponent
+    plural: xbasecomponents
   versions:
   - name: v1alpha1
     schema:

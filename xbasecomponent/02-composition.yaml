@@ -1,11 +1,11 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: x-basecomponent-kcl
+  name: x-basecomponent
 spec:
   compositeTypeRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
-    kind: xBaseComponentKcl
+    kind: xBaseComponent
   mode: Pipeline
   pipeline:
   - step: install-eks-addons

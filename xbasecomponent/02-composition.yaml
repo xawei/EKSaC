@@ -261,6 +261,26 @@ spec:
                          # Per-application dynamic params (map[string]string).
                          # Key must equal the Application name (filename without .yaml).
                          values = {
+                           "aws-load-balancer-controller" = json.encode([
+                             {
+                               name = "clusterName"
+                               value = cluster_name
+                             },
+                             {
+                               name = "region"
+                               value = region
+                             },
+                             {
+                               name = "valuesObjectJSON"
+                               value = json.encode({
+                                 serviceAccount = {
+                                   annotations = {
+                                     "eks.amazonaws.com/role-arn" = "arn:aws:iam::" + aws_account_id + ":role/ALBControllerRole-" + cluster_name
+                                   }
+                                 }
+                               })
+                             }
+                           ])
                            "aws-ebs-csi-driver" = json.encode([
                              {
                                name = "valuesObjectJSON"

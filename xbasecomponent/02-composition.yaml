@@ -281,8 +281,16 @@ spec:
                                value = region
                              },
                              {
-                               name = "roleArn"
-                               value = "arn:aws:iam::" + aws_account_id + ":role/VeleroRole-" + cluster_name
+                               name = "valuesObjectJSON"
+                               value = json.encode({
+                                 serviceAccount = {
+                                   server = {
+                                     annotations = {
+                                       "eks.amazonaws.com/role-arn" = "arn:aws:iam::" + aws_account_id + ":role/VeleroRole-" + cluster_name
+                                     }
+                                   }
+                                 }
+                               })
                              }
                            ]) if oxr.spec.enableVelero else Undefined
                          }
@@ -317,15 +325,23 @@ spec:
                             {{- if $hasHelm }}
                             chart: {{ .helm.chart }}
                             helm:
-                              {{- if index .helm "values" }}
-                              valuesObject: {{ toJson .helm.values }}
+                              {{- $baseValues := (index .helm "values") | default (dict) }}
+                              {{- $extra := dict }}
+                              {{- if $hasValuesForChart }}
+                              {{- range $p := fromJson (index .values $chartName) }}
+                              {{- if eq $p.name "valuesObjectJSON" }}
+                              {{- $extra = fromJson (printf "%v" $p.value) }}
                               {{- end }}
+                              {{- end }}
+                              {{- end }}
+                              valuesObject: {{ toJson (merge $baseValues $extra) }}
                               {{- if index .helm "valueFiles" }}
                               valueFiles: {{ toJson .helm.valueFiles }}
                               {{- end }}
                               parameters:
                               {{ if $hasValuesForChart }}
                               {{ range $parameter := fromJson (index .values $chartName) }}
+                              {{- if ne $parameter.name "valuesObjectJSON" }}
                               {{ $helm := index $ "helm" }}
                               {{ if $helm }}
                               {{ $po := index $helm "parameterOverrides" }}
@@ -346,6 +362,7 @@ spec:
                               - name: {{ $parameter.name }}
                                 value: '{{ printf "%v" $parameter.value }}'
                               {{ end }}
+                              {{- end }}
                               {{ end }}
                               {{ end }}
                                # removed cluster-wide parameter injection; rely on per-app parameterOverrides

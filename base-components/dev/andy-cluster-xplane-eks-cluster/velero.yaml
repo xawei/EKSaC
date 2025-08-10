@@ -13,8 +13,8 @@ helm:
     # Regions for backup and snapshot locations
     regionBackup: 'configuration.backupStorageLocation[0].config.region'
     regionSnapshot: 'configuration.volumeSnapshotLocation[0].config.region'
-    # IRSA role annotation for the velero server service account
-    roleArn: 'serviceAccount.server.annotations["eks.amazonaws.com/role-arn"]'
+    # IRSA role annotation for the velero server service account (escape dots for --set)
+    roleArn: 'serviceAccount.server.annotations.eks\\.amazonaws\\.com/role-arn'
 
   values:
     # Keep CRD handling explicit to avoid conflicts

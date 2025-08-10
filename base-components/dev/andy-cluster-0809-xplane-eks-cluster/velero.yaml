@@ -5,14 +5,21 @@ wave: "0"
 
 helm:
   chart: velero
+  # Map generic parameter names from the ApplicationSet generator to chart-specific keys
+  parameterOverrides:
+    # direct mapping for bucket name
+    s3BucketName: 'configuration.backupStorageLocation[0].bucket'
+    # set region in both backup and snapshot locations
+    regionBackup: 'configuration.backupStorageLocation[0].config.region'
+    regionSnapshot: 'configuration.volumeSnapshotLocation[0].config.region'
+    # set the controller SA annotation to the full role ARN string
+    roleArn: 'serviceAccount.server.annotations["eks.amazonaws.com/role-arn"]'
   values:
     credentials:
       useSecret: false
     serviceAccount:
       server:
         create: true
-        annotations:
-          eks.amazonaws.com/role-arn: "arn:aws:iam::{{ .Values.cluster.awsAccountId }}:role/VeleroRole-{{ .Values.cluster.name }}"
     initContainers:
       - name: velero-plugin-for-aws
         image: velero/velero-plugin-for-aws:v1.5.0
@@ -33,14 +40,13 @@ helm:
       backupStorageLocation:
         - name: default
           provider: aws
-          bucket: "{{ .Values.velero.s3BucketName }}"
           config:
-            region: "{{ .Values.cluster.region }}"
+            region: "ap-southeast-1"
       volumeSnapshotLocation:
         - name: default
           provider: aws
           config:
-            region: "{{ .Values.cluster.region }}"
+            region: "ap-southeast-1"
     # Current setup
     # schedules:
     #   daily-backup-all:

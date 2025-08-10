@@ -271,8 +271,20 @@ spec:
                              {
                                name = "s3BucketName"
                                value = _s3_bucket_name
+                             },
+                             {
+                               name = "regionBackup"
+                               value = region
+                             },
+                             {
+                               name = "regionSnapshot"
+                               value = region
+                             },
+                             {
+                               name = "roleArn"
+                               value = "arn:aws:iam::" + aws_account_id + ":role/VeleroRole-" + cluster_name
                              }
-                           ]) if (oxr.spec.enableVelero and _s3_bucket_name) else Undefined
+                           ]) if oxr.spec.enableVelero else Undefined
                          }
                         }
                       }
@@ -311,20 +323,26 @@ spec:
                               {{- if index .helm "valueFiles" }}
                               valueFiles: {{ toJson .helm.valueFiles }}
                               {{- end }}
-                              {{- end }}
-                            {{- if $hasValuesForChart }}
+                            {{- end }}
                             parameters:
-                            {{- range $parameter := fromJson (index .values $chartName) }}
-                            - name: {{ index $.helm "parameterOverrides" $parameter.name | default $parameter.name }}
-                              value: {{ $parameter.value }}
-                            {{- end }}
-                            {{- end }}
+                              {{- if $hasValuesForChart }}
+                              {{- range $parameter := fromJson (index .values $chartName) }}
+                              - name: {{ index $.helm "parameterOverrides" $parameter.name | default $parameter.name }}
+                                value: {{ $parameter.value }}
+                              {{- end }}
+                              {{- end }}
+                              - name: cluster.name
+                                value: """ + cluster_name + """
+                              - name: cluster.region
+                                value: """ + region + """
+                              - name: cluster.awsAccountId
+                                value: """ + aws_account_id + """
                             {{- if index . "repoPath" }}
                             path: {{ .repoPath }}
                             {{- end }}
                         {{- if and $hasHelm (index .helm "valueFilesSource") }}
                           - {{ toJson .helm.valueFilesSource }}
-                              {{- end }}
+                        {{- end }}
                     """
                   }
                 }

@@ -325,12 +325,30 @@ spec:
                               {{- end }}
                             {{- end }}
                             parameters:
-                              {{- if $hasValuesForChart }}
-                              {{- range $parameter := fromJson (index .values $chartName) }}
-                              - name: {{ index $.helm "parameterOverrides" $parameter.name | default $parameter.name }}
+                              {{ if $hasValuesForChart }}
+                              {{ range $parameter := fromJson (index .values $chartName) }}
+                              {{- $helm := index . "helm" -}}
+                              {{- if $helm -}}
+                              {{- $po := index $helm "parameterOverrides" -}}
+                              {{- if $po -}}
+                              {{- $mapped := index $po $parameter.name -}}
+                              {{- if $mapped -}}
+                              - name: {{ $mapped }}
                                 value: {{ $parameter.value }}
-                              {{- end }}
-                              {{- end }}
+                              {{- else -}}
+                              - name: {{ $parameter.name }}
+                                value: {{ $parameter.value }}
+                              {{- end -}}
+                              {{- else -}}
+                              - name: {{ $parameter.name }}
+                                value: {{ $parameter.value }}
+                              {{- end -}}
+                              {{- else -}}
+                              - name: {{ $parameter.name }}
+                                value: {{ $parameter.value }}
+                              {{- end -}}
+                              {{ end }}
+                              {{ end }}
                               - name: cluster.name
                                 value: """ + cluster_name + """
                               - name: cluster.region

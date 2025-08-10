@@ -261,10 +261,36 @@ spec:
                          # Per-application dynamic params (map[string]string).
                          # Key must equal the Application name (filename without .yaml).
                          values = {
+                           "aws-ebs-csi-driver" = json.encode([
+                             {
+                               name = "valuesObjectJSON"
+                               value = json.encode({
+                                 controller = {
+                                   serviceAccount = {
+                                     annotations = {
+                                       "eks.amazonaws.com/role-arn" = "arn:aws:iam::" + aws_account_id + ":role/EbsCsiRole-" + cluster_name
+                                     }
+                                   }
+                                 }
+                               })
+                             }
+                           ])
                            "aws-efs-csi-driver" = json.encode([
                              {
                                name = "fileSystemId"
                                value = _efs_filesystem_id
+                             },
+                             {
+                               name = "valuesObjectJSON"
+                               value = json.encode({
+                                 controller = {
+                                   serviceAccount = {
+                                     annotations = {
+                                       "eks.amazonaws.com/role-arn" = "arn:aws:iam::" + aws_account_id + ":role/EfsCsiRole-" + cluster_name
+                                     }
+                                   }
+                                 }
+                               })
                              }
                            ]) if (oxr.spec.enableEFSCSIDriver and _efs_filesystem_id) else Undefined
                            "velero" = json.encode([

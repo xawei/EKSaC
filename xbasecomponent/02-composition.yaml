@@ -307,7 +307,7 @@ spec:
 
                     templatePatch = """
                       {{- $chartName := trimSuffix ".yaml" .path.filenameNormalized }}
-                      {{- $hasHelm := index . "helm" }}
+                      {{- $hasHelm := index $ "helm" }}
                       {{- $hasValuesForChart := (and (index . "values") (index .values $chartName)) }}
                       
                       spec:
@@ -326,7 +326,7 @@ spec:
                               parameters:
                               {{ if $hasValuesForChart }}
                               {{ range $parameter := fromJson (index .values $chartName) }}
-                              {{- $helm := index . "helm" -}}
+                              {{- $helm := index $ "helm" -}}
                               {{- if $helm -}}
                               {{- $po := index $helm "parameterOverrides" -}}
                               {{- if $po -}}

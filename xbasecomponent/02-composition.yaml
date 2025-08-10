@@ -169,6 +169,7 @@ spec:
       spec:
         target: Default
         source: |
+          import json
           oxr = option("params").oxr
           ocds = option("params").ocds
           labels = oxr.metadata?.labels or {}
@@ -257,6 +258,22 @@ spec:
                               path = "base-components/dev/" + cluster_name + "/*.yaml"
                             }
                           ]
+                         # Per-application dynamic params (map[string]string).
+                         # Key must equal the Application name (filename without .yaml).
+                         values = {
+                           "aws-efs-csi-driver" = json.encode([
+                             {
+                               name = "fileSystemId"
+                               value = _efs_filesystem_id
+                             }
+                           ]) if (oxr.spec.enableEFSCSIDriver and _efs_filesystem_id) else Undefined
+                           "velero" = json.encode([
+                             {
+                               name = "s3BucketName"
+                               value = _s3_bucket_name
+                             }
+                           ]) if (oxr.spec.enableVelero and _s3_bucket_name) else Undefined
+                         }
                         }
                       }
                     ]

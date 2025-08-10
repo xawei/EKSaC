@@ -323,8 +323,7 @@ spec:
                               {{- if index .helm "valueFiles" }}
                               valueFiles: {{ toJson .helm.valueFiles }}
                               {{- end }}
-                            {{- end }}
-                            parameters:
+                              parameters:
                               {{ if $hasValuesForChart }}
                               {{ range $parameter := fromJson (index .values $chartName) }}
                               {{- $helm := index . "helm" -}}
@@ -334,27 +333,23 @@ spec:
                               {{- $mapped := index $po $parameter.name -}}
                               {{- if $mapped -}}
                               - name: {{ $mapped }}
-                                value: {{ $parameter.value }}
+                                value: '{{ printf "%v" $parameter.value }}'
                               {{- else -}}
                               - name: {{ $parameter.name }}
-                                value: {{ $parameter.value }}
+                                value: '{{ printf "%v" $parameter.value }}'
                               {{- end -}}
                               {{- else -}}
                               - name: {{ $parameter.name }}
-                                value: {{ $parameter.value }}
+                                value: '{{ printf "%v" $parameter.value }}'
                               {{- end -}}
                               {{- else -}}
                               - name: {{ $parameter.name }}
-                                value: {{ $parameter.value }}
+                                value: '{{ printf "%v" $parameter.value }}'
                               {{- end -}}
                               {{ end }}
                               {{ end }}
-                              - name: cluster.name
-                                value: """ + cluster_name + """
-                              - name: cluster.region
-                                value: """ + region + """
-                              - name: cluster.awsAccountId
-                                value: """ + aws_account_id + """
+                               # removed cluster-wide parameter injection; rely on per-app parameterOverrides
+                            {{- end }}
                             {{- if index . "repoPath" }}
                             path: {{ .repoPath }}
                             {{- end }}

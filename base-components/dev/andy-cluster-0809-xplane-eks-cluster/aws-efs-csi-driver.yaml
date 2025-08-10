@@ -5,6 +5,10 @@ wave: "0"
 
 helm:
   chart: aws-efs-csi-driver
+
+  parameterOverrides:
+    fileSystemId: 'storageClasses[0].parameters.fileSystemId'
+    
   values:
     controller:
       # serviceAccount:
@@ -26,7 +30,7 @@ helm:
           - tls
         parameters:
           provisioningMode: efs-ap
-          fileSystemId: "{{ .Values.efs.filesystemId }}" # need to create in advance
+          # fileSystemId: fs-86a4f9c0 # need to create in advance
           directoryPerms: "700"
           gidRangeStart: "1000"
           gidRangeEnd: "5000"

@@ -5,8 +5,7 @@ wave: "0"
 
 helm:
   chart: aws-ebs-csi-driver
-  parameterOverrides:
-    roleArn: 'controller.serviceAccount.annotations["eks.amazonaws.com/role-arn"]'
+
   values:
     controller:
       serviceAccount:

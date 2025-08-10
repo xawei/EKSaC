@@ -326,26 +326,26 @@ spec:
                               parameters:
                               {{ if $hasValuesForChart }}
                               {{ range $parameter := fromJson (index .values $chartName) }}
-                              {{- $helm := index $ "helm" -}}
-                              {{- if $helm -}}
-                              {{- $po := index $helm "parameterOverrides" -}}
-                              {{- if $po -}}
-                              {{- $mapped := index $po $parameter.name -}}
-                              {{- if $mapped -}}
+                              {{ $helm := index $ "helm" }}
+                              {{ if $helm }}
+                              {{ $po := index $helm "parameterOverrides" }}
+                              {{ if $po }}
+                              {{ $mapped := index $po $parameter.name }}
+                              {{ if $mapped }}
                               - name: {{ $mapped }}
                                 value: '{{ printf "%v" $parameter.value }}'
-                              {{- else -}}
+                              {{ else }}
                               - name: {{ $parameter.name }}
                                 value: '{{ printf "%v" $parameter.value }}'
-                              {{- end -}}
-                              {{- else -}}
+                              {{ end }}
+                              {{ else }}
                               - name: {{ $parameter.name }}
                                 value: '{{ printf "%v" $parameter.value }}'
-                              {{- end -}}
-                              {{- else -}}
+                              {{ end }}
+                              {{ else }}
                               - name: {{ $parameter.name }}
                                 value: '{{ printf "%v" $parameter.value }}'
-                              {{- end -}}
+                              {{ end }}
                               {{ end }}
                               {{ end }}
                                # removed cluster-wide parameter injection; rely on per-app parameterOverrides

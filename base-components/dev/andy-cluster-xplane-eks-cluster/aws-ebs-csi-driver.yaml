@@ -1,0 +1,22 @@
+repoURL: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+targetRevision: 2.37.0
+namespace: kube-system
+wave: "0"
+
+helm:
+  chart: aws-ebs-csi-driver
+  parameterOverrides:
+    roleArn: 'controller.serviceAccount.annotations["eks.amazonaws.com/role-arn"]'
+  values:
+    controller:
+      serviceAccount:
+        create: true
+      replicaCount: 1
+
+      tolerations:
+        - key: "karpenter.sh/nodepool"
+          operator: "Equal"
+          value: "infra"
+          effect: "NoSchedule"
+
+      # IAM role and other values

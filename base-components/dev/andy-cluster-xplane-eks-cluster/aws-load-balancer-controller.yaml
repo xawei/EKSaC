@@ -5,9 +5,13 @@ wave: "0"
 
 helm:
   chart: aws-load-balancer-controller
+  parameterOverrides:
+    roleArn: 'serviceAccount.annotations["eks.amazonaws.com/role-arn"]'
+    clusterName: 'clusterName'
+    region: 'region'
   values:
-    clusterName: andy-cluster-xplane-eks-cluster
-    region: ap-southeast-1
+    clusterName: placeholder
+    region: placeholder
     replicaCount: 1
     tolerations:
       - key: "karpenter.sh/nodepool"

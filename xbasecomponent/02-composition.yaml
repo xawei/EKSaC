@@ -313,6 +313,22 @@ spec:
                                })
                              }
                            ]) if (oxr.spec.enableEFSCSIDriver and _efs_filesystem_id) else Undefined
+                           "external-dns" = json.encode([
+                             {
+                               name = "clusterName"
+                               value = cluster_name
+                             },
+                             {
+                               name = "valuesObjectJSON"
+                               value = json.encode({
+                                 serviceAccount = {
+                                   annotations = {
+                                     "eks.amazonaws.com/role-arn" = "arn:aws:iam::" + aws_account_id + ":role/ExternalDNS-" + cluster_name
+                                   }
+                                 }
+                               })
+                             }
+                           ])
                            "velero" = json.encode([
                              {
                                name = "s3BucketName"

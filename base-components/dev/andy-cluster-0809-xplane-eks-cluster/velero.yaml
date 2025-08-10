@@ -5,55 +5,53 @@ wave: "0"
 
 helm:
   chart: velero
-  # Map generic parameter names from the ApplicationSet generator to chart-specific keys
+
+  # Map generic parameters (from the ApplicationSet generator values) to chart keys
   parameterOverrides:
-    # direct mapping for bucket name
+    # S3 bucket used by Velero backups
     s3BucketName: 'configuration.backupStorageLocation[0].bucket'
-    # set region in both backup and snapshot locations
+    # Regions for backup and snapshot locations
     regionBackup: 'configuration.backupStorageLocation[0].config.region'
     regionSnapshot: 'configuration.volumeSnapshotLocation[0].config.region'
-    # set the controller SA annotation to the full role ARN string
-    roleArn: 'serviceAccount.server.annotations["eks.amazonaws.com/role-arn"]'
+    # IRSA role annotation for the velero server service account (escape dots; slash is literal)
+    roleArn: 'serviceAccount.server.annotations.eks\\.amazonaws\\.com/role-arn'
+
   values:
-    credentials:
-      useSecret: false
+    # Keep CRD handling explicit to avoid conflicts
+    installCRDs: false
+    upgradeCRDs: false
+
     serviceAccount:
       server:
         create: true
+        annotations: {}
+
     initContainers:
       - name: velero-plugin-for-aws
         image: velero/velero-plugin-for-aws:v1.5.0
         volumeMounts:
           - mountPath: /target
             name: plugins
+
     tolerations:
       - key: "karpenter.sh/nodepool"
         operator: "Equal"
         value: "infra"
         effect: "NoSchedule"
-    # Disable CRD installation to avoid conflicts
-    installCRDs: false
-    # Or use upgrade CRDs hook
-    upgradeCRDs: false
-    # AWS provider configuration
+
     configuration:
       backupStorageLocation:
         - name: default
           provider: aws
+          # bucket will be set via parameterOverrides.s3BucketName
           config:
-            region: "ap-southeast-1"
+            # region will be overridden by parameterOverrides.regionBackup
+            region: ap-southeast-1
       volumeSnapshotLocation:
         - name: default
           provider: aws
           config:
-            region: "ap-southeast-1"
-    # Current setup
-    # schedules:
-    #   daily-backup-all:
-    #     disabled: true
-    #     schedule: "0 17 * * *"
-    #     useOwnerReferencesInBackup: false
-    #     template:
-    #       ttl: "168h0m0s"
-    #       includedNamespaces:
-    #         - "*"
+            # region will be overridden by parameterOverrides.regionSnapshot
+            region: ap-southeast-1
+
+

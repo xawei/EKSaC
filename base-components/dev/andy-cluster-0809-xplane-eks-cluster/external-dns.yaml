@@ -5,6 +5,9 @@ wave: "0"
 
 helm:
   chart: external-dns
+  parameterOverrides:
+    # Map generic clusterName to the chart's txtOwnerId
+    clusterName: 'txtOwnerId'
   values:
     # AWS Route53 provider configuration
     provider:
@@ -14,8 +17,7 @@ helm:
     serviceAccount:
       create: true
       name: "external-dns-sa"
-      annotations:
-        eks.amazonaws.com/role-arn: "arn:aws:iam::{{ .Values.cluster.awsAccountId }}:role/ExternalDNS-{{ .Values.cluster.name }}"
+      annotations: {}
     
     # Resource management
     resources:
@@ -35,7 +37,7 @@ helm:
     # DNS configuration
     policy: upsert-only
     registry: txt
-    txtOwnerId: "{{ .Values.cluster.name }}"
+    txtOwnerId: "placeholder"
     txtPrefix: "external-dns-"
     
     # Sources to watch

@@ -5,8 +5,11 @@ wave: "0"
 
 helm:
   chart: aws-ebs-csi-driver
+
   values:
     controller:
+      serviceAccount:
+        create: true
       replicaCount: 1
 
       tolerations:

@@ -464,8 +464,19 @@ spec:
 
           trust_policy = {
             "Version" = "2012-10-17"
-            "Statement" = [ {"Effect" = "Allow", "Principal" = {"Service" = "pods.eks.amazonaws.com"}, "Action" = "sts:AssumeRole"} ]
+            "Statement" = [
+              {
+                "Effect" = "Allow"
+                "Principal" = {"Service" = "pods.eks.amazonaws.com"}
+                "Action" = ["sts:AssumeRole", "sts:TagSession"]
+                "Condition" = {
+                  "StringEquals" = { "aws:SourceAccount" = aws_account_id }
+                  "ArnLike" = { "aws:SourceArn" = "arn:aws:eks:" + region + ":" + aws_account_id + ":podidentityassociation/*" }
+                }
+              }
+            ]
           }
+
 
           apps = [
             { name = "ebs-csi",     ns = "kube-system", sa = "ebs-csi-controller-sa",         role = "ebs-csi-role-" + cluster_name,         awsManaged = ["arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"] },

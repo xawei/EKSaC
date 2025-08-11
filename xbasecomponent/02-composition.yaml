@@ -490,7 +490,6 @@ spec:
                 forProvider = { assumeRolePolicy = json.encode(trust_policy), tags = { ManagedBy = "crossplane", App = app.name } },
                 providerConfigRef = { name = "provider-aws-iam" }
               },
-              managementPolicies = ["*"]
             }
             for app in apps
           ]
@@ -504,7 +503,6 @@ spec:
                 forProvider = { name = app.role + "-policy", description = "Cluster policy for " + app.name, policy = json.encode(custom_policy_doc) },
                 providerConfigRef = { name = "provider-aws-iam" }
               },
-              managementPolicies = ["*"]
             }
             for app in apps
           ]
@@ -515,7 +513,6 @@ spec:
               kind = "RolePolicyAttachment",
               metadata = { generateName = app.role + "-aws-", annotations = {"krm.kcl.dev/composition-resource-name" = app.role + "-aws-" + arn} },
               spec = { forProvider = { policyArn = arn, roleRef = { name = app.role } }, providerConfigRef = { name = "provider-aws-iam" } },
-              managementPolicies = ["*"]
             }
             for app in apps
             for arn in (app.awsManaged or [])
@@ -527,7 +524,6 @@ spec:
               kind = "RolePolicyAttachment",
               metadata = { name = app.role + "-custom", annotations = {"krm.kcl.dev/composition-resource-name" = app.role + "-custom"} },
               spec = { forProvider = { policyArn = "arn:aws:iam::" + aws_account_id + ":policy/" + app.role + "-policy", roleRef = { name = app.role } }, providerConfigRef = { name = "provider-aws-iam" } },
-              managementPolicies = ["*"]
             }
             for app in apps
           ]
@@ -538,13 +534,11 @@ spec:
               kind = "PodIdentityAssociation",
               metadata = { name = app.name + "-pod-identity", annotations = {"krm.kcl.dev/composition-resource-name" = app.name + "-pod-identity"} },
               spec = { forProvider = { clusterNameRef = { name = cluster_name }, namespace = app.ns, serviceAccount = app.sa, roleArn = "arn:aws:iam::" + aws_account_id + ":role/" + app.role }, providerConfigRef = { name = "provider-aws-eks" } },
-              managementPolicies = ["*"]
             }
             for app in apps
           ]
 
           items = roles + policies + attachments_aws + attachments_custom + associations
-
   - step: teardown-sequence
     functionRef:
       name: function-kcl

@@ -511,8 +511,14 @@ spec:
             {
               apiVersion = "iam.aws.upbound.io/v1beta1",
               kind = "RolePolicyAttachment",
-              metadata = { generateName = app.name + "-aws-", annotations = {"krm.kcl.dev/composition-resource-name" = app.name + "-aws-attach"} },
-              spec = { forProvider = { policyArn = arn, role = app.role }, providerConfigRef = { name = "provider-aws-iam" } },
+              metadata = {
+                generateName = app.name + "-aws-"
+                annotations = {"krm.kcl.dev/composition-resource-name" = app.name + "-aws-attach-" + arn}
+              },
+              spec = {
+                forProvider = { policyArn = arn, role = app.role },
+                providerConfigRef = { name = "provider-aws-iam" }
+              }
             }
             for app in apps
             for arn in (app.awsManaged or [])

@@ -1,11 +1,11 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: x-ekscluster-kcl
+  name: x-ekscluster-v3
 spec:
   compositeTypeRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
-    kind: xEksClusterKcl
+    kind: xEksClusterV3
   mode: Pipeline
   pipeline:
   - step: create-helm-providerconfig

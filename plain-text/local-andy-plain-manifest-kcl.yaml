@@ -16,7 +16,7 @@ spec:
       1c: "10.0.0.32/28"
 ---
 apiVersion: consumable.trustbank.sg/v1alpha1
-kind: EksClusterKcl
+kind: EksClusterV3
 metadata:
   name: andy-cluster
   namespace: eksac

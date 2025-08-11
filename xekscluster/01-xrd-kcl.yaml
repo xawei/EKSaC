@@ -1,12 +1,12 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: xeksclusterskcl.consumable.trustbank.sg
+  name: xeksclustersv3.consumable.trustbank.sg
 spec:
   group: consumable.trustbank.sg
   names:
-    kind: xEksClusterKcl
-    plural: xeksclusterskcl
+    kind: xEksClusterV3
+    plural: xeksclustersv3
   versions:
   - name: v1alpha1
     schema:
@@ -51,16 +51,6 @@ spec:
                     properties:
                       version:
                         type: string
-                  ebscsiAddOn:
-                    type: object
-                    properties:
-                      version:
-                        type: string
-                  podidentityagentAddOn:
-                    type: object
-                    properties:
-                      version:
-                        type: string
                   eks:
                     type: object
                     properties:
@@ -90,5 +80,5 @@ spec:
     served: true
     referenceable: true
   claimNames:
-    kind: EksClusterKcl
-    plural: eksclusterskcl
+    kind: EksClusterV3
+    plural: eksclustersv3

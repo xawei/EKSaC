@@ -64,5 +64,5 @@ spec:
   # eksAddons:
   # - name: "eks-pod-identity-agent"
   #   version: "v1.0.0-eksbuild.1"
-  enableVelero: false
-  enableEFSCSIDriver: false
+  enableVelero: true
+  enableEFSCSIDriver: true

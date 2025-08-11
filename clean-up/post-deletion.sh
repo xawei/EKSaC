@@ -1,7 +1,7 @@
 #!/bin/bash
 # post-delete-cleanup.sh
 
-CLUSTER_NAME="andy-cluster-xplane-eks-cluster"
+CLUSTER_NAME="andy-cluster-0809-xplane-eks-cluster"
 REGION="ap-southeast-1"
 
 # Set AWS CLI timeout

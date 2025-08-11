@@ -498,9 +498,9 @@ spec:
             {
               apiVersion = "iam.aws.upbound.io/v1beta1",
               kind = "Policy",
-              metadata = { name = app.role + "-policy", annotations = {"krm.kcl.dev/composition-resource-name" = app.role + "-policy"} },
+              metadata = { annotations = {"krm.kcl.dev/composition-resource-name" = app.role + "-policy"} },
               spec = {
-                forProvider = { name = app.role + "-policy", description = "Cluster policy for " + app.name, policy = json.encode(custom_policy_doc) },
+                forProvider = { description = "Cluster policy for " + app.name, policy = json.encode(custom_policy_doc) },
                 providerConfigRef = { name = "provider-aws-iam" }
               },
             }

@@ -463,33 +463,26 @@ spec:
 
           trust_policy = {
             "Version" = "2012-10-17"
-            "Statement" = [
-              {"Effect" = "Allow", "Principal" = {"Service" = "pods.eks.amazonaws.com"}, "Action" = "sts:AssumeRole"}
-            ]
+            "Statement" = [ {"Effect" = "Allow", "Principal" = {"Service" = "pods.eks.amazonaws.com"}, "Action" = "sts:AssumeRole"} ]
           }
 
           apps = [
-            { name = "aws-ebs-csi-driver", ns = "kube-system", sa = "ebs-csi-controller-sa", role = "EbsCsiRole-" + cluster_name, awsManaged = ["arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"] },
-            { name = "aws-efs-csi-driver", ns = "kube-system", sa = "efs-csi-controller-sa", role = "EfsCsiRole-" + cluster_name, awsManaged = ["arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"] },
-            { name = "aws-load-balancer-controller", ns = "kube-system", sa = "aws-load-balancer-controller", role = "ALBControllerRole-" + cluster_name, awsManaged = ["arn:aws:iam::aws:policy/AWSLoadBalancerControllerIAMPolicy"] },
-            { name = "external-dns", ns = "external-dns", sa = "external-dns-sa", role = "ExternalDNS-" + cluster_name, awsManaged = ["arn:aws:iam::aws:policy/AmazonRoute53FullAccess"] },
-            { name = "velero", ns = "velero", sa = "velero-server", role = "VeleroRole-" + cluster_name, awsManaged = ["arn:aws:iam::aws:policy/AmazonS3FullAccess", "arn:aws:iam::aws:policy/AmazonEC2FullAccess"] },
+            { name = "ebs-csi",     ns = "kube-system", sa = "ebs-csi-controller-sa",         role = "ebs-csi-role-" + cluster_name,         awsManaged = ["arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"] },
+            { name = "efs-csi",     ns = "kube-system", sa = "efs-csi-controller-sa",         role = "efs-csi-role-" + cluster_name,         awsManaged = ["arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"] },
+            { name = "alb-controller", ns = "kube-system", sa = "aws-load-balancer-controller", role = "alb-controller-role-" + cluster_name,   awsManaged = ["arn:aws:iam::aws:policy/AWSLoadBalancerControllerIAMPolicy"] },
+            { name = "external-dns",  ns = "external-dns", sa = "external-dns-sa",             role = "external-dns-" + cluster_name,         awsManaged = ["arn:aws:iam::aws:policy/AmazonRoute53FullAccess"] },
+            { name = "velero",        ns = "velero",      sa = "velero-server",                role = "velero-role-" + cluster_name,          awsManaged = ["arn:aws:iam::aws:policy/AmazonS3FullAccess", "arn:aws:iam::aws:policy/AmazonEC2FullAccess"] },
           ]
-
-          custom_policy_doc = {
-            "Version" = "2012-10-17",
-            "Statement" = [ {"Effect" = "Allow", "Action" = ["sts:TagSession"], "Resource" = "*"} ]
-          }
 
           roles = [
             {
               apiVersion = "iam.aws.upbound.io/v1beta1",
               kind = "Role",
-              metadata = { generateName = app.name + "-", annotations = {"krm.kcl.dev/composition-resource-name" = app.role, "crossplane.io/external-name" = app.role} },
+              metadata = { name = app.role, annotations = {"crossplane.io/external-name" = app.role} },
               spec = {
                 forProvider = { assumeRolePolicy = json.encode(trust_policy), tags = { ManagedBy = "crossplane", App = app.name } },
                 providerConfigRef = { name = "provider-aws-iam" }
-              },
+              }
             }
             for app in apps
           ]
@@ -498,11 +491,8 @@ spec:
             {
               apiVersion = "iam.aws.upbound.io/v1beta1",
               kind = "Policy",
-              metadata = { annotations = {"krm.kcl.dev/composition-resource-name" = app.role + "-policy"} },
-              spec = {
-                forProvider = { description = "Cluster policy for " + app.name, policy = json.encode(custom_policy_doc) },
-                providerConfigRef = { name = "provider-aws-iam" }
-              },
+              metadata = { name = app.role + "-policy", annotations = {"crossplane.io/external-name" = app.role + "-policy"} },
+              spec = { forProvider = { description = "Cluster policy for " + app.name, policy = json.encode({"Version" = "2012-10-17", "Statement" = [ {"Effect" = "Allow", "Action" = ["sts:TagSession"], "Resource" = "*"} ]}) }, providerConfigRef = { name = "provider-aws-iam" } }
             }
             for app in apps
           ]
@@ -511,40 +501,25 @@ spec:
             {
               apiVersion = "iam.aws.upbound.io/v1beta1",
               kind = "RolePolicyAttachment",
-              metadata = {
-                generateName = app.name + "-aws-"
-                annotations = {"krm.kcl.dev/composition-resource-name" = app.name + "-aws-attach-" + arn}
-              },
-              spec = {
-                forProvider = { policyArn = arn, role = app.role },
-                providerConfigRef = { name = "provider-aws-iam" }
-              }
+              metadata = { generateName = app.name + "-aws-attach-", annotations = {"krm.kcl.dev/composition-resource-name" = app.name + "-aws-attach-" + arn} },
+              spec = { forProvider = { policyArn = arn, role = app.role }, providerConfigRef = { name = "provider-aws-iam" } }
             }
             for app in apps
             for arn in (app.awsManaged or [])
-          ]
-
-          attachments_custom = [
-            {
-              apiVersion = "iam.aws.upbound.io/v1beta1",
-              kind = "RolePolicyAttachment",
-              metadata = { generateName = app.name + "-custom-", annotations = {"krm.kcl.dev/composition-resource-name" = app.name + "-custom-attach"} },
-              spec = { forProvider = { policyArn = "arn:aws:iam::" + aws_account_id + ":policy/" + app.role + "-policy", role = app.role }, providerConfigRef = { name = "provider-aws-iam" } },
-            }
-            for app in apps
           ]
 
           associations = [
             {
               apiVersion = "eks.aws.upbound.io/v1beta1",
               kind = "PodIdentityAssociation",
-              metadata = { generateName = app.name + "-pod-identity-", annotations = {"krm.kcl.dev/composition-resource-name" = app.name + "-pod-identity"} },
-              spec = { forProvider = { clusterNameRef = { name = cluster_name }, namespace = app.ns, serviceAccount = app.sa, roleArn = "arn:aws:iam::" + aws_account_id + ":role/" + app.role }, providerConfigRef = { name = "provider-aws-eks" } },
+              metadata = { name = app.name + "-pod-identity-" + cluster_name },
+              spec = { forProvider = { clusterNameRef = { name = cluster_name }, namespace = app.ns, serviceAccount = app.sa, roleArn = "arn:aws:iam::" + aws_account_id + ":role/" + app.role }, providerConfigRef = { name = "provider-aws-eks" } }
             }
             for app in apps
           ]
 
-          items = roles + policies + attachments_aws + attachments_custom + associations
+          items = roles + policies + attachments_aws + associations
+
   - step: teardown-sequence
     functionRef:
       name: function-kcl

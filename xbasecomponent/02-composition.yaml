@@ -485,7 +485,7 @@ spec:
             {
               apiVersion = "iam.aws.upbound.io/v1beta1",
               kind = "Role",
-              metadata = { name = app.role, annotations = {"krm.kcl.dev/composition-resource-name" = app.role} },
+              metadata = { generateName = app.name + "-", annotations = {"krm.kcl.dev/composition-resource-name" = app.role, "crossplane.io/external-name" = app.role} },
               spec = {
                 forProvider = { assumeRolePolicy = json.encode(trust_policy), tags = { ManagedBy = "crossplane", App = app.name } },
                 providerConfigRef = { name = "provider-aws-iam" }
@@ -511,7 +511,7 @@ spec:
             {
               apiVersion = "iam.aws.upbound.io/v1beta1",
               kind = "RolePolicyAttachment",
-              metadata = { generateName = app.role + "-aws-", annotations = {"krm.kcl.dev/composition-resource-name" = app.role + "-aws-" + arn} },
+              metadata = { generateName = app.name + "-aws-", annotations = {"krm.kcl.dev/composition-resource-name" = app.name + "-aws-attach"} },
               spec = { forProvider = { policyArn = arn, role = app.role }, providerConfigRef = { name = "provider-aws-iam" } },
             }
             for app in apps
@@ -522,7 +522,7 @@ spec:
             {
               apiVersion = "iam.aws.upbound.io/v1beta1",
               kind = "RolePolicyAttachment",
-              metadata = { name = app.role + "-custom", annotations = {"krm.kcl.dev/composition-resource-name" = app.role + "-custom"} },
+              metadata = { generateName = app.name + "-custom-", annotations = {"krm.kcl.dev/composition-resource-name" = app.name + "-custom-attach"} },
               spec = { forProvider = { policyArn = "arn:aws:iam::" + aws_account_id + ":policy/" + app.role + "-policy", role = app.role }, providerConfigRef = { name = "provider-aws-iam" } },
             }
             for app in apps
@@ -532,7 +532,7 @@ spec:
             {
               apiVersion = "eks.aws.upbound.io/v1beta1",
               kind = "PodIdentityAssociation",
-              metadata = { name = app.name + "-pod-identity", annotations = {"krm.kcl.dev/composition-resource-name" = app.name + "-pod-identity"} },
+              metadata = { generateName = app.name + "-pod-identity-", annotations = {"krm.kcl.dev/composition-resource-name" = app.name + "-pod-identity"} },
               spec = { forProvider = { clusterNameRef = { name = cluster_name }, namespace = app.ns, serviceAccount = app.sa, roleArn = "arn:aws:iam::" + aws_account_id + ":role/" + app.role }, providerConfigRef = { name = "provider-aws-eks" } },
             }
             for app in apps

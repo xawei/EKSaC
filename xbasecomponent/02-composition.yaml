@@ -459,6 +459,7 @@ spec:
           oxr = option("params").oxr
 
           cluster_name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
+          region = oxr.spec.location
           aws_account_id = oxr.spec.awsAccountId
 
           trust_policy = {
@@ -513,7 +514,8 @@ spec:
               apiVersion = "eks.aws.upbound.io/v1beta1",
               kind = "PodIdentityAssociation",
               metadata = { name = app.name + "-pod-identity-" + cluster_name },
-              spec = { forProvider = { clusterNameRef = { name = cluster_name }, namespace = app.ns, serviceAccount = app.sa, roleArn = "arn:aws:iam::" + aws_account_id + ":role/" + app.role }, providerConfigRef = { name = "provider-aws-eks" } }
+              spec = { forProvider = { clusterNameRef = { name = cluster_name }, namespace = app.ns, serviceAccount = app.sa, roleArn = "arn:aws:iam::" + aws_account_id + ":role/" + app.role
+                  region = region }, providerConfigRef = { name = "provider-aws-eks" } }
             }
             for app in apps
           ]

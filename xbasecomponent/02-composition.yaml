@@ -514,8 +514,16 @@ spec:
               apiVersion = "eks.aws.upbound.io/v1beta1",
               kind = "PodIdentityAssociation",
               metadata = { name = app.name + "-pod-identity-" + cluster_name },
-              spec = { forProvider = { clusterNameRef = { name = cluster_name }, namespace = app.ns, serviceAccount = app.sa, roleArn = "arn:aws:iam::" + aws_account_id + ":role/" + app.role
-                  region = region }, providerConfigRef = { name = "provider-aws-eks" } }
+              spec = {
+                forProvider = {
+                  clusterNameRef = { name = cluster_name },
+                  namespace = app.ns,
+                  serviceAccount = app.sa,
+                  roleArn = "arn:aws:iam::" + aws_account_id + ":role/" + app.role,
+                  region = region
+                },
+                providerConfigRef = { name = "provider-aws-eks" }
+              }
             }
             for app in apps
           ]

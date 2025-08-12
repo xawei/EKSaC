@@ -506,7 +506,7 @@ spec:
               metadata = { name = app.role + "-policy", annotations = {"crossplane.io/external-name" = app.role + "-policy"} },
               spec = { forProvider = { description = "Cluster policy for " + app.name, policy = json.encode({"Version" = "2012-10-17", "Statement" = [ {"Effect" = "Allow", "Action" = ["sts:TagSession"], "Resource" = "*"} ]}) }, providerConfigRef = { name = "provider-aws-iam" } }
             }
-            for app in apps
+            for app in apps if app.name not in ["ebs-csi", "efs-csi"]
           ]
 
           

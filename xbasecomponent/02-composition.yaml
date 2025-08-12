@@ -2,6 +2,8 @@ apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
   name: x-basecomponent
+  labels:
+    version: "0.0.1"
 spec:
   compositeTypeRef:
     apiVersion: consumable.trustbank.sg/v1alpha1
@@ -479,11 +481,11 @@ spec:
 
 
           apps = [
-            { name = "ebs-csi",     ns = "kube-system", sa = "ebs-csi-controller-sa",         role = "ebs-csi-role-" + cluster_name,         awsManaged = ["arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"] },
-            { name = "efs-csi",     ns = "kube-system", sa = "efs-csi-controller-sa",         role = "efs-csi-role-" + cluster_name,         awsManaged = ["arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"] },
-            { name = "alb-controller", ns = "kube-system", sa = "aws-load-balancer-controller", role = "alb-controller-role-" + cluster_name,   awsManaged = [] },
-            { name = "external-dns",  ns = "external-dns", sa = "external-dns-sa",             role = "external-dns-" + cluster_name,         awsManaged = [] },
-            { name = "velero",        ns = "velero",      sa = "velero-server",                role = "velero-role-" + cluster_name,          awsManaged = [] },
+            { name = "ebs-csi",     ns = "kube-system", sa = "ebs-csi-controller-sa",         role = cluster_name + "-ebs-csi",         awsManaged = ["arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"] },
+            { name = "efs-csi",     ns = "kube-system", sa = "efs-csi-controller-sa",         role = cluster_name + "-efs-csi",         awsManaged = ["arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"] },
+            { name = "alb-controller", ns = "kube-system", sa = "aws-load-balancer-controller", role = cluster_name + "-alb-controller",   awsManaged = [] },
+            { name = "external-dns",  ns = "external-dns", sa = "external-dns-sa",             role = cluster_name + "-external-dns",         awsManaged = [] },
+            { name = "velero",        ns = "velero",      sa = "velero-server",                role = cluster_name + "-velero",          awsManaged = [] },
           ]
 
           roles = [

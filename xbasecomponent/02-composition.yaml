@@ -482,8 +482,8 @@ spec:
             { name = "ebs-csi",     ns = "kube-system", sa = "ebs-csi-controller-sa",         role = "ebs-csi-role-" + cluster_name,         awsManaged = ["arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"] },
             { name = "efs-csi",     ns = "kube-system", sa = "efs-csi-controller-sa",         role = "efs-csi-role-" + cluster_name,         awsManaged = ["arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"] },
             { name = "alb-controller", ns = "kube-system", sa = "aws-load-balancer-controller", role = "alb-controller-role-" + cluster_name,   awsManaged = [] },
-            { name = "external-dns",  ns = "external-dns", sa = "external-dns-sa",             role = "external-dns-" + cluster_name,         awsManaged = ["arn:aws:iam::aws:policy/AmazonRoute53FullAccess"] },
-            { name = "velero",        ns = "velero",      sa = "velero-server",                role = "velero-role-" + cluster_name,          awsManaged = ["arn:aws:iam::aws:policy/AmazonS3FullAccess", "arn:aws:iam::aws:policy/AmazonEC2FullAccess"] },
+            { name = "external-dns",  ns = "external-dns", sa = "external-dns-sa",             role = "external-dns-" + cluster_name,         awsManaged = [] },
+            { name = "velero",        ns = "velero",      sa = "velero-server",                role = "velero-role-" + cluster_name,          awsManaged = [] },
           ]
 
           roles = [
@@ -522,8 +522,9 @@ spec:
                   policy = json.encode({
                     "Version" = "2012-10-17"
                     "Statement" = [
-                      {"Effect" = "Allow", "Action" = ["route53:ChangeResourceRecordSets"], "Resource" = "*"},
-                      {"Effect" = "Allow", "Action" = ["route53:ListHostedZones", "route53:ListResourceRecordSets"], "Resource" = "*"}
+                      {"Sid" = "GrantModifyAccessToDomain", "Effect" = "Allow", "Action" = ["route53:ChangeResourceRecordSets"], "Resource" = ["arn:aws:route53:::hostedzone/*"]},
+                      {"Sid" = "GrantGetChangeStatus", "Effect" = "Allow", "Action" = ["route53:GetChange"], "Resource" = "arn:aws:route53:::change/*"},
+                      {"Sid" = "GrantListAccessToDomain", "Effect" = "Allow", "Action" = ["route53:ListResourceRecordSets", "route53:ListHostedZonesByName", "route53:ListHostedZones"], "Resource" = "*"}
                     ]
                   })
                 }
@@ -547,10 +548,10 @@ spec:
                     "Version" = "2012-10-17",
                     "Statement" = [
                       {"Effect" = "Allow", "Action" = [
-                        "ec2:DescribeVolumes","ec2:DescribeSnapshots","ec2:CreateTags","ec2:CreateVolume","ec2:CreateSnapshot","ec2:DeleteSnapshot"
+                        "ec2:DescribeVolumes","ec2:DescribeSnapshots","ec2:DeleteSnapshot","ec2:CreateVolume","ec2:CreateTags","ec2:CreateSnapshot"
                       ], "Resource" = "*"},
                       {"Effect" = "Allow", "Action" = [
-                        "s3:GetObject","s3:DeleteObject","s3:PutObject","s3:AbortMultipartUpload","s3:ListMultipartUploadParts"
+                        "s3:PutObject","s3:ListMultipartUploadParts","s3:GetObject","s3:AbortMultipartUpload"
                       ], "Resource" = ["arn:aws:s3:::" + (cluster_name + "-velero-backup") + "/*"]},
                       {"Effect" = "Allow", "Action" = ["s3:ListBucket"], "Resource" = ["arn:aws:s3:::" + (cluster_name + "-velero-backup")]}
                     ]

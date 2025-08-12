@@ -655,14 +655,14 @@ spec:
             metadata.name = oxr.metadata.name + "-applicationset-usage"
             spec = {
               of = {
-                apiVersion = "kubernetes.crossplane.io/v1alpha2"
-                kind = "Object"
-                resourceRef.name = oxr.metadata.name + "-xplane-argocd-applicationset"
-              }
-              by = {
                 apiVersion = "eks.aws.upbound.io/v1beta1"
                 kind = "Cluster"
                 resourceRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
+              }
+              by = {
+                apiVersion = "kubernetes.crossplane.io/v1alpha2"
+                kind = "Object"
+                resourceRef.name = oxr.metadata.name + "-xplane-argocd-applicationset"
               }
             }
           }

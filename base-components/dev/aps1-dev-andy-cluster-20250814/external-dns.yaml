@@ -1,0 +1,53 @@
+repoURL: https://kubernetes-sigs.github.io/external-dns/
+targetRevision: 1.18.0
+namespace: external-dns
+wave: "0"
+
+helm:
+  chart: external-dns
+  parameterOverrides:
+    # Map generic clusterName to the chart's txtOwnerId
+    clusterName: 'txtOwnerId'
+  values:
+    # AWS Route53 provider configuration
+    provider:
+      name: aws
+    
+    # Service account with IAM role for IRSA
+    serviceAccount:
+      create: true
+      name: "external-dns-sa"
+      annotations: {}
+    
+    # Resource management
+    resources:
+      requests:
+        cpu: 10m
+        memory: 50Mi
+      limits:
+        cpu: 50m
+        memory: 100Mi
+    
+    tolerations:
+      - key: "karpenter.sh/nodepool"
+        operator: "Equal"
+        value: "infra"
+        effect: "NoSchedule"
+    
+    # DNS configuration
+    policy: upsert-only
+    registry: txt
+    txtOwnerId: "placeholder"
+    txtPrefix: "external-dns-"
+    
+    # Sources to watch
+    sources:
+      - service
+      - ingress
+    
+    # Domain filters (configure based on your hosted zones)
+    domainFilters: []
+    # Example:
+    # domainFilters:
+    #   - "example.com"
+    #   - "subdomain.example.com"

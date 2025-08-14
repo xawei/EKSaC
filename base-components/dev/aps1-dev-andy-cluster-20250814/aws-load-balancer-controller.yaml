@@ -1,0 +1,24 @@
+repoURL: https://aws.github.io/eks-charts
+targetRevision: 1.13.4
+namespace: kube-system
+wave: "0"
+
+helm:
+  chart: aws-load-balancer-controller
+  parameterOverrides:
+    roleArn: 'serviceAccount.annotations["eks.amazonaws.com/role-arn"]'
+    clusterName: 'clusterName'
+    region: 'region'
+  values:
+    clusterName: placeholder
+    region: placeholder
+    replicaCount: 1
+    tolerations:
+      - key: "karpenter.sh/nodepool"
+        operator: "Equal"
+        value: "infra"
+        effect: "NoSchedule"
+    serviceAccount:
+      # This should be created separately with the correct IAM role
+      create: true
+      name: "aws-load-balancer-controller"

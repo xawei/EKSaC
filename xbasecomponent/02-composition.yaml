@@ -26,7 +26,7 @@ spec:
           oxr = option("params").oxr
           # ocds = option("params").ocds
           
-          region = oxr.spec.location
+          region = oxr.spec.region
           
           # Default configuration values for different addons
           default_configs = {
@@ -95,7 +95,7 @@ spec:
           oxr = option("params").oxr
           
           cluster_name = oxr.spec.eksClusterRef
-          region = oxr.spec.location
+          region = oxr.spec.region
           
           # Only create S3 bucket if Velero is enabled
           items = [
@@ -136,7 +136,7 @@ spec:
           oxr = option("params").oxr
           
           cluster_name = oxr.spec.eksClusterRef
-          region = oxr.spec.location
+          region = oxr.spec.region
           
           # Only create EFS if EFS CSI driver is enabled
           items = [
@@ -177,7 +177,7 @@ spec:
           labels = oxr.metadata?.labels or {}
           
           cluster_name = oxr.spec.eksClusterRef
-          region = oxr.spec.location or "unknown"
+          region = oxr.spec.region or "unknown"
           aws_account_id = oxr.spec.awsAccountId or "unknown"
           env = oxr.spec.env
           
@@ -462,7 +462,7 @@ spec:
           oxr = option("params").oxr
 
           cluster_name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
-          region = oxr.spec.location
+          region = oxr.spec.region
           aws_account_id = oxr.spec.awsAccountId
 
           trust_policy = {

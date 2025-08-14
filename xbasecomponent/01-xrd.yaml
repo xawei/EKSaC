@@ -22,7 +22,7 @@ spec:
               awsAccountId:
                 type: string
                 description: "AWS Account ID where the EKS cluster is deployed"
-              location:
+              region:
                 type: string
                 oneOf:
                 - pattern: '^ap-southeast-1$'
@@ -63,7 +63,7 @@ spec:
             required:
             - eksClusterRef
             - awsAccountId
-            - location
+            - region
             - env
           status:
             type: object

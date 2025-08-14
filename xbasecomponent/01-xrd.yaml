@@ -38,6 +38,9 @@ spec:
                 type: string
                 default: "default"
                 description: "Default namespace for components"
+              env:
+                type: string
+                description: "Environment name (e.g., 'dev', 'staging', 'prod')"
               eksAddons:
                 type: array
                 description: "List of EKS addons to install"
@@ -61,6 +64,7 @@ spec:
             - eksClusterRef
             - awsAccountId
             - location
+            - env
           status:
             type: object
             properties:

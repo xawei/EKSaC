@@ -179,6 +179,7 @@ spec:
           cluster_name = oxr.spec.eksClusterRef
           region = oxr.spec.location or "unknown"
           aws_account_id = oxr.spec.awsAccountId or "unknown"
+          env = oxr.spec.env
           
           # Get S3 bucket name if Velero is enabled
           _s3_bucket_name = ""
@@ -257,7 +258,7 @@ spec:
                           revision = "HEAD"
                           files = [
                             {
-                              path = "base-components/dev/" + cluster_name + "/*.yaml"
+                              path = "base-components/" + env + "/" + cluster_name + "/*.yaml"
                             }
                           ]
                          # Per-application dynamic params (map[string]string).

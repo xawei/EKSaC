@@ -32,7 +32,7 @@ spec:
               credentials = {
                 secretRef = {
                   key = "kubeconfig"
-                  name = oxr.spec.name + "-xplane-eks-cluster-auth"
+                  name = oxr.spec.name + "-auth"
                   namespace = "eksac"
                 }
                 source = "Secret"
@@ -63,7 +63,7 @@ spec:
               credentials = {
                 secretRef = {
                   key = "kubeconfig"
-                  name = oxr.spec.name + "-xplane-eks-cluster-auth"
+                  name = oxr.spec.name + "-auth"
                   namespace = "eksac"
                 }
                 source = "Secret"
@@ -327,7 +327,7 @@ spec:
           cluster = {
             apiVersion = "eks.aws.upbound.io/v1beta1"
             kind = "Cluster"
-            metadata.name = oxr.spec.name + "-xplane-eks-cluster"
+            metadata.name = oxr.spec.name
             spec.forProvider = {
               region = oxr.spec.location
               roleArnRef.name = oxr.spec.name + "-xplane-eks-iam-role"
@@ -349,7 +349,7 @@ spec:
                 }
               ]
               tags: {
-                Name = oxr.spec.name + "-xplane-eks-cluster"
+                Name = oxr.spec.name
                 Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
@@ -361,13 +361,13 @@ spec:
           defaultaccessentry = {
             apiVersion = "eks.aws.upbound.io/v1beta1"
             kind = "AccessEntry"
-            metadata.name = oxr.spec.name + "-xplane-eks-default-access-entry"
+            metadata.name = oxr.spec.name + "-default-access-entry"
             spec.forProvider = {
               region = oxr.spec.location
-              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              clusterNameRef.name = oxr.spec.name
               principalArn = "arn:aws:iam::" + oxr.spec.awsAccountId + ":role/aws-reserved/sso.amazonaws.com/ap-southeast-1/AWSReservedSSO_sso_sandbox_admin_permission_set_a380a3efed7cd9a1"
               tags: {
-                Name = oxr.spec.name + "-xplane-eks-default-access-entry"
+                Name = oxr.spec.name + "-default-access-entry"
                 Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
@@ -379,13 +379,13 @@ spec:
           defaultaccesspolicyassociation = {
             apiVersion = "eks.aws.upbound.io/v1beta1"
             kind = "AccessPolicyAssociation"
-            metadata.name = oxr.spec.name + "-xplane-eks-default-access-policy-association"
+            metadata.name = oxr.spec.name + "-default-access-policy-association"
             spec.forProvider = {
               region = oxr.spec.location
-              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              clusterNameRef.name = oxr.spec.name
               accessScope.type = "cluster"
               policyArn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-              principalArnRef.name =  oxr.spec.name + "-xplane-eks-default-access-entry"
+              principalArnRef.name =  oxr.spec.name + "-default-access-entry"
             }
             spec.providerConfigRef.name = "provider-aws-eks"
           }
@@ -393,13 +393,13 @@ spec:
           crossplaneaccessentry = {
             apiVersion = "eks.aws.upbound.io/v1beta1"
             kind = "AccessEntry"
-            metadata.name = oxr.spec.name + "-xplane-eks-crossplane-access-entry"
+            metadata.name = oxr.spec.name + "-crossplane-access-entry"
             spec.forProvider = {
               region = oxr.spec.location
-              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              clusterNameRef.name = oxr.spec.name
               principalArn = "arn:aws:iam::" + oxr.spec.awsAccountId + ":role/" + crossplane_role_name
               tags: {
-                Name = oxr.spec.name + "-xplane-eks-crossplane-access-entry"
+                Name = oxr.spec.name + "-crossplane-access-entry"
                 Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
@@ -411,13 +411,13 @@ spec:
           crossplaneaccesspolicyassociation = {
             apiVersion = "eks.aws.upbound.io/v1beta1"
             kind = "AccessPolicyAssociation"
-            metadata.name = oxr.spec.name + "-xplane-eks-crossplane-access-policy-association"
+            metadata.name = oxr.spec.name + "-crossplane-access-policy-association"
             spec.forProvider = {
               region = oxr.spec.location
-              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              clusterNameRef.name = oxr.spec.name
               accessScope.type = "cluster"
               policyArn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-              principalArnRef.name =  oxr.spec.name + "-xplane-eks-crossplane-access-entry"
+              principalArnRef.name =  oxr.spec.name + "-crossplane-access-entry"
             }
             spec.providerConfigRef.name = "provider-aws-eks"
           }
@@ -425,14 +425,14 @@ spec:
           karpenteraccessentry = {
             apiVersion = "eks.aws.upbound.io/v1beta1"
             kind = "AccessEntry"
-            metadata.name = oxr.spec.name + "-xplane-eks-karpenter-access-entry"
+            metadata.name = oxr.spec.name + "-karpenter-access-entry"
             spec.forProvider = {
               region = oxr.spec.location
-              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              clusterNameRef.name = oxr.spec.name
               principalArn = "arn:aws:iam::" + oxr.spec.awsAccountId + ":role/" + oxr.spec.name + "-xplane-karpenter-node-iam"
               type = "EC2_LINUX"
               tags: {
-                Name = oxr.spec.name + "-xplane-eks-karpenter-access-entry"
+                Name = oxr.spec.name + "-karpenter-access-entry"
                 Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
@@ -444,13 +444,13 @@ spec:
           localuseraccessentry = {
             apiVersion = "eks.aws.upbound.io/v1beta1"
             kind = "AccessEntry"
-            metadata.name = oxr.spec.name + "-xplane-eks-crossplane-user-access-entry"
+            metadata.name = oxr.spec.name + "-crossplane-user-access-entry"
             spec.forProvider = {
               region = oxr.spec.location
-              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              clusterNameRef.name = oxr.spec.name
               principalArn = "arn:aws:iam::" + oxr.spec.awsAccountId + ":user/crossplane-assume-user"
               tags: {
-                Name = oxr.spec.name + "-xplane-eks-crossplane-user-access-entry"
+                Name = oxr.spec.name + "-crossplane-user-access-entry"
                 Owner = owner_tag_value
                 Environment = "sandbox"
                 Project = "crossplane"
@@ -462,13 +462,13 @@ spec:
           localuseraccesspolicyassociation = {
             apiVersion = "eks.aws.upbound.io/v1beta1"
             kind = "AccessPolicyAssociation"
-            metadata.name = oxr.spec.name + "-xplane-eks-crossplane-user-access-policy-association"
+            metadata.name = oxr.spec.name + "-crossplane-user-access-policy-association"
             spec.forProvider = {
               region = oxr.spec.location
-              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              clusterNameRef.name = oxr.spec.name
               accessScope.type = "cluster"
               policyArn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-              principalArnRef.name =  oxr.spec.name + "-xplane-eks-crossplane-user-access-entry"
+              principalArnRef.name =  oxr.spec.name + "-crossplane-user-access-entry"
             }
             spec.providerConfigRef.name = "provider-aws-eks"
           }
@@ -497,13 +497,13 @@ spec:
           items = [{
             apiVersion = "eks.aws.upbound.io/v1beta1"
             kind = "ClusterAuth"
-            metadata.name = oxr.spec.name + "-xplane-eks-cluster-auth"
+            metadata.name = oxr.spec.name + "-auth"
             spec.forProvider = {
               region = oxr.spec.location
-              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              clusterNameRef.name = oxr.spec.name
             }
             spec.writeConnectionSecretToRef = {
-              name = oxr.spec.name + "-xplane-eks-cluster-auth"
+              name = oxr.spec.name + "-auth"
               namespace = "eksac"
             }
             spec.providerConfigRef.name = "provider-aws-eks"
@@ -531,7 +531,7 @@ spec:
             spec.forProvider = {
               clientIdList = ["sts.amazonaws.com"]
               thumbprintList = ["9e99a48a9960b14926bb7f3b02e22da2b0ab7280"]
-              url = ocds[oxr.spec.name + "-xplane-eks-cluster"]?.Resource?.status?.atProvider?.identity?[0]?.oidc?[0]?.issuer or ""
+              url = ocds[oxr.spec.name]?.Resource?.status?.atProvider?.identity?[0]?.oidc?[0]?.issuer or ""
               tags: {
                 Name = oxr.spec.name + "-xplane-oidc-provider"
                 Owner = owner_tag_value
@@ -605,7 +605,7 @@ spec:
             metadata.name = oxr.spec.name + "-xplane-fargate-profile-karpenter"
             spec.forProvider = {
               region = oxr.spec.location
-              clusterNameRef.name = oxr.spec.name + "-xplane-eks-cluster"
+              clusterNameRef.name = oxr.spec.name
               podExecutionRoleArnRef.name = oxr.spec.name + "-xplane-fargate-pod-iam"
               selector = [
                 {
@@ -646,7 +646,7 @@ spec:
           owner_tag_value = labels["consumable.trustbank.sg/owner"] or "no value"
           ocds = option("params").ocds
 
-          oidcissuer = regex.replace(ocds[oxr.spec.name + "-xplane-eks-cluster"]?.Resource?.status?.atProvider?.identity?[0]?.oidc?[0]?.issuer or "", "https://", "")
+          oidcissuer = regex.replace(ocds[oxr.spec.name]?.Resource?.status?.atProvider?.identity?[0]?.oidc?[0]?.issuer or "", "https://", "")
 
           policy = {
             apiVersion = "iam.aws.upbound.io/v1beta1"
@@ -709,13 +709,13 @@ spec:
                   {
                     "Action": "iam:PassRole",
                     "Effect": "Allow",
-                    "Resource": "arn:aws:iam::" + oxr.spec.awsAccountId + ":role/" + oxr.spec.name + "-xplane-eks-cluster",
+                    "Resource": "arn:aws:iam::" + oxr.spec.awsAccountId + ":role/" + oxr.spec.name,
                     "Sid": "PassNodeIAMRole"
                   },
                   {
                     "Action": "eks:DescribeCluster",
                     "Effect": "Allow",
-                    "Resource": "arn:aws:eks:ap-southeast-1:" + oxr.spec.awsAccountId + ":cluster/" + oxr.spec.name + "-xplane-eks-cluster",
+                    "Resource": "arn:aws:eks:ap-southeast-1:" + oxr.spec.awsAccountId + ":cluster/" + oxr.spec.name,
                     "Sid": "EKSClusterEndpointLookup"
                   }
                 ],
@@ -837,7 +837,7 @@ spec:
                 set = [
                   {
                     name = "settings.clusterName"
-                    value = oxr.spec.name + "-xplane-eks-cluster"
+                    value = oxr.spec.name
                   },
                   {
                     name = "serviceAccount.name"
@@ -1267,7 +1267,7 @@ spec:
           oxr = option("params").oxr
           ocds = option("params").ocds
 
-          kendpoint = regex.replace(ocds[oxr.spec.name + "-xplane-eks-cluster"]?.Resource?.status?.atProvider?.endpoint or "", "https://", "")
+          kendpoint = regex.replace(ocds[oxr.spec.name]?.Resource?.status?.atProvider?.endpoint or "", "https://", "")
 
           items = [{
             apiVersion = "helm.crossplane.io/v1beta1"
@@ -1529,7 +1529,7 @@ spec:
               of = {
                 apiVersion = "eks.aws.upbound.io/v1beta1"
                 kind = "Cluster"
-                resourceRef.name = oxr.spec.name + "-xplane-eks-cluster"
+                resourceRef.name = oxr.spec.name
               }
               by = {
                 apiVersion = "helm.crossplane.io/v1beta1"
@@ -1547,7 +1547,7 @@ spec:
               of = {
                 apiVersion = "eks.aws.upbound.io/v1beta1"
                 kind = "ClusterAuth"
-                resourceRef.name = oxr.spec.name + "-xplane-eks-cluster-auth"
+                resourceRef.name = oxr.spec.name + "-auth"
               }
               by = {
                 apiVersion = "helm.crossplane.io/v1beta1"
@@ -1565,7 +1565,7 @@ spec:
               of = {
                 apiVersion = "eks.aws.upbound.io/v1beta1"
                 kind = "AccessEntry"
-                resourceRef.name = oxr.spec.name + "-xplane-eks-crossplane-access-entry"
+                resourceRef.name = oxr.spec.name + "-crossplane-access-entry"
               }
               by = {
                 apiVersion = "helm.crossplane.io/v1beta1"
@@ -1583,7 +1583,7 @@ spec:
               of = {
                 apiVersion = "eks.aws.upbound.io/v1beta1"
                 kind = "AccessPolicyAssociation"
-                resourceRef.name = oxr.spec.name + "-xplane-eks-crossplane-access-policy-association"
+                resourceRef.name = oxr.spec.name + "-crossplane-access-policy-association"
               }
               by = {
                 apiVersion = "helm.crossplane.io/v1beta1"

@@ -67,7 +67,7 @@ spec:
                   addonName = addon.name
                   addonVersion = addon.version
                   region = region
-                  clusterNameRef.name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
+                  clusterNameRef.name = oxr.spec.eksClusterRef
                   resolveConflicts = "OVERWRITE"
                   # Only set configurationValues if there are actual values to configure
                   configurationValues = json.encode(addon.configurationValues if addon.configurationValues else (default_configs[addon.name] if addon.name in default_configs else {})) if (addon.configurationValues or (addon.name in default_configs and default_configs[addon.name])) else Undefined
@@ -94,7 +94,7 @@ spec:
         source: |
           oxr = option("params").oxr
           
-          cluster_name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
+          cluster_name = oxr.spec.eksClusterRef
           region = oxr.spec.location
           
           # Only create S3 bucket if Velero is enabled
@@ -135,7 +135,7 @@ spec:
         source: |
           oxr = option("params").oxr
           
-          cluster_name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
+          cluster_name = oxr.spec.eksClusterRef
           region = oxr.spec.location
           
           # Only create EFS if EFS CSI driver is enabled
@@ -176,7 +176,7 @@ spec:
           ocds = option("params").ocds
           labels = oxr.metadata?.labels or {}
           
-          cluster_name = oxr.spec.eksClusterRef + "-xplane-eks-cluster"
+          cluster_name = oxr.spec.eksClusterRef
           region = oxr.spec.location or "unknown"
           aws_account_id = oxr.spec.awsAccountId or "unknown"
           

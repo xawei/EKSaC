@@ -181,6 +181,10 @@ spec:
           aws_account_id = oxr.spec.awsAccountId or "unknown"
           env = oxr.spec.env
           
+          # Check for custom repoURL in labels, fallback to default
+          default_repo_url = "https://github.com/xawei/EKSaC"
+          repo_url = labels.get("consumable.trustbank.sg/argocd-appset-repo-url") or default_repo_url
+          
           # Get S3 bucket name if Velero is enabled
           _s3_bucket_name = ""
           if oxr.spec.enableVelero:
@@ -254,7 +258,7 @@ spec:
                     generators = [
                       {
                         git = {
-                          repoURL = "https://github.com/xawei/EKSaC"
+                          repoURL = repo_url
                           revision = "HEAD"
                           files = [
                             {

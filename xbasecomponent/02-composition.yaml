@@ -175,15 +175,18 @@ spec:
           oxr = option("params").oxr
           ocds = option("params").ocds
           labels = oxr.metadata?.labels or {}
+          annotations = oxr.metadata?.annotations or {}
           
           cluster_name = oxr.spec.eksClusterRef
           region = oxr.spec.region or "unknown"
           aws_account_id = oxr.spec.awsAccountId or "unknown"
           env = oxr.spec.env
           
-          # Check for custom repoURL in labels, fallback to default
+          # Check for custom repoURL in annotations, fallback to default
           default_repo_url = "https://github.com/xawei/EKSaC"
-          repo_url = labels.get("consumable.trustbank.sg/argocd-appset-repo-url") or default_repo_url
+          annotation_key = "consumable.trustbank.sg/argocd-appset-repo-url"
+          custom_repo_url = annotations[annotation_key] if annotation_key in annotations else None
+          repo_url = custom_repo_url if custom_repo_url else default_repo_url
           
           # Get S3 bucket name if Velero is enabled
           _s3_bucket_name = ""

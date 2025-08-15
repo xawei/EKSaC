@@ -40,7 +40,10 @@ spec:
                 description: "Default namespace for components"
               env:
                 type: string
-                description: "Environment name (e.g., 'dev', 'staging', 'prod')"
+                description: "Environment name (e.g., 'dev', 'prod')"
+                oneOf:
+                - pattern: '^dev$'
+                - pattern: '^prod$'
               eksAddons:
                 type: array
                 description: "List of EKS addons to install"
